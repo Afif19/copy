@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Manajemen Toko Bangunan</title>
+</head>
+<body>
+    <script src="assets/js/db.js"></script>
+    <script>
+        // Check session and redirect accordingly
+        const isLoggedIn = sessionStorage.getItem('login') === 'true' || localStorage.getItem('login') === 'true';
+        if (isLoggedIn) {
+            window.location.href = 'dashboard.html';
+        } else {
+            window.location.href = 'auth/login.html';
+        }
+    </script>
+</body>
+</html>

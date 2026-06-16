@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Barang - SI Toko Bangunan</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <script src="assets/js/db.js"></script>
+    <script>
+        DB.checkAuth();
+    </script>
+
+    <div id="wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="sidebar-brand">
+                    <i class="fa-solid fa-trowel-bricks"></i>
+                    <span>TB AA BAROKAH</span>
+                </a>
+            </div>
+
+            <ul class="components m-0 p-0">
+                <li id="menu-dashboard">
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang" class="active">
+                    <a href="barang.html">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Data Barang</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang_masuk">
+                    <a href="barang_masuk.html">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Barang Masuk</span>
+                    </a>
+                </li>
+                
+                <li id="menu-penjualan">
+                    <a href="penjualan.html">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Penjualan</span>
+                    </a>
+                </li>
+                
+                <li id="menu-laporan">
+                    <a href="laporan.html">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="auth/logout.html" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');" class="text-warning">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p class="m-0 text-center">&copy; 2026 TB Sumber Jaya</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area Wrapper -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg top-navbar">
+                <div class="container-fluid p-0">
+                    <button type="button" id="sidebarCollapse" class="btn-toggle-sidebar me-2">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <h5 class="m-0 text-dark fw-semibold d-none d-sm-inline-block">
+                        Data Barang
+                    </h5>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted d-none d-md-inline-block">
+                            Selamat Datang, <strong id="logged-username">Admin</strong>
+                        </span>
+                        <div class="dropdown">
+                            <a class="text-decoration-none dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-circle-user fa-xl" style="color: var(--primary-color);"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li>
+                                    <span class="dropdown-item-text d-md-none text-muted border-bottom pb-2" id="logged-username-mobile">
+                                        Hi, Admin
+                                    </span>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger fw-medium" href="auth/logout.html">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Dynamic Content container -->
+            <div class="main-content">
+                <!-- Content Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Data Barang</h4>
+                        <p class="text-muted small mb-0">Kelola stok barang, harga beli/jual, serta kategori bahan bangunan.</p>
+                    </div>
+                    <div>
+                        <a href="kategori.html" class="btn btn-outline-primary me-2">
+                            <i class="fa-solid fa-tags me-1"></i> Kelola Kategori
+                        </a>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBarangModal">
+                            <i class="fa-solid fa-plus me-1"></i> Tambah Barang
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Display alert message -->
+                <div id="alert-container"></div>
+
+                <!-- Products Table Card -->
+                <div class="card card-table">
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle w-100" id="barang-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">No</th>
+                                        <th>Nama Barang</th>
+                                        <th>Kategori</th>
+                                        <th>Satuan</th>
+                                        <th>Harga Beli</th>
+                                        <th>Harga Jual</th>
+                                        <th>Stok</th>
+                                        <th>Min. Stok</th>
+                                        <th>Status</th>
+                                        <th style="width: 120px; text-align: center;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="barang-tbody">
+                                    <!-- Table data loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Barang -->
+    <div class="modal fade" id="addBarangModal" tabindex="-1" aria-labelledby="addBarangModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="addBarangModalLabel"><i class="fa-solid fa-circle-plus me-2"></i> Tambah Barang Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addBarangForm">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="add_nama_barang" class="form-label fw-medium">Nama Barang</label>
+                                <input type="text" class="form-control" name="nama_barang" id="add_nama_barang" placeholder="Masukkan nama barang" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_id_kategori" class="form-label fw-medium">Kategori</label>
+                                <select class="form-select" name="id_kategori" id="add_id_kategori" required>
+                                    <option value="" disabled selected>Pilih Kategori...</option>
+                                    <!-- Options loaded dynamically -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_satuan" class="form-label fw-medium">Satuan</label>
+                                <select class="form-select" name="satuan" id="add_satuan" required>
+                                    <option value="" disabled selected>Pilih Satuan...</option>
+                                    <option value="Sak">Sak</option>
+                                    <option value="PCS">PCS</option>
+                                    <option value="Batang">Batang</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Roll">Roll</option>
+                                    <option value="Biji">Biji</option>
+                                    <option value="Meter">Meter</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_harga_beli" class="form-label fw-medium">Harga Beli (Rp)</label>
+                                <input type="number" class="form-control" name="harga_beli" id="add_harga_beli" placeholder="0" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_harga_jual" class="form-label fw-medium">Harga Jual (Rp)</label>
+                                <input type="number" class="form-control" name="harga_jual" id="add_harga_jual" placeholder="0" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_stok" class="form-label fw-medium">Stok Awal</label>
+                                <input type="number" class="form-control" name="stok" id="add_stok" value="0" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_stok_minimum" class="form-label fw-medium">Stok Minimum</label>
+                                <input type="number" class="form-control" name="stok_minimum" id="add_stok_minimum" value="5" required min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4">Simpan Barang</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Barang -->
+    <div class="modal fade" id="editBarangModal" tabindex="-1" aria-labelledby="editBarangModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="editBarangModalLabel"><i class="fa-solid fa-pen-to-square me-2"></i> Ubah Data Barang</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editBarangForm">
+                    <input type="hidden" name="id_barang" id="edit_id_barang">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="edit_nama_barang" class="form-label fw-medium">Nama Barang</label>
+                                <input type="text" class="form-control" name="nama_barang" id="edit_nama_barang" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_id_kategori" class="form-label fw-medium">Kategori</label>
+                                <select class="form-select" name="id_kategori" id="edit_id_kategori" required>
+                                    <!-- Options loaded dynamically -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_satuan" class="form-label fw-medium">Satuan</label>
+                                <select class="form-select" name="satuan" id="edit_satuan" required>
+                                    <option value="Sak">Sak</option>
+                                    <option value="PCS">PCS</option>
+                                    <option value="Batang">Batang</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Roll">Roll</option>
+                                    <option value="Biji">Biji</option>
+                                    <option value="Meter">Meter</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_harga_beli" class="form-label fw-medium">Harga Beli (Rp)</label>
+                                <input type="number" class="form-control" name="harga_beli" id="edit_harga_beli" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_harga_jual" class="form-label fw-medium">Harga Jual (Rp)</label>
+                                <input type="number" class="form-control" name="harga_jual" id="edit_harga_jual" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_stok" class="form-label fw-medium">Stok</label>
+                                <input type="number" class="form-control" name="stok" id="edit_stok" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_stok_minimum" class="form-label fw-medium">Stok Minimum</label>
+                                <input type="number" class="form-control" name="stok_minimum" id="edit_stok_minimum" required min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        let dataTableInstance = null;
+
+        $(document).ready(function () {
+            // Set User info
+            const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
+            $('#logged-username').text(username);
+            $('#logged-username-mobile').text('Hi, ' + username);
+
+            // Sidebar Toggle
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+
+            // Initialize Page Data
+            loadKategoriDropdowns();
+            loadBarangTable();
+
+            // Form Submit: Add Barang
+            $('#addBarangForm').on('submit', function (e) {
+                e.preventDefault();
+                const item = {
+                    nama_barang: $('#add_nama_barang').val().trim(),
+                    id_kategori: $('#add_id_kategori').val(),
+                    satuan: $('#add_satuan').val(),
+                    harga_beli: $('#add_harga_beli').val(),
+                    harga_jual: $('#add_harga_jual').val(),
+                    stok: $('#add_stok').val(),
+                    stok_minimum: $('#add_stok_minimum').val()
+                };
+
+                try {
+                    DB.addBarang(item);
+                    $('#addBarangModal').modal('hide');
+                    $('#addBarangForm')[0].reset();
+                    showAlert('Barang berhasil ditambahkan!', 'success');
+                    loadBarangTable();
+                } catch (err) {
+                    alert('Gagal menambahkan barang: ' + err.message);
+                }
+            });
+
+            // Form Submit: Edit Barang
+            $('#editBarangForm').on('submit', function (e) {
+                e.preventDefault();
+                const id = $('#edit_id_barang').val();
+                const item = {
+                    nama_barang: $('#edit_nama_barang').val().trim(),
+                    id_kategori: $('#edit_id_kategori').val(),
+                    satuan: $('#edit_satuan').val(),
+                    harga_beli: $('#edit_harga_beli').val(),
+                    harga_jual: $('#edit_harga_jual').val(),
+                    stok: $('#edit_stok').val(),
+                    stok_minimum: $('#edit_stok_minimum').val()
+                };
+
+                try {
+                    DB.updateBarang(id, item);
+                    $('#editBarangModal').modal('hide');
+                    showAlert('Barang berhasil diperbarui!', 'success');
+                    loadBarangTable();
+                } catch (err) {
+                    alert('Gagal memperbarui barang: ' + err.message);
+                }
+            });
+
+            // Click Edit Button handler
+            $(document).on('click', '.btn-edit', function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                const cat = $(this).data('cat');
+                const unit = $(this).data('unit');
+                const buy = $(this).data('buy');
+                const sell = $(this).data('sell');
+                const stock = $(this).data('stock');
+                const min = $(this).data('min');
+ 
+                $('#edit_id_barang').val(id);
+                $('#edit_nama_barang').val(name);
+                $('#edit_id_kategori').val(cat);
+                $('#edit_satuan').val(unit);
+                $('#edit_harga_beli').val(buy);
+                $('#edit_harga_jual').val(sell);
+                $('#edit_stok').val(stock);
+                $('#edit_stok_minimum').val(min);
+            });
+
+            // Click Delete Button handler
+            $(document).on('click', '.btn-delete', function (e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+
+                if (confirm(`Apakah Anda yakin ingin menghapus barang '${name}' ini?`)) {
+                    try {
+                        DB.deleteBarang(id);
+                        showAlert('Barang berhasil dihapus!', 'success');
+                        loadBarangTable();
+                    } catch (err) {
+                        showAlert(err.message, 'danger');
+                    }
+                }
+            });
+        });
+
+        // Load Categories dropdown options
+        function loadKategoriDropdowns() {
+            const categories = DB.getCategories();
+            const addSelect = $('#add_id_kategori');
+            const editSelect = $('#edit_id_kategori');
+
+            addSelect.empty().append('<option value="" disabled selected>Pilih Kategori...</option>');
+            editSelect.empty().append('<option value="" disabled selected>Pilih Kategori...</option>');
+
+            categories.forEach(c => {
+                const optHtml = `<option value="${c.id_kategori}">${escapeHtml(c.nama_kategori)}</option>`;
+                addSelect.append(optHtml);
+                editSelect.append(optHtml);
+            });
+        }
+
+        // Render products list and initialize/redraw DataTable
+        function loadBarangTable() {
+            const barangList = DB.getBarang();
+            const tbody = $('#barang-tbody');
+
+            // Destroy existing DataTable if exists
+            if (dataTableInstance) {
+                dataTableInstance.destroy();
+            }
+
+            tbody.empty();
+
+            barangList.forEach((b, index) => {
+                let badge = '';
+                if (b.stok === 0) {
+                    badge = '<span class="badge bg-danger">Habis</span>';
+                } else if (b.stok <= b.stok_minimum) {
+                    badge = '<span class="badge bg-warning text-dark">Menipis</span>';
+                } else {
+                    badge = '<span class="badge bg-success">Aman</span>';
+                }
+ 
+                tbody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang)}</span></td>
+                        <td>${escapeHtml(b.nama_kategori)}</td>
+                        <td>${escapeHtml(b.satuan)}</td>
+                        <td>Rp ${formatNumber(b.harga_beli)}</td>
+                        <td>Rp ${formatNumber(b.harga_jual)}</td>
+                        <td class="fw-bold">${b.stok}</td>
+                        <td>${b.stok_minimum}</td>
+                        <td>${badge}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit"
+                                    data-id="${b.id_barang}"
+                                    data-name="${escapeHtml(b.nama_barang)}"
+                                    data-cat="${b.id_kategori}"
+                                    data-unit="${escapeHtml(b.satuan)}"
+                                    data-buy="${b.harga_beli}"
+                                    data-sell="${b.harga_jual}"
+                                    data-stock="${b.stok}"
+                                    data-min="${b.stok_minimum}"
+                                    data-bs-toggle="modal" data-bs-target="#editBarangModal">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
+                                    data-id="${b.id_barang}"
+                                    data-name="${escapeHtml(b.nama_barang)}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            // Initialize DataTable
+            dataTableInstance = $('#barang-table').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                }
+            });
+        }
+
+        // Show feedback alert at top
+        function showAlert(message, type) {
+            $('#alert-container').html(`
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `);
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID').format(num);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

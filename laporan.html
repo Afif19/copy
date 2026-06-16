@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan - SI Toko Bangunan</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <script src="assets/js/db.js"></script>
+    <script>
+        DB.checkAuth();
+    </script>
+
+    <div id="wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="sidebar-brand">
+                    <i class="fa-solid fa-trowel-bricks"></i>
+                    <span>TB AA BAROKAH</span>
+                </a>
+            </div>
+
+            <ul class="components m-0 p-0">
+                <li id="menu-dashboard">
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang">
+                    <a href="barang.html">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Data Barang</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang_masuk">
+                    <a href="barang_masuk.html">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Barang Masuk</span>
+                    </a>
+                </li>
+                
+                <li id="menu-penjualan">
+                    <a href="penjualan.html">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Penjualan</span>
+                    </a>
+                </li>
+                
+                <li id="menu-laporan" class="active">
+                    <a href="laporan.html">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="auth/logout.html" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');" class="text-warning">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p class="m-0 text-center">&copy; 2026 TB Sumber Jaya</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area Wrapper -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg top-navbar">
+                <div class="container-fluid p-0">
+                    <button type="button" id="sidebarCollapse" class="btn-toggle-sidebar me-2">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <h5 class="m-0 text-dark fw-semibold d-none d-sm-inline-block">
+                        Laporan Stok & Penjualan
+                    </h5>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted d-none d-md-inline-block">
+                            Selamat Datang, <strong id="logged-username">Admin</strong>
+                        </span>
+                        <div class="dropdown">
+                            <a class="text-decoration-none dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-circle-user fa-xl" style="color: var(--primary-color);"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li>
+                                    <span class="dropdown-item-text d-md-none text-muted border-bottom pb-2" id="logged-username-mobile">
+                                        Hi, Admin
+                                    </span>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger fw-medium" href="auth/logout.html">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Dynamic Content container -->
+            <div class="main-content">
+                <!-- Title and Navigation -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Laporan Stok & Penjualan</h4>
+                        <p class="text-muted small mb-0">Lihat analisis omset penjualan harian/bulanan/tahunan serta status ketersediaan barang.</p>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs border-bottom mb-4" id="reportTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold" id="sales-report-tab" data-bs-toggle="tab" data-bs-target="#sales-report" type="button" role="tab" aria-controls="sales-report" aria-selected="true">
+                            <i class="fa-solid fa-chart-bar me-1"></i> Laporan Penjualan
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="stock-report-tab" data-bs-toggle="tab" data-bs-target="#stock-report" type="button" role="tab" aria-controls="stock-report" aria-selected="false">
+                            <i class="fa-solid fa-boxes-stacked me-1"></i> Laporan Stok Barang
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="reportTabContent">
+                    <!-- TAB 1: SALES REPORT -->
+                    <div class="tab-pane fade show active" id="sales-report" role="tabpanel" aria-labelledby="sales-report-tab">
+                        <!-- Filters panel -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <form id="salesFilterForm" class="row g-3 align-items-end">
+                                    <div class="col-md-3">
+                                        <label for="filter_type" class="form-label fw-medium">Tipe Filter</label>
+                                        <select class="form-select" name="filter_type" id="filter_type">
+                                            <option value="harian">Harian</option>
+                                            <option value="bulanan">Bulanan</option>
+                                            <option value="tahunan">Tahunan</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Dynamic Input: Harian -->
+                                    <div class="col-md-4 filter-input-wrapper" id="wrapper-harian">
+                                        <label for="tanggal" class="form-label fw-medium">Pilih Tanggal</label>
+                                        <input type="date" class="form-control" name="tanggal" id="tanggal">
+                                    </div>
+
+                                    <!-- Dynamic Input: Bulanan -->
+                                    <div class="col-md-4 filter-input-wrapper d-none" id="wrapper-bulanan">
+                                        <label for="bulan" class="form-label fw-medium">Pilih Bulan & Tahun</label>
+                                        <input type="month" class="form-control" name="bulan" id="bulan">
+                                    </div>
+
+                                    <!-- Dynamic Input: Tahunan -->
+                                    <div class="col-md-4 filter-input-wrapper d-none" id="wrapper-tahunan">
+                                        <label for="tahun" class="form-label fw-medium">Pilih Tahun</label>
+                                        <select class="form-select" name="tahun" id="tahun">
+                                            <!-- Loaded dynamically -->
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-5 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary px-4 w-100 fw-semibold">
+                                            <i class="fa-solid fa-filter me-1"></i> Terapkan Filter
+                                        </button>
+                                        <button type="button" id="btnExportPenjualan" class="btn btn-success px-4 w-100 fw-semibold">
+                                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Metrics cards -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-primary border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Pendapatan Penjualan</span>
+                                    <h3 class="fw-bold text-primary mb-0" id="sales-total-revenue">Rp 0</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-success border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Transaksi Selesai</span>
+                                    <h3 class="fw-bold text-success mb-0" id="sales-total-tx">0 Transaksi</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sales details table card -->
+                        <div class="card card-table">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark m-0">Laporan Rincian Barang Terjual</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="sales-report-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No</th>
+                                                <th>Tanggal</th>
+                                                <th>Nama Pembeli</th>
+                                                <th>Nama Barang</th>
+                                                <th class="text-end">Jumlah</th>
+                                                <th class="text-end">Harga Jual</th>
+                                                <th class="text-end">Total Penjualan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sales-report-tbody">
+                                            <!-- Loaded dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: STOCK REPORT -->
+                    <div class="tab-pane fade" id="stock-report" role="tabpanel" aria-labelledby="stock-report-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">Status Inventori Barang Saat Ini</h5>
+                                <p class="text-muted small mb-0">Informasi stok barang secara real-time berdasarkan stok minimum yang diatur.</p>
+                            </div>
+                            <button type="button" id="btnExportStok" class="btn btn-success px-4 fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Laporan Stok
+                            </button>
+                        </div>
+
+                        <!-- Stock table card -->
+                        <div class="card card-table">
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="stock-report-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No</th>
+                                                <th>Nama Barang</th>
+                                                <th>Kategori</th>
+                                                <th class="text-end">Stok Saat Ini</th>
+                                                <th class="text-end">Stok Minimum</th>
+                                                <th style="width: 150px; text-align: center;">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="stock-report-tbody">
+                                            <!-- Loaded dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        let salesTableInstance = null;
+        let stockTableInstance = null;
+
+        $(document).ready(function () {
+            // Set User info
+            const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
+            $('#logged-username').text(username);
+            $('#logged-username-mobile').text('Hi, ' + username);
+
+            // Sidebar Toggle
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+
+            // Set up Year Selector (current down to 10 years ago)
+            const currentYear = new Date().getFullYear();
+            const yearSelect = $('#tahun');
+            yearSelect.empty();
+            for (let y = currentYear; y >= currentYear - 9; y--) {
+                yearSelect.append(`<option value="${y}">${y}</option>`);
+            }
+
+            // Sync filters from URL Parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const filterType = urlParams.get('filter_type') || 'harian';
+            const filterTanggal = urlParams.get('tanggal') || new Date().toISOString().split('T')[0];
+            const filterBulan = urlParams.get('bulan') || new Date().toISOString().substring(0, 7);
+            const filterTahun = parseInt(urlParams.get('tahun')) || currentYear;
+
+            // Set Form values
+            $('#filter_type').val(filterType);
+            $('#tanggal').val(filterTanggal);
+            $('#bulan').val(filterBulan);
+            $('#tahun').val(filterTahun);
+
+            toggleFilterInputs(filterType);
+
+            // Trigger change inputs panel
+            $('#filter_type').on('change', function () {
+                toggleFilterInputs($(this).val());
+            });
+
+            // Handle Filter submission
+            $('#salesFilterForm').on('submit', function (e) {
+                e.preventDefault();
+                const type = $('#filter_type').val();
+                const date = $('#tanggal').val();
+                const month = $('#bulan').val();
+                const year = $('#tahun').val();
+                
+                // Set URL search parameters and reload to keep state
+                const searchParams = new URLSearchParams();
+                searchParams.set('filter_type', type);
+                if (type === 'harian') searchParams.set('tanggal', date);
+                if (type === 'bulanan') searchParams.set('bulan', month);
+                if (type === 'tahunan') searchParams.set('tahun', year);
+                
+                window.location.search = searchParams.toString();
+            });
+
+            // Load Data Reports
+            loadSalesReport(filterType, filterTanggal, filterBulan, filterTahun);
+            loadStockReport();
+
+            // Export Sales Excel Action
+            $('#btnExportPenjualan').on('click', function () {
+                exportSalesToExcel(filterType, filterTanggal, filterBulan, filterTahun);
+            });
+
+            // Export Stock Excel Action
+            $('#btnExportStok').on('click', function () {
+                exportStockToExcel();
+            });
+        });
+
+        // Hide/Show correct input filters
+        function toggleFilterInputs(type) {
+            $('.filter-input-wrapper').addClass('d-none');
+            if (type === 'harian') $('#wrapper-harian').removeClass('d-none');
+            if (type === 'bulanan') $('#wrapper-bulanan').removeClass('d-none');
+            if (type === 'tahunan') $('#wrapper-tahunan').removeClass('d-none');
+        }
+
+        // Fetch sales records and apply manual JS filtering
+        function loadSalesReport(type, dateVal, monthVal, yearVal) {
+            const allSales = DB.getSalesHistoryCombined();
+            let filteredSales = [];
+
+            if (type === 'harian') {
+                filteredSales = allSales.filter(s => s.tanggal === dateVal);
+            } else if (type === 'bulanan') {
+                // monthVal is YYYY-MM
+                filteredSales = allSales.filter(s => s.tanggal.startsWith(monthVal));
+            } else if (type === 'tahunan') {
+                // yearVal is YYYY
+                filteredSales = allSales.filter(s => s.tanggal.startsWith(yearVal.toString()));
+            }
+
+            // Sum metrics
+            const totalRevenue = filteredSales.reduce((sum, s) => sum + s.subtotal, 0);
+            
+            // Unique transaction count
+            const uniqueTxIds = new Set(filteredSales.map(s => s.id_penjualan));
+            const totalTransactions = uniqueTxIds.size;
+
+            $('#sales-total-revenue').text(formatRupiah(totalRevenue));
+            $('#sales-total-tx').text(totalTransactions + ' Transaksi');
+
+            // Render table rows
+            const tbody = $('#sales-report-tbody');
+            if (salesTableInstance) {
+                salesTableInstance.destroy();
+            }
+            tbody.empty();
+
+            filteredSales.forEach((item, index) => {
+                tbody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span class="small text-muted">${formatDate(item.tanggal)}</span></td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_pembeli)}</span></td>
+                        <td><span class="text-dark">${escapeHtml(item.nama_barang)}</span></td>
+                        <td class="text-end">${item.jumlah} <span class="small text-muted">${escapeHtml(item.satuan)}</span></td>
+                        <td class="text-end">Rp ${formatNumber(item.harga_jual)}</td>
+                        <td class="text-end fw-bold text-primary">Rp ${formatNumber(item.subtotal)}</td>
+                    </tr>
+                `);
+            });
+
+            salesTableInstance = $('#sales-report-table').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                }
+            });
+        }
+
+        // Render stock levels table
+        function loadStockReport() {
+            const barangList = DB.getBarang();
+            const tbody = $('#stock-report-tbody');
+
+            if (stockTableInstance) {
+                stockTableInstance.destroy();
+            }
+            tbody.empty();
+
+            barangList.forEach((b, index) => {
+                let badge = '';
+                if (b.stok === 0) {
+                    badge = '<span class="badge bg-danger">Habis</span>';
+                } else if (b.stok <= b.stok_minimum) {
+                    badge = '<span class="badge bg-warning text-dark">Menipis</span>';
+                } else {
+                    badge = '<span class="badge bg-success">Aman</span>';
+                }
+
+                tbody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang)}</span></td>
+                        <td>${escapeHtml(b.nama_kategori)}</td>
+                        <td class="text-end fw-bold">${b.stok} <span class="small text-muted fw-normal">${escapeHtml(b.satuan)}</span></td>
+                        <td class="text-end">${b.stok_minimum}</td>
+                        <td class="text-center">${badge}</td>
+                    </tr>
+                `);
+            });
+
+            stockTableInstance = $('#stock-report-table').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                }
+            });
+        }
+
+        // Offline Excel Sales generation and triggers download
+        function exportSalesToExcel(type, dateVal, monthVal, yearVal) {
+            const allSales = DB.getSalesHistoryCombined();
+            let filteredSales = [];
+            let filterTitle = "";
+
+            if (type === 'harian') {
+                filteredSales = allSales.filter(s => s.tanggal === dateVal);
+                filterTitle = "Hari/Tanggal: " + formatDate(dateVal);
+            } else if (type === 'bulanan') {
+                filteredSales = allSales.filter(s => s.tanggal.startsWith(monthVal));
+                const parts = monthVal.split('-');
+                const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                filterTitle = "Bulan: " + monthNames[parseInt(parts[1]) - 1] + " " + parts[0];
+            } else if (type === 'tahunan') {
+                filteredSales = allSales.filter(s => s.tanggal.startsWith(yearVal.toString()));
+                filterTitle = "Tahun: " + yearVal;
+            }
+
+            const totalRevenue = filteredSales.reduce((sum, s) => sum + s.subtotal, 0);
+            const uniqueTxIds = new Set(filteredSales.map(s => s.id_penjualan));
+            const totalTransactions = uniqueTxIds.size;
+
+            let rowHtml = '';
+            if (filteredSales.length === 0) {
+                rowHtml = '<tr><td colspan="7" align="center">Tidak ada data transaksi penjualan pada periode ini.</td></tr>';
+            } else {
+                filteredSales.forEach((item, index) => {
+                    rowHtml += `
+                        <tr>
+                            <td align="center">${index + 1}</td>
+                            <td align="center">${formatDate(item.tanggal)}</td>
+                            <td>${escapeHtml(item.nama_pembeli)}</td>
+                            <td>${escapeHtml(item.nama_barang)}</td>
+                            <td align="right">${item.jumlah} ${escapeHtml(item.satuan)}</td>
+                            <td align="right">${item.harga_jual}</td>
+                            <td align="right" style="font-weight: bold; color: #1E3A8A;">${item.subtotal}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const today = new Date();
+            const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
+
+            const excelTemplate = `
+                <h3>LAPORAN PENJUALAN TOKO BANGUNAN</h3>
+                <h4>TB SUMBER JAYA</h4>
+                <p>${filterTitle}</p>
+                <p>Di-export pada: ${exportDate}</p>
+
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">
+                            <th style="width: 50px;">No</th>
+                            <th style="width: 120px;">Tanggal</th>
+                            <th style="width: 180px;">Nama Pembeli</th>
+                            <th style="width: 200px;">Nama Barang</th>
+                            <th style="width: 100px;">Jumlah</th>
+                            <th style="width: 150px;">Harga Jual</th>
+                            <th style="width: 150px;">Total Penjualan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowHtml}
+                        <tr style="background-color: #F3F4F6; font-weight: bold;">
+                            <td colspan="6" align="right">Total Pendapatan</td>
+                            <td align="right">${totalRevenue}</td>
+                        </tr>
+                        <tr style="background-color: #F3F4F6; font-weight: bold;">
+                            <td colspan="6" align="right">Total Transaksi</td>
+                            <td align="right">${totalTransactions} Transaksi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            DB.exportToExcel(excelTemplate, `Laporan_Penjualan_${timestamp}.xls`);
+        }
+
+        // Offline Excel Stock generation and triggers download
+        function exportStockToExcel() {
+            const barangList = DB.getBarang();
+            let rowHtml = '';
+
+            if (barangList.length === 0) {
+                rowHtml = '<tr><td colspan="6" align="center">Tidak ada data barang di inventori.</td></tr>';
+            } else {
+                barangList.forEach((b, index) => {
+                    let status = 'Aman';
+                    let color = '#16A34A'; // Green
+                    if (b.stok === 0) {
+                        status = 'Habis';
+                        color = '#DC2626'; // Red
+                    } else if (b.stok <= b.stok_minimum) {
+                        status = 'Menipis';
+                        color = '#D97706'; // Orange
+                    }
+
+                    rowHtml += `
+                        <tr>
+                            <td align="center">${index + 1}</td>
+                            <td>${escapeHtml(b.nama_barang)}</td>
+                            <td>${escapeHtml(b.nama_kategori)}</td>
+                            <td align="right" style="font-weight: bold;">${b.stok} ${escapeHtml(b.satuan)}</td>
+                            <td align="right">${b.stok_minimum}</td>
+                            <td align="center" style="font-weight: bold; color: ${color};">${status}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const today = new Date();
+            const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
+
+            const excelTemplate = `
+                <h3>LAPORAN STOK BARANG TOKO BANGUNAN</h3>
+                <h4>TB SUMBER JAYA</h4>
+                <p>Di-export pada: ${exportDate}</p>
+
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">
+                            <th style="width: 50px;">No</th>
+                            <th style="width: 250px;">Nama Barang</th>
+                            <th style="width: 150px;">Kategori</th>
+                            <th style="width: 120px;">Stok Saat Ini</th>
+                            <th style="width: 120px;">Stok Minimum</th>
+                            <th style="width: 120px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowHtml}
+                    </tbody>
+                </table>
+            `;
+
+            const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            DB.exportToExcel(excelTemplate, `Laporan_Stok_Barang_${timestamp}.xls`);
+        }
+
+        // Formatting Helpers
+        function formatRupiah(value) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID').format(num);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

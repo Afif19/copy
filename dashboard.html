@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SI Toko Bangunan</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <script src="assets/js/db.js"></script>
+    <script>
+        DB.checkAuth();
+    </script>
+
+    <div id="wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="sidebar-brand">
+                    <i class="fa-solid fa-trowel-bricks"></i>
+                    <span>TB AA BAROKAH</span>
+                </a>
+            </div>
+
+            <ul class="components m-0 p-0">
+                <li id="menu-dashboard" class="active">
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang">
+                    <a href="barang.html">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Data Barang</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang_masuk">
+                    <a href="barang_masuk.html">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Barang Masuk</span>
+                    </a>
+                </li>
+                
+                <li id="menu-penjualan">
+                    <a href="penjualan.html">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Penjualan</span>
+                    </a>
+                </li>
+                
+                <li id="menu-laporan">
+                    <a href="laporan.html">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="auth/logout.html" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');" class="text-warning">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p class="m-0 text-center">&copy; 2026 TB Sumber Jaya</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area Wrapper -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg top-navbar">
+                <div class="container-fluid p-0">
+                    <button type="button" id="sidebarCollapse" class="btn-toggle-sidebar me-2">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <h5 class="m-0 text-dark fw-semibold d-none d-sm-inline-block">
+                        Dashboard
+                    </h5>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted d-none d-md-inline-block">
+                            Selamat Datang, <strong id="logged-username">Admin</strong>
+                        </span>
+                        <div class="dropdown">
+                            <a class="text-decoration-none dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-circle-user fa-xl" style="color: var(--primary-color);"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li>
+                                    <span class="dropdown-item-text d-md-none text-muted border-bottom pb-2" id="logged-username-mobile">
+                                        Hi, Admin
+                                    </span>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger fw-medium" href="auth/logout.html">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Content Area -->
+            <div class="main-content">
+                <!-- Stat Cards Grid -->
+                <div class="row g-4 mb-4">
+                    <!-- Total Barang -->
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="stat-card d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small fw-medium">Total Barang</span>
+                                <h3 class="fw-bold text-dark mt-1 mb-0" id="stat-total-barang">0</h3>
+                            </div>
+                            <div class="stat-icon bg-primary-light">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Penjualan Hari Ini -->
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="stat-card d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small fw-medium">Penjualan Hari Ini</span>
+                                <h3 class="fw-bold text-dark mt-1 mb-0" id="stat-penjualan-hari-ini">Rp 0</h3>
+                            </div>
+                            <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                <i class="fa-solid fa-money-bill-wave"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Transaksi -->
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="stat-card d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small fw-medium">Total Transaksi</span>
+                                <h3 class="fw-bold text-dark mt-1 mb-0" id="stat-total-transaksi">0</h3>
+                            </div>
+                            <div class="stat-icon bg-info bg-opacity-10 text-info">
+                                <i class="fa-solid fa-cash-register"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Barang Hampir Habis -->
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="stat-card d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small fw-medium">Barang Hampir Habis</span>
+                                <h3 class="fw-bold text-dark mt-1 mb-0" id="stat-barang-hampir-habis">0</h3>
+                            </div>
+                            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart & Best Sellers Section -->
+                <div class="row g-4 mb-4">
+                    <!-- Chart Growth -->
+                    <div class="col-xl-8">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-line me-1"></i> Grafik Pertumbuhan Penjualan</h6>
+                                <div style="width: 150px;">
+                                    <select class="form-select form-select-sm" id="chartFilter">
+                                        <option value="harian" selected>Harian</option>
+                                        <option value="bulanan">Bulanan</option>
+                                        <option value="tahunan">Tahunan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <div style="position: relative; height: 320px;">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barang Terlaris Table -->
+                    <div class="col-xl-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-fire text-danger me-1"></i> 5 Barang Terlaris</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nama Barang</th>
+                                                <th class="text-end">Terjual</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="top-selling-table">
+                                            <tr>
+                                                <td colspan="2" class="text-center py-4 text-muted small">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lower Sections: Last Transactions & Stock Alert -->
+                <div class="row g-4">
+                    <!-- Last Transactions -->
+                    <div class="col-lg-7">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-clock-rotate-left me-1"></i> Transaksi Terakhir</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Tanggal</th>
+                                                <th>Pembeli/Toko</th>
+                                                <th class="text-center">Item</th>
+                                                <th class="text-end">Total Transaksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-sales-table">
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4 text-muted small">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Alerts -->
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Peringatan Stok Hampir Habis</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nama Barang</th>
+                                                <th class="text-center">Stok</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="alert-stock-table">
+                                            <tr>
+                                                <td colspan="3" class="text-center py-4 text-success small"><i class="fa-solid fa-circle-check me-1"></i> Semua stok aman!</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery & JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Set User info
+            const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
+            $('#logged-username').text(username);
+            $('#logged-username-mobile').text('Hi, ' + username);
+
+            // Sidebar Toggle
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+
+            // Load Metrics
+            const metrics = DB.getMetrics();
+            $('#stat-total-barang').text(metrics.total_barang);
+            $('#stat-penjualan-hari-ini').text(formatRupiah(metrics.penjualan_hari_ini));
+            $('#stat-total-transaksi').text(metrics.total_transaksi);
+            $('#stat-barang-hampir-habis').text(metrics.barang_hampir_habis);
+
+            // Load Top Selling
+            const topProducts = DB.getTopSellingProducts();
+            const topTable = $('#top-selling-table');
+            topTable.empty();
+            if (topProducts.length === 0) {
+                topTable.append('<tr><td colspan="2" class="text-center py-4 text-muted small">Belum ada transaksi.</td></tr>');
+            } else {
+                topProducts.forEach(item => {
+                    topTable.append(`
+                        <tr>
+                            <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_barang)}</span></td>
+                            <td class="text-end fw-bold text-primary">${item.total_terjual} <span class="text-muted fw-normal small">${escapeHtml(item.satuan)}</span></td>
+                        </tr>
+                    `);
+                });
+            }
+
+            // Load Recent Sales
+            const recentSales = DB.getRecentTransactions();
+            const recentTable = $('#recent-sales-table');
+            recentTable.empty();
+            if (recentSales.length === 0) {
+                recentTable.append('<tr><td colspan="4" class="text-center py-4 text-muted small">Belum ada transaksi.</td></tr>');
+            } else {
+                recentSales.forEach(item => {
+                    recentTable.append(`
+                        <tr>
+                            <td><span class="small text-muted">${formatDate(item.tanggal)}</span></td>
+                            <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_pembeli)}</span></td>
+                            <td class="text-center"><span class="badge bg-light text-dark border">${item.jumlah_item}</span></td>
+                            <td class="text-end fw-semibold text-primary">${formatRupiah(item.total_transaksi)}</td>
+                        </tr>
+                    `);
+                });
+            }
+
+            // Load Alert Stock
+            const alertStock = DB.getAlertStockList();
+            const alertTable = $('#alert-stock-table');
+            alertTable.empty();
+            if (alertStock.length === 0) {
+                alertTable.append('<tr><td colspan="3" class="text-center py-4 text-success small"><i class="fa-solid fa-circle-check me-1"></i> Semua stok aman!</td></tr>');
+            } else {
+                alertStock.forEach(item => {
+                    const badgeClass = item.status === 'Habis' ? 'bg-danger' : 'bg-warning text-dark';
+                    alertTable.append(`
+                        <tr>
+                            <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_barang)}</span></td>
+                            <td class="text-center fw-bold text-danger">${item.stok} <span class="text-muted fw-normal small">${escapeHtml(item.satuan)}</span></td>
+                            <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                        </tr>
+                    `);
+                });
+            }
+
+            // Chart Configuration
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            let currentChartData = DB.getChartData('harian');
+
+            const salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: currentChartData.labels,
+                    datasets: [{
+                        label: currentChartData.label,
+                        data: currentChartData.values,
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.05)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#1e3a8a',
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatRupiah(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID', { notation: 'compact', compactDisplay: 'short' }).format(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart Filter Event
+            $('#chartFilter').on('change', function() {
+                const filter = $(this).val();
+                const activeData = DB.getChartData(filter);
+                salesChart.data.labels = activeData.labels;
+                salesChart.data.datasets[0].label = activeData.label;
+                salesChart.data.datasets[0].data = activeData.values;
+                salesChart.update();
+            });
+        });
+
+        // Helper Formats
+        function formatRupiah(value) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

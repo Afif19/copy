@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barang Masuk - SI Toko Bangunan</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <script src="assets/js/db.js"></script>
+    <script>
+        DB.checkAuth();
+    </script>
+
+    <div id="wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="sidebar-brand">
+                    <i class="fa-solid fa-trowel-bricks"></i>
+                    <span>TB AA BAROKAH</span>
+                </a>
+            </div>
+
+            <ul class="components m-0 p-0">
+                <li id="menu-dashboard">
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang">
+                    <a href="barang.html">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Data Barang</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang_masuk" class="active">
+                    <a href="barang_masuk.html">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Barang Masuk</span>
+                    </a>
+                </li>
+                
+                <li id="menu-penjualan">
+                    <a href="penjualan.html">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Penjualan</span>
+                    </a>
+                </li>
+                
+                <li id="menu-laporan">
+                    <a href="laporan.html">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="auth/logout.html" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');" class="text-warning">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p class="m-0 text-center">&copy; 2026 TB Sumber Jaya</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area Wrapper -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg top-navbar">
+                <div class="container-fluid p-0">
+                    <button type="button" id="sidebarCollapse" class="btn-toggle-sidebar me-2">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <h5 class="m-0 text-dark fw-semibold d-none d-sm-inline-block">
+                        Barang Masuk (Tambah Stok)
+                    </h5>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted d-none d-md-inline-block">
+                            Selamat Datang, <strong id="logged-username">Admin</strong>
+                        </span>
+                        <div class="dropdown">
+                            <a class="text-decoration-none dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-circle-user fa-xl" style="color: var(--primary-color);"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li>
+                                    <span class="dropdown-item-text d-md-none text-muted border-bottom pb-2" id="logged-username-mobile">
+                                        Hi, Admin
+                                    </span>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger fw-medium" href="auth/logout.html">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Dynamic Content container -->
+            <div class="main-content">
+                <!-- Page Title -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Barang Masuk (Tambah Stok)</h4>
+                        <p class="text-muted small mb-0">Catat penambahan stok barang bangunan yang masuk dari supplier.</p>
+                    </div>
+                </div>
+
+                <!-- Display alert message -->
+                <div id="alert-container"></div>
+
+                <div class="row g-4">
+                    <!-- Form Section -->
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h6 class="card-title fw-bold mb-0"><i class="fa-solid fa-plus-circle me-1"></i> Input Barang Masuk</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <form id="barangMasukForm">
+                                    <div class="mb-3">
+                                        <label for="tanggal" class="form-label fw-medium">Tanggal Masuk</label>
+                                        <input type="date" class="form-control" name="tanggal" id="tanggal" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_barang" class="form-label fw-medium">Pilih Barang</label>
+                                        <select class="form-select" name="id_barang" id="id_barang" required>
+                                            <option value="" disabled selected>Pilih Barang...</option>
+                                            <!-- Options loaded dynamically -->
+                                        </select>
+                                    </div>
+
+                                    <!-- Current stock info display (Read-Only) -->
+                                    <div class="mb-3 d-none" id="stok-info-wrapper">
+                                        <div class="p-2.5 bg-light rounded border text-muted small">
+                                            Stok Saat Ini: <span class="fw-bold text-dark" id="info-stok">0</span> <span id="info-satuan"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="jumlah_masuk" class="form-label fw-medium">Jumlah Masuk</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" name="jumlah_masuk" id="jumlah_masuk" placeholder="0" required min="1">
+                                            <span class="input-group-text bg-light text-muted" id="satuan-addon">-</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="harga_beli" class="form-label fw-medium">Harga Beli Baru (Rp)</label>
+                                        <input type="number" step="0.01" class="form-control" name="harga_beli" id="harga_beli" placeholder="0" required min="0">
+                                        <span class="form-text text-muted small">Harga beli di data barang akan diperbarui ke nilai ini.</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="harga_jual" class="form-label fw-medium">Harga Jual Baru (Rp)</label>
+                                        <input type="number" step="0.01" class="form-control" name="harga_jual" id="harga_jual" placeholder="0" required min="0">
+                                        <span class="form-text text-muted small">Harga jual di data barang akan diperbarui ke nilai ini.</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="keterangan" class="form-label fw-medium">Keterangan / Supplier</label>
+                                        <textarea class="form-control" name="keterangan" id="keterangan" rows="2" placeholder="Contoh: Toko Semen Tiga Roda, restock rutin"></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold mt-2">
+                                        <i class="fa-solid fa-save me-1"></i> Simpan Transaksi
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History List Section -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card card-table border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-clock-rotate-left me-1"></i> Riwayat Barang Masuk</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No</th>
+                                                <th>Tanggal</th>
+                                                <th>Nama Barang</th>
+                                                <th>Jumlah</th>
+                                                <th>Harga Beli</th>
+                                                <th>Harga Jual</th>
+                                                <th>Keterangan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="history-tbody">
+                                            <!-- Dynamic history rows loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        let dataTableInstance = null;
+
+        $(document).ready(function () {
+            // Set User info
+            const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
+            $('#logged-username').text(username);
+            $('#logged-username-mobile').text('Hi, ' + username);
+
+            // Sidebar Toggle
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+
+            // Set default date to today
+            $('#tanggal').val(new Date().toISOString().split('T')[0]);
+
+            // Initialize Page Data
+            loadProductDropdown();
+            loadHistoryTable();
+
+            // Product Selection change trigger
+            $('#id_barang').on('change', function () {
+                const selectedOption = $(this).find('option:selected');
+                if (selectedOption.val()) {
+                    const buy = parseFloat(selectedOption.data('beli'));
+                    const sell = parseFloat(selectedOption.data('jual'));
+                    const unit = selectedOption.data('satuan');
+                    const stock = selectedOption.data('stok');
+
+                    $('#harga_beli').val(buy);
+                    $('#harga_jual').val(sell);
+                    $('#satuan-addon').text(unit);
+                    
+                    $('#info-stok').text(stock);
+                    $('#info-satuan').text(unit);
+                    $('#stok-info-wrapper').removeClass('d-none');
+                } else {
+                    $('#stok-info-wrapper').addClass('d-none');
+                    $('#satuan-addon').text('-');
+                }
+            });
+
+            // Form Submit: Save Barang Masuk Transaction
+            $('#barangMasukForm').on('submit', function (e) {
+                e.preventDefault();
+                const entry = {
+                    tanggal: $('#tanggal').val(),
+                    id_barang: $('#id_barang').val(),
+                    jumlah_masuk: $('#jumlah_masuk').val(),
+                    harga_beli: $('#harga_beli').val(),
+                    harga_jual: $('#harga_jual').val(),
+                    keterangan: $('#keterangan').val().trim()
+                };
+
+                try {
+                    DB.addBarangMasuk(entry);
+                    $('#barangMasukForm')[0].reset();
+                    $('#stok-info-wrapper').addClass('d-none');
+                    $('#satuan-addon').text('-');
+                    $('#tanggal').val(new Date().toISOString().split('T')[0]);
+                    
+                    showAlert('Stok barang masuk berhasil dicatat!', 'success');
+                    
+                    // Reload dropdown and history table
+                    loadProductDropdown();
+                    loadHistoryTable();
+                } catch (err) {
+                    alert('Gagal mencatat barang masuk: ' + err.message);
+                }
+            });
+        });
+
+        // Load Products into dropdown
+        function loadProductDropdown() {
+            const barangList = DB.getTable('barang').sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
+            const select = $('#id_barang');
+            select.empty().append('<option value="" disabled selected>Pilih Barang...</option>');
+
+            barangList.forEach(b => {
+                select.append(`
+                    <option value="${b.id_barang}" 
+                            data-beli="${b.harga_beli}" 
+                            data-jual="${b.harga_jual}" 
+                            data-satuan="${escapeHtml(b.satuan)}" 
+                            data-stok="${b.stok}">
+                        ${escapeHtml(b.nama_barang)}
+                    </option>
+                `);
+            });
+        }
+
+        // Render history table and reload DataTable
+        function loadHistoryTable() {
+            const historyList = DB.getBarangMasuk();
+            const tbody = $('#history-tbody');
+
+            if (dataTableInstance) {
+                dataTableInstance.destroy();
+            }
+
+            tbody.empty();
+
+            historyList.forEach((bm, index) => {
+                tbody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span class="small text-muted">${formatDate(bm.tanggal)}</span></td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(bm.nama_barang)}</span></td>
+                        <td class="fw-bold">${bm.jumlah_masuk} <span class="small text-muted fw-normal">${escapeHtml(bm.satuan)}</span></td>
+                        <td>Rp ${formatNumber(bm.harga_beli)}</td>
+                        <td>Rp ${formatNumber(bm.harga_jual)}</td>
+                        <td><span class="small text-muted">${escapeHtml(bm.keterangan || '-')}</span></td>
+                    </tr>
+                `);
+            });
+
+            dataTableInstance = $('#history-table').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                }
+            });
+        }
+
+        function showAlert(message, type) {
+            $('#alert-container').html(`
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID').format(num);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

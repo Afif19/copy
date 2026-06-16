@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SI Toko Bangunan</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="login-page">
+    <div class="login-card">
+        <div class="text-center mb-4">
+            <div class="login-logo">
+                <i class="fa-solid fa-trowel-bricks"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-1">TB Sumber Jaya</h4>
+            <p class="text-muted small">Sistem Informasi Stok & Penjualan</p>
+        </div>
+
+        <div id="alert-wrapper"></div>
+
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label fw-medium text-secondary">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-user"></i></span>
+                    <input type="text" name="username" id="username" class="form-control border-start-0 bg-light" placeholder="Masukkan username" required autocomplete="username">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label fw-medium text-secondary">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password" id="password" class="form-control border-start-0 bg-light" placeholder="Masukkan password" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="mb-4 form-check">
+                <input type="checkbox" class="form-check-input" id="rememberMe">
+                <label class="form-check-label text-muted small" for="rememberMe">Ingat saya di perangkat ini</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold shadow-sm">
+                <i class="fa-solid fa-right-to-bracket me-2"></i> Masuk ke Sistem
+            </button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script>
+        // Redirect to dashboard if already logged in
+        DB.checkAuth(true);
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            if (username && password) {
+                const success = DB.login(username, password, rememberMe);
+                if (success) {
+                    window.location.href = '../dashboard.html';
+                } else {
+                    showAlert('Username atau Password salah!', 'danger');
+                }
+            } else {
+                showAlert('Semua field wajib diisi!', 'warning');
+            }
+        });
+
+        function showAlert(message, type) {
+            const wrapper = document.getElementById('alert-wrapper');
+            wrapper.innerHTML = `
+                <div class="alert alert-${type} d-flex align-items-center alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>
+                    <div>${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

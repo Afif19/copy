@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori Barang - SI Toko Bangunan</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <script src="assets/js/db.js"></script>
+    <script>
+        DB.checkAuth();
+    </script>
+
+    <div id="wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="sidebar-brand">
+                    <i class="fa-solid fa-trowel-bricks"></i>
+                    <span>TB AA BAROKAH</span>
+                </a>
+            </div>
+
+            <ul class="components m-0 p-0">
+                <li id="menu-dashboard">
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang" class="active">
+                    <a href="barang.html">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Data Barang</span>
+                    </a>
+                </li>
+                
+                <li id="menu-barang_masuk">
+                    <a href="barang_masuk.html">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Barang Masuk</span>
+                    </a>
+                </li>
+                
+                <li id="menu-penjualan">
+                    <a href="penjualan.html">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Penjualan</span>
+                    </a>
+                </li>
+                
+                <li id="menu-laporan">
+                    <a href="laporan.html">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="auth/logout.html" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');" class="text-warning">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p class="m-0 text-center">&copy; 2026 TB Sumber Jaya</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area Wrapper -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg top-navbar">
+                <div class="container-fluid p-0">
+                    <button type="button" id="sidebarCollapse" class="btn-toggle-sidebar me-2">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <h5 class="m-0 text-dark fw-semibold d-none d-sm-inline-block">
+                        Kategori Barang
+                    </h5>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted d-none d-md-inline-block">
+                            Selamat Datang, <strong id="logged-username">Admin</strong>
+                        </span>
+                        <div class="dropdown">
+                            <a class="text-decoration-none dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-circle-user fa-xl" style="color: var(--primary-color);"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li>
+                                    <span class="dropdown-item-text d-md-none text-muted border-bottom pb-2" id="logged-username-mobile">
+                                        Hi, Admin
+                                    </span>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger fw-medium" href="auth/logout.html">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Dynamic Content container -->
+            <div class="main-content">
+                <!-- Content Title & Breadcrumb -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Kategori Barang</h4>
+                        <p class="text-muted small mb-0">Kelola kategori produk toko bangunan Anda secara dinamis.</p>
+                    </div>
+                    <div>
+                        <a href="barang.html" class="btn btn-outline-secondary me-2">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Barang
+                        </a>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                            <i class="fa-solid fa-plus me-1"></i> Tambah Kategori
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Display alert message if exists -->
+                <div id="alert-container"></div>
+
+                <!-- Category Table Card -->
+                <div class="card card-table">
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle w-100" id="kategori-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px;">No</th>
+                                        <th>Nama Kategori</th>
+                                        <th style="width: 150px; text-align: center;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kategori-tbody">
+                                    <!-- Dynamic rows loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Category -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="addCategoryModalLabel">Tambah Kategori Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addCategoryForm">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="nama_kategori" class="form-label fw-medium">Nama Kategori</label>
+                            <input type="text" class="form-control" name="nama_kategori" id="nama_kategori" placeholder="Contoh: Semen, Besi, Cat" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Category -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="editCategoryModalLabel">Ubah Kategori</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editCategoryForm">
+                    <input type="hidden" name="id_kategori" id="edit_id_kategori">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="edit_nama_kategori" class="form-label fw-medium">Nama Kategori</label>
+                            <input type="text" class="form-control" name="nama_kategori" id="edit_nama_kategori" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        let dataTableInstance = null;
+
+        $(document).ready(function () {
+            // Set User info
+            const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
+            $('#logged-username').text(username);
+            $('#logged-username-mobile').text('Hi, ' + username);
+
+            // Sidebar Toggle
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+
+            // Initialize Page Data
+            loadKategoriTable();
+
+            // Form Submit: Add Category
+            $('#addCategoryForm').on('submit', function (e) {
+                e.preventDefault();
+                const name = $('#nama_kategori').val().trim();
+                try {
+                    DB.addCategory(name);
+                    $('#addCategoryModal').modal('hide');
+                    $('#addCategoryForm')[0].reset();
+                    showAlert('Kategori berhasil ditambahkan!', 'success');
+                    loadKategoriTable();
+                } catch (err) {
+                    alert(err.message);
+                }
+            });
+
+            // Form Submit: Edit Category
+            $('#editCategoryForm').on('submit', function (e) {
+                e.preventDefault();
+                const id = $('#edit_id_kategori').val();
+                const name = $('#edit_nama_kategori').val().trim();
+                try {
+                    DB.updateCategory(id, name);
+                    $('#editCategoryModal').modal('hide');
+                    showAlert('Kategori berhasil diperbarui!', 'success');
+                    loadKategoriTable();
+                } catch (err) {
+                    alert(err.message);
+                }
+            });
+
+            // Click Edit Button handler
+            $(document).on('click', '.btn-edit', function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                $('#edit_id_kategori').val(id);
+                $('#edit_nama_kategori').val(name);
+            });
+
+            // Click Delete Button handler
+            $(document).on('click', '.btn-delete', function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+
+                if (confirm(`Apakah Anda yakin ingin menghapus kategori '${name}'?`)) {
+                    try {
+                        DB.deleteCategory(id);
+                        showAlert('Kategori berhasil dihapus!', 'success');
+                        loadKategoriTable();
+                    } catch (err) {
+                        showAlert(err.message, 'danger');
+                    }
+                }
+            });
+        });
+
+        // Load Categories from LocalStorage and render
+        function loadKategoriTable() {
+            const categories = DB.getCategories();
+            const tbody = $('#kategori-tbody');
+
+            // Destroy existing DataTable if exists
+            if (dataTableInstance) {
+                dataTableInstance.destroy();
+            }
+
+            tbody.empty();
+
+            categories.forEach((cat, index) => {
+                tbody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(cat.nama_kategori)}</span></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit" 
+                                    data-id="${cat.id_kategori}" 
+                                    data-name="${escapeHtml(cat.nama_kategori)}"
+                                    data-bs-toggle="modal" data-bs-target="#editCategoryModal">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete" 
+                                    data-id="${cat.id_kategori}" 
+                                    data-name="${escapeHtml(cat.nama_kategori)}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            // Initialize DataTable
+            dataTableInstance = $('#kategori-table').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                }
+            });
+        }
+
+        // Show feedback alert at top
+        function showAlert(message, type) {
+            $('#alert-container').html(`
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
