@@ -450,6 +450,72 @@ const DB = {
     },
 
     /**
+     * FUNGSI: addBarangMasukMulti(tanggal, keterangan, items)
+     * Deskripsi: Menambahkan mutasi barang masuk supplier untuk beberapa barang sekaligus.
+     * Parameter:
+     *   - tanggal (string): Tanggal transaksi barang masuk.
+     *   - keterangan (string): Keterangan supplier / catatan transaksi.
+     *   - items (Array of Objects): Daftar barang masuk, masing-masing berisi id_barang, jumlah_masuk, harga_beli, harga_jual.
+     * Alur:
+     *   1. Ambil data tabel barang_masuk dan barang dari localStorage.
+     *   2. Lakukan perulangan untuk memvalidasi dan memproses tiap item restock.
+     *   3. Update stok dan harga beli/jual di master barang.
+     *   4. Simpan kembali seluruh data ke localStorage.
+     */
+    addBarangMasukMulti: function (tanggal, keterangan, items) {
+        // Ambil data tabel barang_masuk dari localStorage
+        const inList = this.getTable('barang_masuk');
+        // Ambil data tabel barang dari localStorage
+        const barangList = this.getTable('barang');
+        // Cari ID auto-increment berikutnya untuk barang_masuk
+        let nextId = this.getNextId('barang_masuk', 'id_barang_masuk');
+
+        // Lakukan iterasi pada setiap item barang masuk yang dikirim
+        items.forEach(item => {
+            // Konversi tipe data ke integer/float untuk kalkulasi aman
+            const idBarang = parseInt(item.id_barang);
+            const qty = parseInt(item.jumlah_masuk);
+            const buy = parseFloat(item.harga_beli);
+            const sell = parseFloat(item.harga_jual);
+
+            // Validasi data input agar tidak ada nilai minus atau kosong
+            if (idBarang <= 0 || qty <= 0 || buy < 0 || sell < 0) {
+                throw new Error('Data input tidak valid!');
+            }
+
+            // Cari indeks barang di master barang berdasarkan ID-nya
+            const index = barangList.findIndex(b => b.id_barang === idBarang);
+            // Lempar error jika barang tidak ditemukan
+            if (index === -1) throw new Error(`Barang dengan ID ${idBarang} tidak ditemukan!`);
+
+            // Tambahkan catatan mutasi barang masuk baru ke list array
+            inList.push({
+                id_barang_masuk: nextId++,
+                tanggal: tanggal,
+                id_barang: idBarang,
+                jumlah_masuk: qty,
+                harga_beli: buy,
+                harga_jual: sell,
+                keterangan: keterangan || ''
+            });
+
+            // Tambahkan jumlah stok masuk ke stok saat ini di master barang
+            barangList[index].stok += qty;
+            // Perbarui harga beli lama ke harga beli yang baru dimasukkan
+            barangList[index].harga_beli = buy;
+            // Perbarui harga jual lama ke harga jual yang baru dimasukkan
+            barangList[index].harga_jual = sell;
+        });
+
+        // Simpan data array barang masuk yang baru ke localStorage
+        this.saveTable('barang_masuk', inList);
+        // Simpan data array master barang yang diperbarui ke localStorage
+        this.saveTable('barang', barangList);
+        // Mengembalikan nilai true sebagai tanda operasi berhasil dilakukan
+        return true;
+    },
+
+    /**
      * FUNGSI: getSalesHistoryCombined()
      * Deskripsi: Menggabungkan tabel penjualan, detail_penjualan, dan barang (JOIN 3 tabel).
      * Kembalian: Array of objek transaksi gabungan.
@@ -550,6 +616,114 @@ const DB = {
         this.saveTable('penjualan', salesList);
         this.saveTable('detail_penjualan', detailsList);
         this.saveTable('barang', barangList);
+        return true;
+    },
+
+    /**
+     * FUNGSI: addPenjualanMulti(transaction, items)
+     * Deskripsi: Mencatat transaksi penjualan baru dengan beberapa barang sekaligus.
+     * Parameter:
+     *   - transaction (Object): Berisi tanggal, nama_pembeli, alamat.
+     *   - items (Array of Objects): List barang belanjaan, masing-masing berisi id_barang, jumlah, harga_jual.
+     * Alur:
+     *   1. Ambil data tabel master barang dari localStorage.
+     *   2. Validasi kecukupan stok untuk semua barang di dalam keranjang belanja.
+     *   3. Hitung total_transaksi dari penjumlahan subtotal masing-masing barang.
+     *   4. Simpan header transaksi baru ke tabel `penjualan`.
+     *   5. Simpan setiap item barang belanjaan ke tabel `detail_penjualan`.
+     *   6. Kurangi stok masing-masing barang di tabel master `barang`.
+     */
+    addPenjualanMulti: function (transaction, items) {
+        // Validasi parameter transaksi dan item agar tidak kosong
+        if (!transaction.tanggal || !transaction.nama_pembeli || !items || items.length === 0) {
+            throw new Error('Data transaksi tidak lengkap!');
+        }
+
+        // Ambil data tabel barang dari localStorage
+        const barangList = this.getTable('barang');
+
+        // Validasi kecukupan stok untuk setiap barang sebelum menyimpan apapun
+        items.forEach(item => {
+            // Konversi nilai parameter ke tipe data angka
+            const idBarang = parseInt(item.id_barang);
+            const qty = parseInt(item.jumlah);
+            const sellPrice = parseFloat(item.harga_jual);
+
+            // Validasi data input agar tidak ada nilai minus atau kosong
+            if (idBarang <= 0 || qty <= 0 || sellPrice < 0) {
+                throw new Error('Data barang tidak valid!');
+            }
+
+            // Cari indeks barang di master barang berdasarkan ID-nya
+            const bIndex = barangList.findIndex(x => x.id_barang === idBarang);
+            // Lempar error jika barang tidak ditemukan
+            if (bIndex === -1) throw new Error(`Barang dengan ID ${idBarang} tidak ditemukan!`);
+
+            // Validasi sisa stok barang di master terhadap kuantitas yang dibeli
+            if (barangList[bIndex].stok < qty) {
+                throw new Error(`Stok barang '${barangList[bIndex].nama_barang}' tidak mencukupi! Tersedia: ${barangList[bIndex].stok}`);
+            }
+        });
+
+        // Definisikan total nilai transaksi belanja keseluruhan
+        let totalTransaksi = 0;
+        // Inisialisasi kontainer array rincian detail penjualan yang siap disimpan
+        const detailsToSave = [];
+        // Ambil ID auto-increment berikutnya untuk tabel penjualan (header)
+        const nextSaleId = this.getNextId('penjualan', 'id_penjualan');
+        // Ambil ID auto-increment berikutnya untuk detail_penjualan (item)
+        let nextDetailId = this.getNextId('detail_penjualan', 'id_detail');
+
+        // Ulangi pemrosesan untuk setiap item barang belanjaan
+        items.forEach(item => {
+            // Konversi tipe data ke number
+            const idBarang = parseInt(item.id_barang);
+            const qty = parseInt(item.jumlah);
+            const sellPrice = parseFloat(item.harga_jual);
+            // Hitung subtotal harga belanja barang (jumlah * harga jual)
+            const subtotal = qty * sellPrice;
+            // Akumulasikan subtotal ke total belanja kotor transaksi
+            totalTransaksi += subtotal;
+
+            // Masukkan objek detail belanja ke array penampung
+            detailsToSave.push({
+                id_detail: nextDetailId++,
+                id_penjualan: nextSaleId,
+                id_barang: idBarang,
+                jumlah: qty,
+                harga_jual: sellPrice,
+                subtotal: subtotal
+            });
+
+            // Cari indeks barang di master barang
+            const bIndex = barangList.findIndex(x => x.id_barang === idBarang);
+            // Kurangi sisa stok barang berjalan di master dengan jumlah beli
+            barangList[bIndex].stok -= qty;
+        });
+
+        // Ambil data tabel penjualan (header) dari localStorage
+        const salesList = this.getTable('penjualan');
+        // Masukkan objek header transaksi penjualan baru ke array list
+        salesList.push({
+            id_penjualan: nextSaleId,
+            tanggal: transaction.tanggal,
+            nama_pembeli: transaction.nama_pembeli,
+            alamat: transaction.alamat || '',
+            total_transaksi: totalTransaksi
+        });
+
+        // Ambil data tabel detail_penjualan dari localStorage
+        const detailsList = this.getTable('detail_penjualan');
+        // Masukkan seluruh baris rincian detail belanja ke array list
+        detailsList.push(...detailsToSave);
+
+        // Simpan data array penjualan (header) terbaru ke localStorage
+        this.saveTable('penjualan', salesList);
+        // Simpan data array detail_penjualan terbaru ke localStorage
+        this.saveTable('detail_penjualan', detailsList);
+        // Simpan data array master barang yang stoknya berkurang ke localStorage
+        this.saveTable('barang', barangList);
+        // Mengembalikan nilai true sebagai tanda transaksi penjualan selesai diproses
         return true;
     },
 

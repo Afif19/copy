@@ -134,29 +134,36 @@
                 <div id="alert-container"></div>
 
                 <div class="row g-4">
-                    <!-- Form Section -->
+                    <!-- Sisi Kiri: Input Form -->
                     <div class="col-xl-4 col-lg-5">
-                        <div class="card border-0 shadow-sm rounded-3">
+                        <!-- Card 1: Informasi Pelanggan & Transaksi -->
+                        <div class="card border-0 shadow-sm rounded-3 mb-4">
                             <div class="card-header bg-primary text-white py-3">
-                                <h6 class="card-title fw-bold mb-0"><i class="fa-solid fa-cart-plus me-1"></i> Input Penjualan</h6>
+                                <h6 class="card-title fw-bold mb-0"><i class="fa-solid fa-file-invoice me-1"></i> Informasi Transaksi</h6>
                             </div>
                             <div class="card-body p-4">
-                                <form id="penjualanForm">
-                                    <div class="mb-3">
-                                        <label for="tanggal" class="form-label fw-medium">Tanggal Transaksi</label>
-                                        <input type="date" class="form-control" name="tanggal" id="tanggal" required>
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="tanggal" class="form-label fw-medium">Tanggal Transaksi</label>
+                                    <input type="date" class="form-control" name="tanggal" id="tanggal" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="nama_pembeli" class="form-label fw-medium">Nama Pembeli / Toko</label>
+                                    <input type="text" class="form-control" name="nama_pembeli" id="nama_pembeli" placeholder="Masukkan nama pembeli" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="alamat" class="form-label fw-medium">Alamat</label>
+                                    <textarea class="form-control" name="alamat" id="alamat" rows="2" placeholder="Masukkan alamat pembeli (Opsional)"></textarea>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="nama_pembeli" class="form-label fw-medium">Nama Pembeli / Toko</label>
-                                        <input type="text" class="form-control" name="nama_pembeli" id="nama_pembeli" placeholder="Masukkan nama pembeli" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="alamat" class="form-label fw-medium">Alamat</label>
-                                        <textarea class="form-control" name="alamat" id="alamat" rows="2" placeholder="Masukkan alamat pembeli (Opsional)"></textarea>
-                                    </div>
-
+                        <!-- Card 2: Tambah Item Barang -->
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h6 class="card-title fw-bold mb-0"><i class="fa-solid fa-cart-plus me-1"></i> Input Item Barang</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <form id="addItemForm">
                                     <div class="mb-3">
                                         <label for="id_barang" class="form-label fw-medium">Pilih Barang</label>
                                         <select class="form-select" name="id_barang" id="id_barang" required>
@@ -164,14 +171,12 @@
                                             <!-- Options loaded dynamically -->
                                         </select>
                                     </div>
-
-                                    <!-- Current stock info display (Read-Only) -->
+                                    <!-- Current stock info display -->
                                     <div class="mb-3 d-none" id="stok-info-wrapper">
                                         <div class="p-2.5 bg-light rounded border text-muted small">
                                             Stok Saat Ini: <span class="fw-bold text-dark" id="info-stok">0</span> <span id="info-satuan"></span>
                                         </div>
                                     </div>
-
                                     <div class="mb-3">
                                         <label for="jumlah" class="form-label fw-medium">Jumlah</label>
                                         <div class="input-group">
@@ -179,23 +184,59 @@
                                             <span class="input-group-text bg-light text-muted" id="satuan-addon">-</span>
                                         </div>
                                     </div>
-
                                     <div class="mb-3">
                                         <label for="harga_jual" class="form-label fw-medium">Harga Jual (Rp)</label>
                                         <input type="number" step="0.01" class="form-control" name="harga_jual" id="harga_jual" placeholder="0" required min="0">
                                     </div>
-
-                                    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold mt-2">
-                                        <i class="fa-solid fa-save me-1"></i> Simpan Transaksi
+                                    <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-semibold">
+                                        <i class="fa-solid fa-plus me-1"></i> Tambah ke Keranjang
                                     </button>
                                 </form>
                             </div>
                         </div>
                     </div>
 
-                    <!-- History List Section -->
+                    <!-- Sisi Kanan: Keranjang Sementara & Riwayat Transaksi -->
                     <div class="col-xl-8 col-lg-7">
-                        <div class="card card-table border-0 shadow-sm h-100">
+                        <!-- Card 1: Keranjang Belanja -->
+                        <div class="card border-0 shadow-sm rounded-3 mb-4">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-shopping-basket me-1"></i> Keranjang Belanja</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="cart-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Barang</th>
+                                                <th class="text-end" style="width: 80px;">Qty</th>
+                                                <th class="text-end" style="width: 130px;">Harga Satuan</th>
+                                                <th class="text-end" style="width: 220px;">Jumlah Harga Barang Per Item</th>
+                                                <th class="text-center" style="width: 80px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cart-tbody">
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">Keranjang kosong. Tambahkan barang di sebelah kiri.</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="fw-bold table-light">
+                                                <td colspan="3" class="text-end">Total Transaksi:</td>
+                                                <td class="text-end text-primary" id="cart-total">Rp 0</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <button type="button" id="btnSimpanTransaksi" class="btn btn-primary w-100 py-2.5 fw-semibold mt-3" disabled>
+                                    <i class="fa-solid fa-save me-1"></i> Simpan Transaksi Penjualan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Riwayat Penjualan -->
+                        <div class="card card-table border-0 shadow-sm">
                             <div class="card-header bg-white border-bottom py-3">
                                 <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-clock-rotate-left me-1"></i> Riwayat Penjualan</h6>
                             </div>
@@ -232,75 +273,173 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script>
+        // FUNGSI: Menampung instansi library DataTables untuk riwayat penjualan.
+        // DETAIL: Digunakan untuk mempermudah destroy instansi tabel lama saat memuat data baru.
         let dataTableInstance = null;
+        // FUNGSI: Menyimpan daftar barang belanjaan sementara yang dimasukkan kasir di sisi browser.
+        // DETAIL: Data berupa array of objects yang merepresentasikan item keranjang belanja.
+        let cartItems = [];
 
+        // FUNGSI: Jalankan inisialisasi form, dropdown, tabel riwayat, dan register listener event.
+        // DETAIL: Dipanggil otomatis ketika DOM halaman selesai dimuat sepenuhnya.
         $(document).ready(function () {
-            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
+            // FUNGSI: Mengambil nama admin dari storage sesi/lokal dan mencantumkannya pada bagian navbar.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // FUNGSI: Event listener click untuk sidebar Collapse.
+            // FUNGSI: Event listener click untuk navigasi sidebar.
+            // DETAIL: Berfungsi untuk mengecilkan atau melebarkan navigasi menu samping (sidebar).
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // FUNGSI: Mengatur default tanggal kasir ke tanggal hari ini.
+            // FUNGSI: Mengatur default masukan tanggal ke hari ini saat halaman dimuat pertama kali.
             $('#tanggal').val(new Date().toISOString().split('T')[0]);
 
-            // FUNGSI: Memuat pilihan barang (hanya yang stoknya > 0) dan merender tabel riwayat penjualan.
+            // FUNGSI: Memanggil fungsi internal untuk memuat list dropdown barang dan tabel riwayat transaksi.
             loadProductDropdown();
             loadHistoryTable();
 
-            // FUNGSI: Event listener change untuk dropdown id_barang.
-            // DETAIL: Memuat harga jual dan batas kuantitas maksimal (max) sesuai sisa stok barang berjalan
-            //         agar kasir tidak dapat menjual barang melebihi stok yang ada di toko.
+            // FUNGSI: Event listener change pada dropdown pilih barang.
+            // DETAIL: Mengambil data barang yang terpilih (satuan, stok, harga) lalu menampilkannya sebagai info dan prefill form.
             $('#id_barang').on('change', function () {
                 const selectedOption = $(this).find('option:selected');
                 if (selectedOption.val()) {
+                    // Ambil nilai data-atribut dari opsi terpilih
                     const sell = parseFloat(selectedOption.data('jual'));
                     const unit = selectedOption.data('satuan');
                     const stock = parseInt(selectedOption.data('stok'));
 
+                    // Set input harga jual default dan label addon satuan
                     $('#harga_jual').val(sell);
                     $('#satuan-addon').text(unit);
-                    $('#jumlah').attr('max', stock); // Pasang batas maksimal input jumlah
+                    // Pasang batas maksimal input jumlah berdasarkan sisa stok master barang
+                    $('#jumlah').attr('max', stock); 
                     
+                    // Tampilkan box informasi stok sisa barang berjalan
                     $('#info-stok').text(stock);
                     $('#info-satuan').text(unit);
                     $('#stok-info-wrapper').removeClass('d-none');
                 } else {
+                    // Sembunyikan info stok jika tidak ada barang yang dipilih
                     $('#stok-info-wrapper').addClass('d-none');
                     $('#satuan-addon').text('-');
                     $('#jumlah').removeAttr('max');
                 }
             });
 
-            // FUNGSI: Form Submit: Simpan Transaksi Penjualan.
-            // DETAIL: Menyusun objek 'sale', memanggil fungsi DB.addPenjualan() di db.js,
-            //         dan jika sukses memotong stok barang secara otomatis dan me-reload data visual.
-            $('#penjualanForm').on('submit', function (e) {
+            // FUNGSI: Event submit form input barang belanjaan (#addItemForm).
+            // DETAIL: Memvalidasi sisa stok, memasukkan item belanja baru ke array keranjang belanja,
+            //         dan memperbarui rendering tabel keranjang.
+            $('#addItemForm').on('submit', function (e) {
+                // Mencegah reload halaman bawaan browser saat submit
                 e.preventDefault();
-                const sale = {
-                    tanggal: $('#tanggal').val(),
-                    nama_pembeli: $('#nama_pembeli').val().trim(),
-                    alamat: $('#alamat').val().trim(),
-                    id_barang: $('#id_barang').val(),
-                    jumlah: $('#jumlah').val(),
-                    harga_jual: $('#harga_jual').val()
+                
+                // Ambil data input item barang belanja
+                const idBarang = $('#id_barang').val();
+                const selectedOption = $('#id_barang').find('option:selected');
+                const namaBarang = selectedOption.text().trim();
+                const unit = selectedOption.data('satuan');
+                const stockMaster = parseInt(selectedOption.data('stok'));
+                const qty = parseInt($('#jumlah').val());
+                const sellPrice = parseFloat($('#harga_jual').val());
+
+                // Validasi data input agar tidak ada data kosong atau minus
+                if (!idBarang || qty <= 0 || sellPrice < 0) {
+                    alert('Data barang yang Anda masukkan tidak valid!');
+                    return;
+                }
+
+                // Cek apakah barang sudah ada di keranjang belanja berjalan
+                const existingIdx = cartItems.findIndex(item => item.id_barang === idBarang);
+                const existingQty = existingIdx !== -1 ? cartItems[existingIdx].jumlah : 0;
+
+                // Validasi sisa stok di database master agar jumlah total belanja tidak melebihi stok yang ada
+                if (stockMaster < (existingQty + qty)) {
+                    alert(`Stok tidak mencukupi! Stok master tersedia: ${stockMaster}, jumlah di keranjang Anda: ${existingQty}.`);
+                    return;
+                }
+
+                if (existingIdx !== -1) {
+                    // Jika barang sudah ada, gabungkan kuantitas dan hitung ulang subtotalnya
+                    cartItems[existingIdx].jumlah += qty;
+                    cartItems[existingIdx].subtotal = cartItems[existingIdx].jumlah * cartItems[existingIdx].harga_jual;
+                } else {
+                    // Jika barang baru, masukkan data baru ke dalam array keranjang belanja
+                    cartItems.push({
+                        id_barang: idBarang,
+                        nama_barang: namaBarang,
+                        jumlah: qty,
+                        satuan: unit,
+                        harga_jual: sellPrice,
+                        subtotal: qty * sellPrice
+                    });
+                }
+
+                // Kosongkan inputan form pemilihan barang agar kasir dapat memasukkan barang berikutnya
+                $('#id_barang').val('').trigger('change');
+                $('#jumlah').val('');
+                $('#harga_jual').val('');
+
+                // Merender ulang isi keranjang belanja
+                renderCartTable();
+            });
+
+            // FUNGSI: Event click tombol hapus item belanja di tabel keranjang.
+            // DETAIL: Menghapus baris item belanja terpilih berdasarkan indeks array.
+            $(document).on('click', '.btn-remove-item', function () {
+                // Ambil indeks baris item dari atribut data-index
+                const index = $(this).data('index');
+                // Hapus 1 data dari array cartItems pada indeks tersebut
+                cartItems.splice(index, 1);
+                // Merender ulang isi tabel keranjang pasca penghapusan
+                renderCartTable();
+            });
+
+            // FUNGSI: Event click tombol checkout/simpan transaksi penjualan final.
+            // DETAIL: Mengambil metadata transaksi, memicu DB.addPenjualanMulti(), dan mereset form.
+            $('#btnSimpanTransaksi').on('click', function () {
+                // Ambil nilai input metadata transaksi
+                const tanggal = $('#tanggal').val();
+                const namaPembeli = $('#nama_pembeli').val().trim();
+                const alamat = $('#alamat').val().trim();
+
+                // Validasi metadata transaksi wajib diisi
+                if (!tanggal) {
+                    alert('Harap pilih tanggal transaksi terlebih dahulu!');
+                    return;
+                }
+                if (!namaPembeli) {
+                    alert('Harap isi nama pembeli terlebih dahulu!');
+                    return;
+                }
+
+                // Susun objek metadata transaksi
+                const transaction = {
+                    tanggal: tanggal,
+                    nama_pembeli: namaPembeli,
+                    alamat: alamat
                 };
 
                 try {
-                    DB.addPenjualan(sale);
-                    $('#penjualanForm')[0].reset();
-                    $('#stok-info-wrapper').addClass('d-none');
-                    $('#satuan-addon').text('-');
+                    // Panggil engine database localStorage untuk menyimpan transaksi multi-item
+                    DB.addPenjualanMulti(transaction, cartItems);
+
+                    // Kosongkan keranjang belanja setelah sukses disimpan
+                    cartItems = [];
+                    renderCartTable();
+
+                    // Reset field metadata transaksi
+                    $('#nama_pembeli').val('');
+                    $('#alamat').val('');
                     $('#tanggal').val(new Date().toISOString().split('T')[0]);
-                    
-                    showAlert('Transaksi penjualan berhasil disimpan!', 'success');
-                    
-                    // Reload dropdown (karena stok barang telah dipotong) & tabel penjualan
+
+                    // Tampilkan pesan notifikasi sukses
+                    showAlert('Transaksi penjualan multi-barang berhasil disimpan!', 'success');
+
+                    // Muat ulang dropdown barang (karena stok barang berkurang) dan muat tabel riwayat
                     loadProductDropdown();
                     loadHistoryTable();
                 } catch (err) {
@@ -309,14 +448,68 @@
             });
         });
 
+        // FUNGSI: renderCartTable()
+        // DETAIL: Merender data array `cartItems` ke tabel keranjang belanja HTML dinamis.
+        //         Mengalkulasi subtotal (jumlah harga per item) dan grand total transaksi keseluruhan.
+        function renderCartTable() {
+            const tbody = $('#cart-tbody');
+            // Bersihkan baris tabel keranjang
+            tbody.empty();
+
+            // Jika keranjang belanja kosong
+            if (cartItems.length === 0) {
+                tbody.append(`
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Keranjang kosong. Tambahkan barang di sebelah kiri.</td>
+                    </tr>
+                `);
+                // Update total belanja ke 0
+                $('#cart-total').text('Rp 0');
+                // Matikan tombol simpan transaksi penjualan
+                $('#btnSimpanTransaksi').attr('disabled', true);
+                return;
+            }
+
+            let grandTotal = 0;
+            // Looping dan render baris data belanjaan berjalan
+            cartItems.forEach((item, index) => {
+                // Hitung grand total keseluruhan
+                grandTotal += item.subtotal;
+                
+                // Tambahkan baris tabel
+                // DETAIL: Menampilkan kolom "Jumlah Harga Barang Per Item" (item.subtotal) sesuai request user
+                tbody.append(`
+                    <tr>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_barang)}</span></td>
+                        <td class="text-end fw-medium">${item.jumlah} <span class="small text-muted fw-normal">${escapeHtml(item.satuan)}</span></td>
+                        <td class="text-end">Rp ${formatNumber(item.harga_jual)}</td>
+                        <td class="text-end fw-bold text-primary">Rp ${formatNumber(item.subtotal)}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-item" data-index="${index}">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            // Tampilkan total akumulasi belanja terformat Rupiah
+            $('#cart-total').text(formatRupiah(grandTotal));
+            // Aktifkan tombol simpan transaksi penjualan
+            $('#btnSimpanTransaksi').removeAttr('disabled');
+        }
+
         // FUNGSI: loadProductDropdown()
         // MEMANGGIL: DB.getTable('barang') di db.js
-        // DETAIL: Mengambil data barang yang stoknya di atas 0 untuk dijadikan opsi di kasir.
+        // DETAIL: Mengambil data barang yang stoknya di atas 0 untuk dijadikan opsi di dropdown kasir.
         function loadProductDropdown() {
+            // Ambil semua barang aktif dengan stok > 0, urutkan berdasarkan abjad A-Z
             const barangList = DB.getTable('barang').filter(b => b.stok > 0).sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
             const select = $('#id_barang');
+            // Bersihkan dropdown dan pasang opsi default placeholder
             select.empty().append('<option value="" disabled selected>Pilih Barang...</option>');
 
+            // Tambahkan data opsi barang
             barangList.forEach(b => {
                 select.append(`
                     <option value="${b.id_barang}" 
@@ -331,17 +524,21 @@
 
         // FUNGSI: loadHistoryTable()
         // MEMANGGIL: DB.getSalesHistoryCombined() di db.js
-        // DETAIL: Memuat riwayat penjualan yang ter-JOIN lengkap dengan nama barang dan satuan.
+        // DETAIL: Mengambil data riwayat transaksi penjualan ter-join lengkap dari database dan merender ke tabel.
         function loadHistoryTable() {
+            // Ambil riwayat dari database
             const historyList = DB.getSalesHistoryCombined();
             const tbody = $('#history-tbody');
 
+            // Hancurkan instansi DataTables lama jika terdeteksi agar tidak terjadi duplikasi inisialisasi
             if (dataTableInstance) {
                 dataTableInstance.destroy();
             }
 
+            // Kosongkan isi baris tabel riwayat
             tbody.empty();
 
+            // Render baris data riwayat penjualan
             historyList.forEach((item, index) => {
                 tbody.append(`
                     <tr>
@@ -359,6 +556,7 @@
                 `);
             });
 
+            // Aktifkan kembali instansi library DataTables ter-lokalisasi Bahasa Indonesia
             dataTableInstance = $('#history-table').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
@@ -366,6 +564,8 @@
             });
         }
 
+        // FUNGSI: showAlert(message, type)
+        // DETAIL: Menampilkan box notifikasi (alert) dinamis Bootstrap 5 di halaman.
         function showAlert(message, type) {
             $('#alert-container').html(`
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -376,6 +576,7 @@
             `);
         }
 
+        // FUNGSI UTILITAS: Mengubah format string tanggal ISO (YYYY-MM-DD) ke tampilan Indonesia (DD/MM/YYYY).
         function formatDate(dateStr) {
             if (!dateStr) return '-';
             const parts = dateStr.split('-');
@@ -383,10 +584,17 @@
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
+        // FUNGSI UTILITAS: Memformat nilai nominal angka ke string pemisah ribuan titik.
         function formatNumber(num) {
             return new Intl.NumberFormat('id-ID').format(num);
         }
 
+        // FUNGSI UTILITAS: Memformat nilai nominal angka ke string representasi mata uang Rupiah terformat.
+        function formatRupiah(value) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+        }
+
+        // FUNGSI UTILITAS: Mengubah karakter rawan HTML ke entitas HTML yang aman demi menangkal eksploitasi XSS.
         function escapeHtml(text) {
             if (!text) return '';
             return text
