@@ -27,7 +27,7 @@
             <div class="sidebar-header">
                 <a href="dashboard.html" class="sidebar-brand">
                     <i class="fa-solid fa-trowel-bricks"></i>
-                    <span>TB AA BAROKAH</span>
+                    <span>TOKO BANGUNAN</span>
                 </a>
             </div>
 
@@ -292,25 +292,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(document).ready(function () {
-            // Set User info
+            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // Sidebar Toggle
+            // FUNGSI: Event listener click untuk sidebar Collapse (Membuka/menutup menu di HP).
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // Load Metrics
+            // MEMANGGIL: DB.getMetrics() di db.js
+            // FUNGSI: Menampilkan data box metrik ringkasan di dashboard secara dinamis.
             const metrics = DB.getMetrics();
             $('#stat-total-barang').text(metrics.total_barang);
             $('#stat-penjualan-hari-ini').text(formatRupiah(metrics.penjualan_hari_ini));
             $('#stat-total-transaksi').text(metrics.total_transaksi);
             $('#stat-barang-hampir-habis').text(metrics.barang_hampir_habis);
 
-            // Load Top Selling
+            // MEMANGGIL: DB.getTopSellingProducts() di db.js
+            // FUNGSI: Mengambil data 5 barang terlaris dan merendernya ke tabel HTML.
             const topProducts = DB.getTopSellingProducts();
             const topTable = $('#top-selling-table');
             topTable.empty();
@@ -327,7 +329,8 @@
                 });
             }
 
-            // Load Recent Sales
+            // MEMANGGIL: DB.getRecentTransactions() di db.js
+            // FUNGSI: Mengambil data 5 penjualan terakhir dan merendernya ke tabel HTML.
             const recentSales = DB.getRecentTransactions();
             const recentTable = $('#recent-sales-table');
             recentTable.empty();
@@ -346,7 +349,8 @@
                 });
             }
 
-            // Load Alert Stock
+            // MEMANGGIL: DB.getAlertStockList() di db.js
+            // FUNGSI: Mengambil daftar barang yang stoknya kritis untuk ditampilkan di tabel warning.
             const alertStock = DB.getAlertStockList();
             const alertTable = $('#alert-stock-table');
             alertTable.empty();
@@ -365,7 +369,8 @@
                 });
             }
 
-            // Chart Configuration
+            // FUNGSI: Inisialisasi Grafik Chart.js
+            // MEMANGGIL: DB.getChartData('harian') sebagai data default.
             const ctx = document.getElementById('salesChart').getContext('2d');
             let currentChartData = DB.getChartData('harian');
 
@@ -426,7 +431,9 @@
                 }
             });
 
-            // Chart Filter Event
+            // FUNGSI: Event listener change untuk dropdown chartFilter.
+            // DETAIL: Mengubah data sumbu X & Y grafik Chart.js berdasarkan filter terpilih (harian/bulanan/tahunan) 
+            //         dan merender ulang grafik dengan memanggil salesChart.update().
             $('#chartFilter').on('change', function() {
                 const filter = $(this).val();
                 const activeData = DB.getChartData(filter);

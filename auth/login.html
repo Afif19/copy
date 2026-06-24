@@ -19,7 +19,7 @@
             <div class="login-logo">
                 <i class="fa-solid fa-trowel-bricks"></i>
             </div>
-            <h4 class="fw-bold text-dark mb-1">TB Sumber Jaya</h4>
+            <h4 class="fw-bold text-dark mb-1">TOKO BANGUNAN</h4>
             <p class="text-muted small">Sistem Informasi Stok & Penjualan</p>
         </div>
 
@@ -38,7 +38,8 @@
                 <label for="password" class="form-label fw-medium text-secondary">Password</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
-                    <input type="password" name="password" id="password" class="form-control border-start-0 bg-light" placeholder="Masukkan password" required autocomplete="current-password">
+                    <input type="password" name="password" id="password" class="form-control border-start-0 border-end-0 bg-light" placeholder="Masukkan password" required autocomplete="current-password">
+                    <button type="button" id="togglePassword" class="input-group-text bg-light border-start-0 text-muted" style="cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
                 </div>
             </div>
 
@@ -57,9 +58,33 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/db.js"></script>
     <script>
-        // Redirect to dashboard if already logged in
+        // MEMANGGIL: DB.checkAuth() dari db.js
+        // FUNGSI: Memeriksa apakah pengguna sudah memiliki sesi login aktif. 
+        //         Jika ya, otomatis dialihkan ke halaman dashboard.html.
         DB.checkAuth(true);
 
+        // FUNGSI: Event listener click untuk tombol mata togglePassword.
+        // DETAIL: Mengubah tipe input field password antara 'password' (sembunyi) dan 'text' (tampil)
+        //         serta menukar class icon Font Awesome (fa-eye / fa-eye-slash).
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // FUNGSI: Event listener submit untuk loginForm.
+        // ALUR: 1. Mencegah submit default browser (e.preventDefault()).
+        //       2. Mengambil input username, password, dan status rememberMe checkbox.
+        //       3. Memanggil fungsi DB.login() di db.js untuk memeriksa kebenaran kredensial.
+        //       4. Jika DB.login() bernilai true, alihkan ke dashboard.html. Jika salah, tampilkan pesan error.
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const username = document.getElementById('username').value.trim();
@@ -78,6 +103,11 @@
             }
         });
 
+        // FUNGSI: showAlert(message, type)
+        // DETAIL: Mengisi element alert-wrapper secara dinamis dengan bootstrap alert box.
+        // PARAMETER:
+        //   - message (string): Teks pesan kesalahan.
+        //   - type (string): Tema bootstrap (danger / warning / success).
         function showAlert(message, type) {
             const wrapper = document.getElementById('alert-wrapper');
             wrapper.innerHTML = `

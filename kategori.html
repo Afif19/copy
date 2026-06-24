@@ -222,21 +222,23 @@
         let dataTableInstance = null;
 
         $(document).ready(function () {
-            // Set User info
+            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // Sidebar Toggle
+            // FUNGSI: Event listener click untuk sidebar Collapse.
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // Initialize Page Data
+            // FUNGSI: Memuat data tabel kategori saat halaman dibuka.
             loadKategoriTable();
 
-            // Form Submit: Add Category
+            // FUNGSI: Form Submit: Tambah Kategori Baru.
+            // DETAIL: Mencegah submit standar, mengambil input nama, memanggil fungsi DB.addCategory() di db.js,
+            //         dan merender ulang tabel jika berhasil.
             $('#addCategoryForm').on('submit', function (e) {
                 e.preventDefault();
                 const name = $('#nama_kategori').val().trim();
@@ -251,7 +253,8 @@
                 }
             });
 
-            // Form Submit: Edit Category
+            // FUNGSI: Form Submit: Edit Kategori.
+            // DETAIL: Memanggil fungsi DB.updateCategory() di db.js dan merender ulang jika berhasil.
             $('#editCategoryForm').on('submit', function (e) {
                 e.preventDefault();
                 const id = $('#edit_id_kategori').val();
@@ -266,7 +269,8 @@
                 }
             });
 
-            // Click Edit Button handler
+            // FUNGSI: Event listener click untuk tombol Edit (.btn-edit).
+            // DETAIL: Memasukkan ID dan Nama kategori yang akan diubah ke form modal Edit.
             $(document).on('click', '.btn-edit', function () {
                 const id = $(this).data('id');
                 const name = $(this).data('name');
@@ -274,7 +278,8 @@
                 $('#edit_nama_kategori').val(name);
             });
 
-            // Click Delete Button handler
+            // FUNGSI: Event listener click untuk tombol Hapus (.btn-delete).
+            // DETAIL: Memanggil fungsi DB.deleteCategory() di db.js yang memuat validasi Foreign Key (relasi data).
             $(document).on('click', '.btn-delete', function () {
                 const id = $(this).data('id');
                 const name = $(this).data('name');
@@ -291,12 +296,14 @@
             });
         });
 
-        // Load Categories from LocalStorage and render
+        // FUNGSI: loadKategoriTable()
+        // MEMANGGIL: DB.getCategories() di db.js
+        // DETAIL: Mengambil data kategori dan merendernya ke tabel HTML, lalu mengaktifkan jQuery DataTables.
         function loadKategoriTable() {
             const categories = DB.getCategories();
             const tbody = $('#kategori-tbody');
 
-            // Destroy existing DataTable if exists
+            // Hancurkan instance DataTable lama jika ada.
             if (dataTableInstance) {
                 dataTableInstance.destroy();
             }
@@ -325,7 +332,7 @@
                 `);
             });
 
-            // Initialize DataTable
+            // Jalankan ulang DataTables
             dataTableInstance = $('#kategori-table').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
@@ -333,7 +340,8 @@
             });
         }
 
-        // Show feedback alert at top
+        // FUNGSI: showAlert(message, type)
+        // DETAIL: Menampilkan notifikasi banner keberhasilan atau kegagalan di bagian atas.
         function showAlert(message, type) {
             $('#alert-container').html(`
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">

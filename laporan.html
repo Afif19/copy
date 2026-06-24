@@ -282,22 +282,29 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script>
+        // FUNGSI: Instance variabel global untuk menampung instansi library DataTables.
+        // DETAIL: Digunakan untuk mempermudah penghancuran (destroy) instansi tabel lama saat memuat data baru / memfilter.
         let salesTableInstance = null;
         let stockTableInstance = null;
 
+        // FUNGSI: Jalankan seluruh inisialisasi setelah seluruh DOM (Document Object Model) selesai dimuat.
+        // DETAIL: Mengatur state filter default dari parameter URL, memicu inisialisasi dropdown tahun, memicu pemuatan data laporan, dan meregister event listener.
         $(document).ready(function () {
-            // Set User info
+            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
+            // DETAIL: Menggunakan nilai default 'Admin' jika tidak ditemukan username di storage sesi/lokal.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // Sidebar Toggle
+            // FUNGSI: Mengatur aksi collapse/toggle sidebar navigation menu.
+            // DETAIL: Menambahkan atau menghapus kelas 'active' pada elemen sidebar dan container utama halaman.
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // Set up Year Selector (current down to 10 years ago)
+            // FUNGSI: Membuka opsi dropdown pemilih tahun untuk filter laporan tahunan.
+            // DETAIL: Mengisi dropdown '#tahun' dengan tahun saat ini mundur hingga 10 tahun ke belakang.
             const currentYear = new Date().getFullYear();
             const yearSelect = $('#tahun');
             yearSelect.empty();
@@ -305,27 +312,33 @@
                 yearSelect.append(`<option value="${y}">${y}</option>`);
             }
 
-            // Sync filters from URL Parameters
+            // FUNGSI: Sinkronisasi dan pemulihan nilai parameter filter laporan dari URL query string.
+            // DETAIL: Mencegah hilangnya state filter yang dipilih saat halaman memicu reload/refresh.
+            //         Jika parameter kosong di URL, maka default harian (hari ini) akan digunakan.
             const urlParams = new URLSearchParams(window.location.search);
             const filterType = urlParams.get('filter_type') || 'harian';
             const filterTanggal = urlParams.get('tanggal') || new Date().toISOString().split('T')[0];
             const filterBulan = urlParams.get('bulan') || new Date().toISOString().substring(0, 7);
             const filterTahun = parseInt(urlParams.get('tahun')) || currentYear;
 
-            // Set Form values
+            // FUNGSI: Mengisi nilai default input form filter berdasarkan parameter URL di atas.
             $('#filter_type').val(filterType);
             $('#tanggal').val(filterTanggal);
             $('#bulan').val(filterBulan);
             $('#tahun').val(filterTahun);
 
+            // FUNGSI: Menampilkan input filter yang sesuai pada load awal.
             toggleFilterInputs(filterType);
 
-            // Trigger change inputs panel
+            // FUNGSI: Mengubah tampilan input dinamis ketika tipe filter diubah oleh pengguna.
+            // DETAIL: Memanggil toggleFilterInputs dengan tipe filter yang baru dipilih (harian/bulanan/tahunan).
             $('#filter_type').on('change', function () {
                 toggleFilterInputs($(this).val());
             });
 
-            // Handle Filter submission
+            // FUNGSI: Menangani event submit form filter penjualan.
+            // DETAIL: Menghentikan aksi submit form default, menyusun parameter query URL baru, 
+            //         lalu memicu reload halaman menggunakan search query yang baru agar state terjaga.
             $('#salesFilterForm').on('submit', function (e) {
                 e.preventDefault();
                 const type = $('#filter_type').val();
@@ -333,32 +346,38 @@
                 const month = $('#bulan').val();
                 const year = $('#tahun').val();
                 
-                // Set URL search parameters and reload to keep state
+                // Menyusun parameter query baru untuk URL
                 const searchParams = new URLSearchParams();
                 searchParams.set('filter_type', type);
                 if (type === 'harian') searchParams.set('tanggal', date);
                 if (type === 'bulanan') searchParams.set('bulan', month);
                 if (type === 'tahunan') searchParams.set('tahun', year);
                 
+                // Mengalihkan halaman dengan query parameter baru yang memicu reload
                 window.location.search = searchParams.toString();
             });
 
-            // Load Data Reports
+            // FUNGSI: Memuat data awal untuk Laporan Rincian Penjualan dan Laporan Stok Barang.
+            // DETAIL: Mengambil data terfilter dari database localStorage untuk disajikan ke tabel HTML.
             loadSalesReport(filterType, filterTanggal, filterBulan, filterTahun);
             loadStockReport();
 
-            // Export Sales Excel Action
+            // FUNGSI: Menangani event click untuk tombol Export Penjualan ke Excel.
+            // DETAIL: Memanggil fungsi exportSalesToExcel dengan parameter filter aktif untuk menghasilkan berkas unduhan spreadsheet.
             $('#btnExportPenjualan').on('click', function () {
                 exportSalesToExcel(filterType, filterTanggal, filterBulan, filterTahun);
             });
 
-            // Export Stock Excel Action
+            // FUNGSI: Menangani event click untuk tombol Export Laporan Stok ke Excel.
+            // DETAIL: Memanggil fungsi exportStockToExcel untuk menghasilkan berkas unduhan inventori saat ini.
             $('#btnExportStok').on('click', function () {
                 exportStockToExcel();
             });
         });
 
-        // Hide/Show correct input filters
+        // FUNGSI: Menyembunyikan atau menampilkan elemen masukan filter yang sesuai.
+        // PARAMETER: type (string) - Tipe filter ('harian', 'bulanan', atau 'tahunan').
+        // DETAIL: Menggunakan kelas Bootstrap 'd-none' untuk menyembunyikan input lain dan hanya memperlihatkan input yang relevan.
         function toggleFilterInputs(type) {
             $('.filter-input-wrapper').addClass('d-none');
             if (type === 'harian') $('#wrapper-harian').removeClass('d-none');
@@ -366,38 +385,49 @@
             if (type === 'tahunan') $('#wrapper-tahunan').removeClass('d-none');
         }
 
-        // Fetch sales records and apply manual JS filtering
+        // FUNGSI: Memuat data transaksi penjualan, memfilternya, menghitung metrik penjualan, dan memperbarui tabel UI.
+        // PARAMETER:
+        //   - type (string): Tipe filter ('harian', 'bulanan', 'tahunan')
+        //   - dateVal (string): Nilai tanggal berformat YYYY-MM-DD
+        //   - monthVal (string): Nilai bulan berformat YYYY-MM
+        //   - yearVal (number): Nilai tahun berformat YYYY
+        // DETAIL:
+        //   - Mengambil data gabungan riwayat transaksi menggunakan DB.getSalesHistoryCombined() dari db.js.
+        //   - Menyaring data penjualan secara client-side berdasarkan parameter yang dilewatkan.
+        //   - Menghitung total omset pendapatan dan total transaksi unik.
+        //   - Melakukan render baris tabel dan menginisialisasi plugin DataTables.
         function loadSalesReport(type, dateVal, monthVal, yearVal) {
             const allSales = DB.getSalesHistoryCombined();
             let filteredSales = [];
 
+            // Memfilter data berdasarkan opsi tipe filter terpilih
             if (type === 'harian') {
                 filteredSales = allSales.filter(s => s.tanggal === dateVal);
             } else if (type === 'bulanan') {
-                // monthVal is YYYY-MM
                 filteredSales = allSales.filter(s => s.tanggal.startsWith(monthVal));
             } else if (type === 'tahunan') {
-                // yearVal is YYYY
                 filteredSales = allSales.filter(s => s.tanggal.startsWith(yearVal.toString()));
             }
 
-            // Sum metrics
+            // Menjumlahkan total pendapatan dari seluruh subtotal item terfilter
             const totalRevenue = filteredSales.reduce((sum, s) => sum + s.subtotal, 0);
             
-            // Unique transaction count
+            // Mencari jumlah transaksi unik (berdasarkan ID penjualan yang unik)
             const uniqueTxIds = new Set(filteredSales.map(s => s.id_penjualan));
             const totalTransactions = uniqueTxIds.size;
 
+            // Menampilkan metrik terhitung pada widget kartu di UI
             $('#sales-total-revenue').text(formatRupiah(totalRevenue));
             $('#sales-total-tx').text(totalTransactions + ' Transaksi');
 
-            // Render table rows
             const tbody = $('#sales-report-tbody');
+            // Menghancurkan instansi DataTables yang sudah ada sebelumnya sebelum mengisi ulang tabel baru
             if (salesTableInstance) {
                 salesTableInstance.destroy();
             }
             tbody.empty();
 
+            // Render data terfilter ke dalam baris tabel
             filteredSales.forEach((item, index) => {
                 tbody.append(`
                     <tr>
@@ -412,6 +442,7 @@
                 `);
             });
 
+            // Menginisialisasi ulang library DataTables agar fungsi pencarian dan pagination berjalan
             salesTableInstance = $('#sales-report-table').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
@@ -419,16 +450,22 @@
             });
         }
 
-        // Render stock levels table
+        // FUNGSI: Memuat data stok barang saat ini dari database lokal dan menampilkan status aman/menipis/habis.
+        // DETAIL:
+        //   - Memanggil fungsi DB.getBarang() dari db.js.
+        //   - Menghitung status stok berdasarkan nilai batas 'stok_minimum' yang didefinisikan pengguna.
+        //   - Menginisialisasi DataTables pada tabel stok.
         function loadStockReport() {
             const barangList = DB.getBarang();
             const tbody = $('#stock-report-tbody');
 
+            // Menghancurkan instansi tabel stok yang lama sebelum rendering data baru
             if (stockTableInstance) {
                 stockTableInstance.destroy();
             }
             tbody.empty();
 
+            // Render baris tabel barang beserta status level ketersediaannya
             barangList.forEach((b, index) => {
                 let badge = '';
                 if (b.stok === 0) {
@@ -451,6 +488,7 @@
                 `);
             });
 
+            // Menginisialisasi plugin DataTables dengan lokalisasi Bahasa Indonesia
             stockTableInstance = $('#stock-report-table').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
@@ -458,12 +496,20 @@
             });
         }
 
-        // Offline Excel Sales generation and triggers download
+        // FUNGSI: Membuat berkas Excel (.xls) berisi laporan rincian transaksi penjualan terfilter secara lokal/offline.
+        // PARAMETER:
+        //   - type (string): Tipe filter aktif
+        //   - dateVal, monthVal, yearVal (string/number): Parameter filter aktif
+        // DETAIL:
+        //   - Menyusun dokumen HTML bergaya spreadsheet dengan warna dan gridborder.
+        //   - Menyaring data penjualan secara manual di sisi client.
+        //   - Memanggil fungsi utilitas DB.exportToExcel() di db.js untuk mengunduh file spreadsheet langsung ke browser.
         function exportSalesToExcel(type, dateVal, monthVal, yearVal) {
             const allSales = DB.getSalesHistoryCombined();
             let filteredSales = [];
             let filterTitle = "";
 
+            // Memfilter data dan menyusun judul periode laporan berdasarkan filter aktif
             if (type === 'harian') {
                 filteredSales = allSales.filter(s => s.tanggal === dateVal);
                 filterTitle = "Hari/Tanggal: " + formatDate(dateVal);
@@ -503,6 +549,7 @@
             const today = new Date();
             const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
 
+            // Membuat kerangka template Excel HTML/XML dengan header bergaya biru tua (#1E3A8A)
             const excelTemplate = `
                 <h3>LAPORAN PENJUALAN TOKO BANGUNAN</h3>
                 <h4>TB SUMBER JAYA</h4>
@@ -536,10 +583,15 @@
             `;
 
             const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            // Memicu download berkas excel (.xls)
             DB.exportToExcel(excelTemplate, `Laporan_Penjualan_${timestamp}.xls`);
         }
 
-        // Offline Excel Stock generation and triggers download
+        // FUNGSI: Membuat berkas Excel (.xls) berisi status inventori dan level stok barang secara offline.
+        // DETAIL:
+        //   - Menyusun dokumen HTML berstruktur tabel.
+        //   - Menghitung status persediaan barang ("Aman", "Menipis", "Habis") dengan warna teks yang sesuai.
+        //   - Memanggil fungsi ekspor file Excel DB.exportToExcel() di db.js.
         function exportStockToExcel() {
             const barangList = DB.getBarang();
             let rowHtml = '';
@@ -549,13 +601,13 @@
             } else {
                 barangList.forEach((b, index) => {
                     let status = 'Aman';
-                    let color = '#16A34A'; // Green
+                    let color = '#16A34A'; // Hijau
                     if (b.stok === 0) {
                         status = 'Habis';
-                        color = '#DC2626'; // Red
+                        color = '#DC2626'; // Merah
                     } else if (b.stok <= b.stok_minimum) {
                         status = 'Menipis';
-                        color = '#D97706'; // Orange
+                        color = '#D97706'; // Oranye
                     }
 
                     rowHtml += `
@@ -574,6 +626,7 @@
             const today = new Date();
             const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
 
+            // Membuat kerangka template Excel HTML/XML untuk daftar inventori
             const excelTemplate = `
                 <h3>LAPORAN STOK BARANG TOKO BANGUNAN</h3>
                 <h4>TB SUMBER JAYA</h4>
@@ -597,14 +650,20 @@
             `;
 
             const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            // Memicu download berkas excel (.xls)
             DB.exportToExcel(excelTemplate, `Laporan_Stok_Barang_${timestamp}.xls`);
         }
 
-        // Formatting Helpers
+        // FUNGSI UTILITAS: Memformat nilai nominal angka ke string representasi mata uang Rupiah.
+        // PARAMETER: value (number) - Angka nominal.
+        // RETURN VALUE: String mata uang rupiah berformat (misal: "Rp 150.000").
         function formatRupiah(value) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
         }
 
+        // FUNGSI UTILITAS: Mengubah format string tanggal ISO ke format tampilan Indonesia.
+        // PARAMETER: dateStr (string) - Tanggal berformat "YYYY-MM-DD"
+        // RETURN VALUE: Tanggal berformat "DD/MM/YYYY"
         function formatDate(dateStr) {
             if (!dateStr) return '-';
             const parts = dateStr.split('-');
@@ -612,10 +671,16 @@
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
+        // FUNGSI UTILITAS: Memformat angka desimal/bulat biasa ke format ribuan dipisah titik.
+        // PARAMETER: num (number) - Angka kuantitas atau nominal.
+        // RETURN VALUE: String angka terformat (misal: "1.250").
         function formatNumber(num) {
             return new Intl.NumberFormat('id-ID').format(num);
         }
 
+        // FUNGSI UTILITAS: Melakukan sanitasi karakter string HTML agar aman dari ancaman eksploitasi XSS.
+        // PARAMETER: text (string) - Teks string mentah.
+        // RETURN VALUE: String ter-escape yang aman untuk dirender ke halaman web.
         function escapeHtml(text) {
             if (!text) return '';
             return text

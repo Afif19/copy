@@ -8,6 +8,9 @@
 <body>
     <script src="../assets/js/db.js"></script>
     <script>
+        // FUNGSI: Menghapus data session login pengguna dari storage dan mengarahkannya kembali ke halaman login.
+        // DETAIL: Memanggil fungsi DB.logout() yang didefinisikan pada assets/js/db.js. 
+        //         Fungsi tersebut menghapus key login di session/local storage dan mengalihkan halaman ke auth/login.html.
         DB.logout();
     </script>
 </body>

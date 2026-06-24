@@ -303,22 +303,24 @@
         let dataTableInstance = null;
 
         $(document).ready(function () {
-            // Set User info
+            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // Sidebar Toggle
+            // FUNGSI: Event listener click untuk sidebar Collapse.
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // Initialize Page Data
+            // FUNGSI: Memuat data dropdown kategori dan tabel utama saat pertama kali halaman dibuka.
             loadKategoriDropdowns();
             loadBarangTable();
 
-            // Form Submit: Add Barang
+            // FUNGSI: Form Submit: Tambah Barang Baru.
+            // DETAIL: Mencegah submit standar, menyusun objek 'item', memanggil fungsi DB.addBarang() di db.js,
+            //         dan merender ulang tabel barang jika sukses.
             $('#addBarangForm').on('submit', function (e) {
                 e.preventDefault();
                 const item = {
@@ -342,7 +344,8 @@
                 }
             });
 
-            // Form Submit: Edit Barang
+            // FUNGSI: Form Submit: Edit data barang.
+            // DETAIL: Memanggil fungsi DB.updateBarang() di db.js dan merender ulang tabel barang jika sukses.
             $('#editBarangForm').on('submit', function (e) {
                 e.preventDefault();
                 const id = $('#edit_id_barang').val();
@@ -362,11 +365,12 @@
                     showAlert('Barang berhasil diperbarui!', 'success');
                     loadBarangTable();
                 } catch (err) {
-                    alert('Gagal memperbarui barang: ' + err.message);
+                    alert('Gagal diperbarui: ' + err.message);
                 }
             });
 
-            // Click Edit Button handler
+            // FUNGSI: Event listener click untuk tombol Edit (.btn-edit).
+            // DETAIL: Mengambil data atribut HTML row terpilih dan memasukkannya (pre-fill) ke form modal Edit.
             $(document).on('click', '.btn-edit', function () {
                 const id = $(this).data('id');
                 const name = $(this).data('name');
@@ -387,7 +391,8 @@
                 $('#edit_stok_minimum').val(min);
             });
 
-            // Click Delete Button handler
+            // FUNGSI: Event listener click untuk tombol Hapus (.btn-delete).
+            // DETAIL: Memanggil fungsi DB.deleteBarang() di db.js yang memiliki validasi database relasional.
             $(document).on('click', '.btn-delete', function (e) {
                 e.preventDefault();
                 const id = $(this).data('id');
@@ -405,7 +410,9 @@
             });
         });
 
-        // Load Categories dropdown options
+        // FUNGSI: loadKategoriDropdowns()
+        // MEMANGGIL: DB.getCategories() di db.js
+        // DETAIL: Mengambil data kategori untuk dirender sebagai opsi pilihan dropdown di modal Tambah/Edit Barang.
         function loadKategoriDropdowns() {
             const categories = DB.getCategories();
             const addSelect = $('#add_id_kategori');
@@ -421,12 +428,15 @@
             });
         }
 
-        // Render products list and initialize/redraw DataTable
+        // FUNGSI: loadBarangTable()
+        // MEMANGGIL: DB.getBarang() di db.js
+        // DETAIL: Mengambil data gabungan barang & kategori, menentukan badge status stok (Aman/Menipis/Habis),
+        //         memasukkannya ke tabel tbody, dan menyalakan library jQuery DataTables.
         function loadBarangTable() {
             const barangList = DB.getBarang();
             const tbody = $('#barang-tbody');
 
-            // Destroy existing DataTable if exists
+            // Hancurkan instance DataTable lama jika ada (untuk mereset pencarian & pagination)
             if (dataTableInstance) {
                 dataTableInstance.destroy();
             }
@@ -477,7 +487,7 @@
                 `);
             });
 
-            // Initialize DataTable
+            // Jalankan ulang DataTables
             dataTableInstance = $('#barang-table').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
@@ -485,7 +495,8 @@
             });
         }
 
-        // Show feedback alert at top
+        // FUNGSI: showAlert(message, type)
+        // DETAIL: Menampilkan notifikasi banner keberhasilan atau kegagalan di bagian atas.
         function showAlert(message, type) {
             $('#alert-container').html(`
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">

@@ -8,7 +8,10 @@
 <body>
     <script src="assets/js/db.js"></script>
     <script>
-        // Check session and redirect accordingly
+        // FUNGSI: Mengecek status session login pengguna dan mengalihkan (redirect) halaman secara otomatis.
+        // DETAIL: Membaca status key 'login' dari sessionStorage dan localStorage. 
+        //         Jika bernilai true (user sudah login), maka halaman dialihkan ke dashboard.html.
+        //         Jika false atau belum login, dialihkan ke halaman login (auth/login.html).
         const isLoggedIn = sessionStorage.getItem('login') === 'true' || localStorage.getItem('login') === 'true';
         if (isLoggedIn) {
             window.location.href = 'dashboard.html';

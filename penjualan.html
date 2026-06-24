@@ -235,25 +235,27 @@
         let dataTableInstance = null;
 
         $(document).ready(function () {
-            // Set User info
+            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // Sidebar Toggle
+            // FUNGSI: Event listener click untuk sidebar Collapse.
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // Set default date to today
+            // FUNGSI: Mengatur default tanggal kasir ke tanggal hari ini.
             $('#tanggal').val(new Date().toISOString().split('T')[0]);
 
-            // Initialize Page Data
+            // FUNGSI: Memuat pilihan barang (hanya yang stoknya > 0) dan merender tabel riwayat penjualan.
             loadProductDropdown();
             loadHistoryTable();
 
-            // Product Selection change trigger
+            // FUNGSI: Event listener change untuk dropdown id_barang.
+            // DETAIL: Memuat harga jual dan batas kuantitas maksimal (max) sesuai sisa stok barang berjalan
+            //         agar kasir tidak dapat menjual barang melebihi stok yang ada di toko.
             $('#id_barang').on('change', function () {
                 const selectedOption = $(this).find('option:selected');
                 if (selectedOption.val()) {
@@ -263,7 +265,7 @@
 
                     $('#harga_jual').val(sell);
                     $('#satuan-addon').text(unit);
-                    $('#jumlah').attr('max', stock); // Set maximum quantity to current stock
+                    $('#jumlah').attr('max', stock); // Pasang batas maksimal input jumlah
                     
                     $('#info-stok').text(stock);
                     $('#info-satuan').text(unit);
@@ -275,7 +277,9 @@
                 }
             });
 
-            // Form Submit: Save Sale Transaction
+            // FUNGSI: Form Submit: Simpan Transaksi Penjualan.
+            // DETAIL: Menyusun objek 'sale', memanggil fungsi DB.addPenjualan() di db.js,
+            //         dan jika sukses memotong stok barang secara otomatis dan me-reload data visual.
             $('#penjualanForm').on('submit', function (e) {
                 e.preventDefault();
                 const sale = {
@@ -296,7 +300,7 @@
                     
                     showAlert('Transaksi penjualan berhasil disimpan!', 'success');
                     
-                    // Reload dropdown and history table
+                    // Reload dropdown (karena stok barang telah dipotong) & tabel penjualan
                     loadProductDropdown();
                     loadHistoryTable();
                 } catch (err) {
@@ -305,7 +309,9 @@
             });
         });
 
-        // Load active products (stock > 0)
+        // FUNGSI: loadProductDropdown()
+        // MEMANGGIL: DB.getTable('barang') di db.js
+        // DETAIL: Mengambil data barang yang stoknya di atas 0 untuk dijadikan opsi di kasir.
         function loadProductDropdown() {
             const barangList = DB.getTable('barang').filter(b => b.stok > 0).sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
             const select = $('#id_barang');
@@ -323,7 +329,9 @@
             });
         }
 
-        // Render sales history
+        // FUNGSI: loadHistoryTable()
+        // MEMANGGIL: DB.getSalesHistoryCombined() di db.js
+        // DETAIL: Memuat riwayat penjualan yang ter-JOIN lengkap dengan nama barang dan satuan.
         function loadHistoryTable() {
             const historyList = DB.getSalesHistoryCombined();
             const tbody = $('#history-tbody');

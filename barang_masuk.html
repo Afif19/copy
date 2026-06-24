@@ -237,25 +237,27 @@
         let dataTableInstance = null;
 
         $(document).ready(function () {
-            // Set User info
+            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // Sidebar Toggle
+            // FUNGSI: Event listener click untuk sidebar Collapse.
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // Set default date to today
+            // FUNGSI: Mengatur default input tanggal transaksi ke tanggal hari ini.
             $('#tanggal').val(new Date().toISOString().split('T')[0]);
 
-            // Initialize Page Data
+            // FUNGSI: Memuat opsi pilihan dropdown barang dan tabel riwayat masuk.
             loadProductDropdown();
             loadHistoryTable();
 
-            // Product Selection change trigger
+            // FUNGSI: Event listener change untuk dropdown id_barang.
+            // DETAIL: Saat barang dipilih, ambil data atributnya (harga beli, harga jual, satuan, stok)
+            //         dan lakukan pre-fill otomatis ke form serta tampilkan box info stok sisa saat ini.
             $('#id_barang').on('change', function () {
                 const selectedOption = $(this).find('option:selected');
                 if (selectedOption.val()) {
@@ -277,7 +279,9 @@
                 }
             });
 
-            // Form Submit: Save Barang Masuk Transaction
+            // FUNGSI: Form Submit: Simpan Transaksi Barang Masuk.
+            // DETAIL: Menyusun objek 'entry', memanggil fungsi DB.addBarangMasuk() di db.js,
+            //         dan merender ulang dropdown + tabel jika berhasil.
             $('#barangMasukForm').on('submit', function (e) {
                 e.preventDefault();
                 const entry = {
@@ -298,7 +302,7 @@
                     
                     showAlert('Stok barang masuk berhasil dicatat!', 'success');
                     
-                    // Reload dropdown and history table
+                    // Reload dropdown (karena harga/stok master barang berubah) & tabel riwayat
                     loadProductDropdown();
                     loadHistoryTable();
                 } catch (err) {
@@ -307,7 +311,9 @@
             });
         });
 
-        // Load Products into dropdown
+        // FUNGSI: loadProductDropdown()
+        // MEMANGGIL: DB.getTable('barang') di db.js
+        // DETAIL: Mengambil data master barang dan memuatnya ke dropdown pilihan di form.
         function loadProductDropdown() {
             const barangList = DB.getTable('barang').sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
             const select = $('#id_barang');
@@ -326,7 +332,9 @@
             });
         }
 
-        // Render history table and reload DataTable
+        // FUNGSI: loadHistoryTable()
+        // MEMANGGIL: DB.getBarangMasuk() di db.js
+        // DETAIL: Mengambil log history barang masuk dan merendernya ke tabel HTML, lalu menyalakan DataTables.
         function loadHistoryTable() {
             const historyList = DB.getBarangMasuk();
             const tbody = $('#history-tbody');
