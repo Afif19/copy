@@ -149,6 +149,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">No</th>
+                                        <th style="width: 100px;">Kode</th>
                                         <th>Nama Barang</th>
                                         <th>Kategori</th>
                                         <th>Satuan</th>
@@ -245,7 +246,11 @@
                     <input type="hidden" name="id_barang" id="edit_id_barang">
                     <div class="modal-body p-4">
                         <div class="row g-3">
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <label for="edit_kode_barang" class="form-label fw-medium">Kode Barang (Otomatis)</label>
+                                <input type="text" class="form-control bg-light font-monospace" id="edit_kode_barang" readonly>
+                            </div>
+                            <div class="col-md-6">
                                 <label for="edit_nama_barang" class="form-label fw-medium">Nama Barang</label>
                                 <input type="text" class="form-control" name="nama_barang" id="edit_nama_barang" required>
                             </div>
@@ -373,6 +378,7 @@
             // DETAIL: Mengambil data atribut HTML row terpilih dan memasukkannya (pre-fill) ke form modal Edit.
             $(document).on('click', '.btn-edit', function () {
                 const id = $(this).data('id');
+                const code = $(this).data('code');
                 const name = $(this).data('name');
                 const cat = $(this).data('cat');
                 const unit = $(this).data('unit');
@@ -382,6 +388,7 @@
                 const min = $(this).data('min');
  
                 $('#edit_id_barang').val(id);
+                $('#edit_kode_barang').val(code);
                 $('#edit_nama_barang').val(name);
                 $('#edit_id_kategori').val(cat);
                 $('#edit_satuan').val(unit);
@@ -456,6 +463,7 @@
                 tbody.append(`
                     <tr>
                         <td>${index + 1}</td>
+                        <td><span class="badge bg-secondary">${escapeHtml(b.kode_barang)}</span></td>
                         <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang)}</span></td>
                         <td>${escapeHtml(b.nama_kategori)}</td>
                         <td>${escapeHtml(b.satuan)}</td>
@@ -467,6 +475,7 @@
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit"
                                     data-id="${b.id_barang}"
+                                    data-code="${escapeHtml(b.kode_barang)}"
                                     data-name="${escapeHtml(b.nama_barang)}"
                                     data-cat="${b.id_kategori}"
                                     data-unit="${escapeHtml(b.satuan)}"
