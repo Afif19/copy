@@ -184,24 +184,53 @@
                                 <h6 class="card-title fw-bold mb-0"><i class="fa-solid fa-file-invoice me-1"></i> Informasi Transaksi</h6>
                             </div>
                             <div class="card-body p-3">
-                                <div class="row g-2">
-                                    <div class="col-md-4">
-                                        <label for="no_pembelian" class="form-label small fw-medium text-secondary mb-1">Nomor Pembelian (Otomatis)</label>
-                                        <input type="text" class="form-control bg-light font-monospace form-control-sm" id="no_pembelian" readonly>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="tanggal" class="form-label small fw-medium text-secondary mb-1">Tanggal Masuk</label>
-                                        <input type="date" class="form-control form-control-sm" name="tanggal" id="tanggal" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="supplier_input" class="form-label small fw-medium text-secondary mb-1">Supplier</label>
-                                        <div class="autocomplete-wrapper">
-                                            <input type="text" class="form-control form-control-sm" id="supplier_input" placeholder="Nama supplier (baru/lama)..." required autocomplete="off">
-                                            <input type="hidden" id="selected_id_supplier">
-                                            <div id="supplier_suggestions" class="autocomplete-suggestions d-none"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                 <div class="row g-2">
+                                     <div class="col-md-2">
+                                         <label for="no_pembelian" class="form-label small fw-medium text-secondary mb-1">Nomor Pembelian (Otomatis)</label>
+                                         <input type="text" class="form-control bg-light font-monospace form-control-sm" id="no_pembelian" readonly>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="tanggal" class="form-label small fw-medium text-secondary mb-1">Tanggal Masuk</label>
+                                         <input type="date" class="form-control form-control-sm" name="tanggal" id="tanggal" required>
+                                     </div>
+                                     <div class="col-md-3">
+                                         <label for="supplier_input" class="form-label small fw-medium text-secondary mb-1">Supplier</label>
+                                         <div class="autocomplete-wrapper">
+                                             <input type="text" class="form-control form-control-sm" id="supplier_input" placeholder="Nama supplier (baru/lama)..." required autocomplete="off">
+                                             <input type="hidden" id="selected_id_supplier">
+                                             <div id="supplier_suggestions" class="autocomplete-suggestions d-none"></div>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-5">
+                                         <label for="alamat_supplier" class="form-label small fw-medium text-secondary mb-1">Alamat Supplier</label>
+                                         <input type="text" class="form-control form-control-sm" id="alamat_supplier" placeholder="Alamat supplier..." required>
+                                     </div>
+                                 </div>
+                                 <div class="row g-2 mt-2">
+                                     <div class="col-md-2">
+                                         <label for="no_faktur_supplier" class="form-label small fw-medium text-secondary mb-1">No. Faktur Supplier</label>
+                                         <input type="text" class="form-control form-control-sm" id="no_faktur_supplier" placeholder="Contoh: 0282/GCU" required>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="metode_pembayaran" class="form-label small fw-medium text-secondary mb-1">Metode Pembayaran</label>
+                                         <select class="form-select form-select-sm" id="metode_pembayaran" required>
+                                             <option value="Tunai" selected>Tunai</option>
+                                             <option value="Transfer">Transfer</option>
+                                             <option value="Tempo">Tempo</option>
+                                         </select>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="status_pembayaran" class="form-label small fw-medium text-secondary mb-1">Status Pembayaran</label>
+                                         <select class="form-select form-select-sm" id="status_pembayaran" required>
+                                             <option value="Lunas" selected>Lunas</option>
+                                             <option value="Belum Lunas">Belum Lunas</option>
+                                         </select>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="jatuh_tempo" class="form-label small fw-medium text-secondary mb-1">Tanggal Jatuh Tempo</label>
+                                         <input type="date" class="form-control form-control-sm" id="jatuh_tempo" disabled>
+                                     </div>
+                                 </div>
                             </div>
                         </div>
                     </div>
@@ -321,12 +350,12 @@
                                         <thead>
                                             <tr>
                                                 <th style="width: 50px;">No</th>
+                                                <th>No Pembelian</th>
                                                 <th>Tanggal</th>
-                                                <th>Nama Barang</th>
-                                                <th>Jumlah</th>
-                                                <th>Harga Beli</th>
-                                                <th>Harga Jual</th>
-                                                <th>Keterangan</th>
+                                                <th>Supplier</th>
+                                                <th class="text-end">Total Pembelian</th>
+                                                <th>Metode Bayar</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody id="history-tbody">
@@ -370,6 +399,18 @@
             // Muat master dropdown & data riwayat
             loadSupplierDropdown();
             loadHistoryTable();
+
+            // Logika Otomatisasi Metode Pembayaran, Status, dan Jatuh Tempo
+            $('#metode_pembayaran').on('change', function () {
+                const metode = $(this).val();
+                if (metode === 'Tempo') {
+                    $('#status_pembayaran').val('Belum Lunas');
+                    $('#jatuh_tempo').prop('disabled', false).prop('required', true);
+                } else {
+                    $('#status_pembayaran').val('Lunas');
+                    $('#jatuh_tempo').prop('disabled', true).val('').prop('required', false);
+                }
+            });
 
             // ==========================================
             // LOGIKA AUTOCOMPLETE & BARCODE SCANNER
@@ -532,6 +573,9 @@
                     supplierVal = $('#supplier_input').val().trim();
                 }
 
+                const noFaktur = $('#no_faktur_supplier').val().trim();
+                const alamatSupplier = $('#alamat_supplier').val().trim();
+
                 if (!tanggal) {
                     alert('Harap pilih tanggal masuk terlebih dahulu!');
                     return;
@@ -540,16 +584,37 @@
                     alert('Harap isi nama supplier terlebih dahulu!');
                     return;
                 }
+                if (!alamatSupplier) {
+                    alert('Harap isi Alamat Supplier terlebih dahulu!');
+                    return;
+                }
+                if (!noFaktur) {
+                    alert('Harap isi Nomor Faktur Supplier terlebih dahulu!');
+                    return;
+                }
+
+                const extraData = {
+                    nomor_faktur_supplier: noFaktur,
+                    metode_pembayaran: $('#metode_pembayaran').val(),
+                    status_pembayaran: $('#status_pembayaran').val(),
+                    jatuh_tempo: $('#jatuh_tempo').val() || '-',
+                    alamat_supplier: alamatSupplier
+                };
 
                 if (confirm('Apakah Anda yakin ingin menyimpan seluruh transaksi barang masuk ini?')) {
                     try {
-                        DB.addBarangMasukMulti(tanggal, supplierVal, cartItems);
+                        DB.addBarangMasukMulti(tanggal, supplierVal, cartItems, extraData);
                         cartItems = [];
                         renderCartTable();
 
                         // Reset form kotor
                         $('#supplier_input').val('');
                         $('#selected_id_supplier').val('');
+                        $('#alamat_supplier').val('');
+                        $('#no_faktur_supplier').val('');
+                        $('#metode_pembayaran').val('Tunai');
+                        $('#status_pembayaran').val('Lunas');
+                        $('#jatuh_tempo').val('').prop('disabled', true);
                         $('#tanggal').val(new Date().toISOString().split('T')[0]);
                         $('#no_pembelian').val(DB.generateNoPembelian());
 
@@ -608,6 +673,7 @@
 
             supplierInput.on('input', function () {
                 $('#selected_id_supplier').val('');
+                $('#alamat_supplier').val('');
                 const query = $(this).val().trim().toLowerCase();
                 suggestionsContainer.empty().addClass('d-none');
 
@@ -629,6 +695,7 @@
                         el.on('click', function () {
                             supplierInput.val(s.nama_supplier);
                             $('#selected_id_supplier').val(s.id_supplier);
+                            $('#alamat_supplier').val(s.alamat || '-');
                             suggestionsContainer.empty().addClass('d-none');
                         });
                         suggestionsContainer.append(el);
@@ -646,7 +713,7 @@
         }
 
         function loadHistoryTable() {
-            const historyList = DB.getBarangMasuk();
+            const historyList = DB.getPembelianHeaders();
             const tbody = $('#history-tbody');
 
             if (dataTableInstance) {
@@ -657,14 +724,18 @@
 
             historyList.forEach((bm, index) => {
                 tbody.append(`
-                    <tr>
+                    <tr class="cursor-pointer" onclick="showPembelianDetail('${escapeHtml(bm.no_pembelian)}')" title="Klik untuk detail" style="cursor: pointer;">
                         <td>${index + 1}</td>
+                        <td><span class="fw-bold font-monospace text-primary">${escapeHtml(bm.no_pembelian)}</span></td>
                         <td><span class="small text-muted">${formatDate(bm.tanggal)}</span></td>
-                        <td><span class="fw-semibold text-dark">${escapeHtml(bm.nama_barang)}</span></td>
-                        <td class="fw-bold">${bm.jumlah_masuk} <span class="small text-muted fw-normal">${escapeHtml(bm.satuan)}</span></td>
-                        <td>Rp ${formatNumber(bm.harga_beli)}</td>
-                        <td>Rp ${formatNumber(bm.harga_jual)}</td>
-                        <td><span class="small text-muted">${escapeHtml(bm.keterangan || '-')}</span></td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(bm.supplier)}</span></td>
+                        <td class="fw-bold text-end text-dark">Rp ${formatNumber(bm.total_pembelian)}</td>
+                        <td><span class="badge bg-secondary">${escapeHtml(bm.metode_pembayaran)}</span></td>
+                        <td>
+                            <span class="badge ${bm.status_pembayaran === 'Lunas' ? 'bg-success' : 'bg-warning'} text-white">
+                                ${escapeHtml(bm.status_pembayaran)}
+                            </span>
+                        </td>
                     </tr>
                 `);
             });
@@ -674,6 +745,53 @@
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
                 }
             });
+        }
+
+        function showPembelianDetail(noPembelian) {
+            const pembelianList = DB.getTable('pembelian');
+            const detailPembelian = DB.getTable('detail_pembelian');
+            const barangList = DB.getTable('barang');
+            const suppliers = DB.getTable('supplier');
+
+            const parent = pembelianList.find(p => p.no_pembelian === noPembelian);
+            if (!parent) return;
+
+            const s = suppliers.find(x => x.id_supplier === parent.id_supplier) || {};
+
+            $('#detail-no-pembelian').text(parent.no_pembelian);
+            $('#detail-supplier').text(s.nama_supplier || 'Supplier Dihapus');
+            $('#detail-tanggal').text(formatDate(parent.tanggal));
+            $('#detail-metode').text(parent.metode_pembayaran || 'Tunai');
+            $('#detail-status').text(parent.status_pembayaran || 'Lunas');
+            
+            if (parent.metode_pembayaran === 'Tempo') {
+                $('#detail-jatuh-tempo').text(formatDate(parent.jatuh_tempo));
+                $('#detail-jatuh-tempo-row').show();
+            } else {
+                $('#detail-jatuh-tempo-row').hide();
+            }
+
+            const items = detailPembelian.filter(dp => dp.no_pembelian === noPembelian);
+            const tbody = $('#detail-pembelian-tbody');
+            tbody.empty();
+
+            let index = 1;
+            items.forEach(dp => {
+                const b = barangList.find(x => x.id_inventori === dp.id_inventori) || {};
+                tbody.append(`
+                    <tr>
+                        <td>${index++}</td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang || 'Barang Dihapus')}</span></td>
+                        <td class="text-end fw-medium">${dp.qty}</td>
+                        <td>${escapeHtml(dp.satuan || b.satuan || '-')}</td>
+                        <td class="text-end">Rp ${formatNumber(dp.harga_beli)}</td>
+                        <td class="text-end fw-bold text-primary">Rp ${formatNumber(dp.subtotal)}</td>
+                    </tr>
+                `);
+            });
+
+            $('#detail-pembelian-total').text(formatRupiah(parent.total_pembelian));
+            $('#detailPembelianModal').modal('show');
         }
 
         function showAlert(message, type) {
@@ -712,5 +830,60 @@
                 .replace(/'/g, "&#039;");
         }
     </script>
+
+    <!-- Modal: Detail Transaksi Pembelian -->
+    <div class="modal fade" id="detailPembelianModal" tabindex="-1" aria-labelledby="detailPembelianModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="detailPembelianModalLabel"><i class="fa-solid fa-file-invoice me-2"></i> Detail Transaksi <span id="detail-no-pembelian"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm small mb-0">
+                                <tr><td class="fw-bold text-secondary" style="width: 140px;">Supplier:</td><td id="detail-supplier"></td></tr>
+                                <tr><td class="fw-bold text-secondary">Tanggal Masuk:</td><td id="detail-tanggal"></td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm small mb-0">
+                                <tr><td class="fw-bold text-secondary" style="width: 140px;">Metode Pembayaran:</td><td id="detail-metode"></td></tr>
+                                <tr><td class="fw-bold text-secondary">Status Pembayaran:</td><td id="detail-status"></td></tr>
+                                <tr id="detail-jatuh-tempo-row"><td class="fw-bold text-secondary">Tanggal Jatuh Tempo:</td><td id="detail-jatuh-tempo"></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-striped align-middle table-sm small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-end">Jumlah</th>
+                                    <th>Satuan</th>
+                                    <th class="text-end">Harga Beli</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-pembelian-tbody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light">
+                                    <td colspan="5" class="text-end">Total Pembelian:</td>
+                                    <td class="text-end text-primary" id="detail-pembelian-total">Rp 0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -184,35 +184,52 @@
                                 <h6 class="card-title fw-bold mb-0"><i class="fa-solid fa-file-invoice me-1"></i> Informasi Transaksi</h6>
                             </div>
                             <div class="card-body p-3">
-                                <div class="row g-2">
-                                    <div class="col-md-3">
-                                        <label for="no_penjualan" class="form-label small fw-medium text-secondary mb-1">Nomor Penjualan (Otomatis)</label>
-                                        <input type="text" class="form-control bg-light font-monospace form-control-sm" id="no_penjualan" readonly>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="tanggal" class="form-label small fw-medium text-secondary mb-1">Tanggal Nota</label>
-                                        <input type="date" class="form-control form-control-sm" name="tanggal" id="tanggal" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="pelanggan_input" class="form-label small fw-medium text-secondary mb-1">Pelanggan</label>
-                                        <div class="autocomplete-wrapper">
-                                            <input type="text" class="form-control form-control-sm" id="pelanggan_input" placeholder="Nama pembeli (baru/lama)..." required autocomplete="off">
-                                            <input type="hidden" id="selected_id_pelanggan">
-                                            <div id="pelanggan_suggestions" class="autocomplete-suggestions d-none"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="metode_pembayaran" class="form-label small fw-medium text-secondary mb-1">Metode Pembayaran</label>
-                                        <select class="form-select form-select-sm" id="metode_pembayaran" required>
-                                            <option value="Tunai" selected>Tunai</option>
-                                            <option value="Transfer">Transfer</option>
-                                            <option value="Tempo">Tempo</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                 <div class="row g-2">
+                                     <div class="col-md-2">
+                                         <label for="no_penjualan" class="form-label small fw-medium text-secondary mb-1">Nomor Penjualan (Otomatis)</label>
+                                         <input type="text" class="form-control bg-light font-monospace form-control-sm" id="no_penjualan" readonly>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="tanggal" class="form-label small fw-medium text-secondary mb-1">Tanggal Nota</label>
+                                         <input type="date" class="form-control form-control-sm" name="tanggal" id="tanggal" required>
+                                     </div>
+                                     <div class="col-md-3">
+                                         <label for="pelanggan_input" class="form-label small fw-medium text-secondary mb-1">Pelanggan</label>
+                                         <div class="autocomplete-wrapper">
+                                             <input type="text" class="form-control form-control-sm" id="pelanggan_input" placeholder="Nama pembeli (baru/lama)..." required autocomplete="off">
+                                             <input type="hidden" id="selected_id_pelanggan">
+                                             <div id="pelanggan_suggestions" class="autocomplete-suggestions d-none"></div>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-5">
+                                         <label for="alamat_pelanggan" class="form-label small fw-medium text-secondary mb-1">Alamat Pelanggan</label>
+                                         <input type="text" class="form-control form-control-sm" id="alamat_pelanggan" placeholder="Alamat pelanggan..." required>
+                                     </div>
+                                 </div>
+                                 <div class="row g-2 mt-2">
+                                     <div class="col-md-2">
+                                         <label for="metode_pembayaran" class="form-label small fw-medium text-secondary mb-1">Metode Pembayaran</label>
+                                         <select class="form-select form-select-sm" id="metode_pembayaran" required>
+                                             <option value="Tunai" selected>Tunai</option>
+                                             <option value="Transfer">Transfer</option>
+                                             <option value="Tempo">Tempo</option>
+                                         </select>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="status_pembayaran" class="form-label small fw-medium text-secondary mb-1">Status Pembayaran</label>
+                                         <select class="form-select form-select-sm" id="status_pembayaran" required>
+                                             <option value="Lunas" selected>Lunas</option>
+                                             <option value="Belum Lunas">Belum Lunas</option>
+                                         </select>
+                                     </div>
+                                     <div class="col-md-2">
+                                         <label for="jatuh_tempo" class="form-label small fw-medium text-secondary mb-1">Tanggal Jatuh Tempo</label>
+                                         <input type="date" class="form-control form-control-sm" id="jatuh_tempo" disabled>
+                                     </div>
+                                 </div>
+                              </div>
+                          </div>
+                      </div>
 
                     <!-- 2. Detail Barang -->
                     <div class="col-12">
@@ -325,12 +342,13 @@
                                         <thead>
                                             <tr>
                                                 <th style="width: 50px;">No</th>
+                                                <th>No Penjualan</th>
                                                 <th>Tanggal</th>
-                                                <th>Pembeli / Alamat</th>
-                                                <th>Nama Barang</th>
-                                                <th>Jumlah</th>
-                                                <th>Harga Satuan</th>
-                                                <th>Total Penjualan</th>
+                                                <th>Pelanggan</th>
+                                                <th>alamat</th>
+                                                <th class="text-end">Total Penjualan</th>
+                                                <th>Metode Bayar</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody id="history-tbody">
@@ -374,6 +392,18 @@
             // Muat master dropdown & data riwayat
             loadPelangganDropdown();
             loadHistoryTable();
+
+            // Logika Otomatisasi Metode Pembayaran, Status, dan Jatuh Tempo
+            $('#metode_pembayaran').on('change', function () {
+                const metode = $(this).val();
+                if (metode === 'Tempo') {
+                    $('#status_pembayaran').val('Belum Lunas');
+                    $('#jatuh_tempo').prop('disabled', false).prop('required', true);
+                } else {
+                    $('#status_pembayaran').val('Lunas');
+                    $('#jatuh_tempo').prop('disabled', true).val('').prop('required', false);
+                }
+            });
 
             // ==========================================
             // LOGIKA AUTOCOMPLETE & BARCODE SCANNER
@@ -542,6 +572,10 @@
                     pelangganVal = $('#pelanggan_input').val().trim();
                 }
                 const metode_pembayaran = $('#metode_pembayaran').val();
+                const status_pembayaran = $('#status_pembayaran').val();
+                const jatuh_tempo = $('#jatuh_tempo').val() || '-';
+
+                const alamatPelanggan = $('#alamat_pelanggan').val().trim();
 
                 if (!tanggal) {
                     alert('Harap pilih tanggal transaksi terlebih dahulu!');
@@ -551,11 +585,18 @@
                     alert('Harap isi nama pelanggan terlebih dahulu!');
                     return;
                 }
+                if (!alamatPelanggan) {
+                    alert('Harap isi Alamat Pelanggan terlebih dahulu!');
+                    return;
+                }
 
                 const transaction = {
                     tanggal: tanggal,
                     id_pelanggan: pelangganVal,
-                    metode_pembayaran: metode_pembayaran
+                    alamat_pelanggan: alamatPelanggan,
+                    metode_pembayaran: metode_pembayaran,
+                    status_pembayaran: status_pembayaran,
+                    jatuh_tempo: jatuh_tempo
                 };
 
                 if (confirm('Apakah Anda yakin ingin menyimpan seluruh transaksi penjualan ini?')) {
@@ -567,7 +608,10 @@
                         // Reset form kotor
                         $('#pelanggan_input').val('');
                         $('#selected_id_pelanggan').val('');
+                        $('#alamat_pelanggan').val('');
                         $('#metode_pembayaran').val('Tunai');
+                        $('#status_pembayaran').val('Lunas');
+                        $('#jatuh_tempo').val('').prop('disabled', true);
                         $('#tanggal').val(new Date().toISOString().split('T')[0]);
                         $('#no_penjualan').val(DB.generateNoPenjualan());
 
@@ -625,6 +669,7 @@
 
             pelangganInput.on('input', function () {
                 $('#selected_id_pelanggan').val('');
+                $('#alamat_pelanggan').val('');
                 const query = $(this).val().trim().toLowerCase();
                 suggestionsContainer.empty().addClass('d-none');
 
@@ -646,6 +691,7 @@
                         el.on('click', function () {
                             pelangganInput.val(p.nama_pelanggan);
                             $('#selected_id_pelanggan').val(p.id_pelanggan);
+                            $('#alamat_pelanggan').val(p.alamat || '-');
                             suggestionsContainer.empty().addClass('d-none');
                         });
                         suggestionsContainer.append(el);
@@ -663,7 +709,7 @@
         }
 
         function loadHistoryTable() {
-            const historyList = DB.getSalesHistoryCombined();
+            const historyList = DB.getPenjualanHeaders();
             const tbody = $('#history-tbody');
 
             if (dataTableInstance) {
@@ -672,19 +718,21 @@
 
             tbody.empty();
 
-            historyList.forEach((item, index) => {
+            historyList.forEach((bm, index) => {
                 tbody.append(`
-                    <tr>
+                    <tr class="cursor-pointer" onclick="showPenjualanDetail('${escapeHtml(bm.no_penjualan)}')" title="Klik untuk detail" style="cursor: pointer;">
                         <td>${index + 1}</td>
-                        <td><span class="small text-muted">${formatDate(item.tanggal)}</span></td>
+                        <td><span class="fw-bold font-monospace text-primary">${escapeHtml(bm.no_penjualan)}</span></td>
+                        <td><span class="small text-muted">${formatDate(bm.tanggal)}</span></td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(bm.pelanggan)}</span></td>
+                        <td><span class="small text-muted">${escapeHtml(bm.alamat)}</span></td>
+                        <td class="fw-bold text-end text-dark">Rp ${formatNumber(bm.total_penjualan)}</td>
+                        <td><span class="badge bg-secondary">${escapeHtml(bm.metode_pembayaran)}</span></td>
                         <td>
-                            <span class="fw-semibold text-dark d-block">${escapeHtml(item.nama_pembeli)}</span>
-                            <span class="small text-muted d-block" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(item.alamat)}</span>
+                            <span class="badge ${bm.status_pembayaran === 'Lunas' ? 'bg-success' : 'bg-warning'} text-white">
+                                ${escapeHtml(bm.status_pembayaran)}
+                            </span>
                         </td>
-                        <td><span class="text-dark">${escapeHtml(item.nama_barang)}</span></td>
-                        <td class="fw-bold">${item.jumlah} <span class="small text-muted fw-normal">${escapeHtml(item.satuan)}</span></td>
-                        <td>Rp ${formatNumber(item.harga_jual)}</td>
-                        <td class="fw-bold text-primary">Rp ${formatNumber(item.subtotal)}</td>
                     </tr>
                 `);
             });
@@ -694,6 +742,54 @@
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
                 }
             });
+        }
+
+        function showPenjualanDetail(noPenjualan) {
+            const penjualanList = DB.getTable('penjualan');
+            const detailPenjualan = DB.getTable('detail_penjualan');
+            const barangList = DB.getTable('barang');
+            const pelangganList = DB.getTable('pelanggan');
+
+            const parent = penjualanList.find(p => p.no_penjualan === noPenjualan);
+            if (!parent) return;
+
+            const pl = pelangganList.find(x => x.id_pelanggan === parent.id_pelanggan) || {};
+
+            $('#detail-no-penjualan').text(parent.no_penjualan);
+            $('#detail-pelanggan').text(pl.nama_pelanggan || 'Umum');
+            $('#detail-alamat').text(pl.alamat || '-');
+            $('#detail-tanggal').text(formatDate(parent.tanggal));
+            $('#detail-metode').text(parent.metode_pembayaran || 'Tunai');
+            $('#detail-status').text(parent.status_pembayaran || 'Lunas');
+            
+            if (parent.metode_pembayaran === 'Tempo') {
+                $('#detail-jatuh-tempo').text(formatDate(parent.jatuh_tempo));
+                $('#detail-jatuh-tempo-row').show();
+            } else {
+                $('#detail-jatuh-tempo-row').hide();
+            }
+
+            const items = detailPenjualan.filter(dp => dp.no_penjualan === noPenjualan);
+            const tbody = $('#detail-penjualan-tbody');
+            tbody.empty();
+
+            let index = 1;
+            items.forEach(dp => {
+                const b = barangList.find(x => x.id_inventori === dp.id_inventori) || {};
+                tbody.append(`
+                    <tr>
+                        <td>${index++}</td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang || 'Barang Dihapus')}</span></td>
+                        <td class="text-end fw-medium">${dp.qty}</td>
+                        <td>${escapeHtml(dp.satuan || b.satuan || '-')}</td>
+                        <td class="text-end">Rp ${formatNumber(dp.harga_jual)}</td>
+                        <td class="text-end fw-bold text-primary">Rp ${formatNumber(dp.subtotal)}</td>
+                    </tr>
+                `);
+            });
+
+            $('#detail-penjualan-total').text(formatRupiah(parent.total_penjualan));
+            $('#detailPenjualanModal').modal('show');
         }
 
         function showAlert(message, type) {
@@ -732,5 +828,61 @@
                 .replace(/'/g, "&#039;");
         }
     </script>
+
+    <!-- Modal: Detail Transaksi Penjualan -->
+    <div class="modal fade" id="detailPenjualanModal" tabindex="-1" aria-labelledby="detailPenjualanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="detailPenjualanModalLabel"><i class="fa-solid fa-file-invoice me-2"></i> Detail Transaksi <span id="detail-no-penjualan"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm small mb-0">
+                                <tr><td class="fw-bold text-secondary" style="width: 140px;">Pelanggan:</td><td id="detail-pelanggan"></td></tr>
+                                <tr><td class="fw-bold text-secondary">Alamat:</td><td id="detail-alamat"></td></tr>
+                                <tr><td class="fw-bold text-secondary">Tanggal Nota:</td><td id="detail-tanggal"></td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm small mb-0">
+                                <tr><td class="fw-bold text-secondary" style="width: 140px;">Metode Pembayaran:</td><td id="detail-metode"></td></tr>
+                                <tr><td class="fw-bold text-secondary">Status Pembayaran:</td><td id="detail-status"></td></tr>
+                                <tr id="detail-jatuh-tempo-row"><td class="fw-bold text-secondary">Tanggal Jatuh Tempo:</td><td id="detail-jatuh-tempo"></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-striped align-middle table-sm small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-end">Jumlah</th>
+                                    <th>Satuan</th>
+                                    <th class="text-end">Harga Satuan</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-penjualan-tbody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light">
+                                    <td colspan="5" class="text-end">Total Penjualan:</td>
+                                    <td class="text-end text-primary" id="detail-penjualan-total">Rp 0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -79,6 +79,10 @@ CREATE TABLE IF NOT EXISTS `pembelian` (
   `tanggal` DATE NOT NULL,
   `id_supplier` INT NOT NULL,
   `total_pembelian` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `nomor_faktur_supplier` VARCHAR(50) NOT NULL,
+  `metode_pembayaran` VARCHAR(50) NOT NULL DEFAULT 'Tunai', -- Tunai, Transfer, Tempo
+  `status_pembayaran` VARCHAR(50) NOT NULL DEFAULT 'Lunas', -- Lunas, Belum Lunas
+  `jatuh_tempo` VARCHAR(50) DEFAULT NULL,
   FOREIGN KEY (`id_supplier`) REFERENCES `supplier` (`id_supplier`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -102,6 +106,8 @@ CREATE TABLE IF NOT EXISTS `penjualan` (
   `tanggal` DATE NOT NULL,
   `id_pelanggan` INT NOT NULL,
   `metode_pembayaran` VARCHAR(50) NOT NULL DEFAULT 'Tunai', -- Tunai, Transfer, Tempo
+  `status_pembayaran` VARCHAR(50) NOT NULL DEFAULT 'Lunas', -- Lunas, Belum Lunas
+  `jatuh_tempo` VARCHAR(50) DEFAULT NULL,
   `total_penjualan` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
   FOREIGN KEY (`id_pelanggan`) REFERENCES `pelanggan` (`id_pelanggan`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -160,18 +166,18 @@ INSERT INTO `barang` (`id_inventori`, `kode_barang`, `nama_barang`, `kategori`, 
 (5, 'BRG0005', 'Kayu Kaso 4x6', 'Kayu', 'Batang', 12000.00, 15000.00, 0, 5);
 
 -- Seed Transaksi Pembelian (Barang Masuk) - Format nomor pembelian 6-digit: PBL000001
-INSERT INTO `pembelian` (`no_pembelian`, `tanggal`, `id_supplier`, `total_pembelian`) VALUES
-('PBL000001', '2026-06-10', 1, 6500000.00),
-('PBL000002', '2026-06-12', 2, 4400000.00);
+INSERT INTO `pembelian` (`no_pembelian`, `tanggal`, `id_supplier`, `total_pembelian`, `nomor_faktur_supplier`, `metode_pembayaran`, `status_pembayaran`, `jatuh_tempo`) VALUES
+('PBL000001', '2026-06-10', 1, 6500000.00, '0100/GCU', 'Tunai', 'Lunas', NULL),
+('PBL000002', '2026-06-12', 2, 4400000.00, '0200/GCU', 'Tempo', 'Belum Lunas', '2026-07-12');
 
 INSERT INTO `detail_pembelian` (`no_pembelian`, `id_inventori`, `qty`, `harga_beli`, `subtotal`) VALUES
 ('PBL000001', 1, 100, 65000.00, 6500000.00),
 ('PBL000002', 2, 80, 55000.00, 4400000.00);
 
 -- Seed Transaksi Penjualan (Nota Penjualan) - Format nomor penjualan 6-digit: PJL000001
-INSERT INTO `penjualan` (`no_penjualan`, `tanggal`, `id_pelanggan`, `metode_pembayaran`, `total_penjualan`) VALUES
-('PJL000001', '2026-06-14', 1, 'Tunai', 140000.00),
-('PJL000002', '2026-06-15', 2, 'Transfer', 186000.00);
+INSERT INTO `penjualan` (`no_penjualan`, `tanggal`, `id_pelanggan`, `metode_pembayaran`, `status_pembayaran`, `jatuh_tempo`, `total_penjualan`) VALUES
+('PJL000001', '2026-06-14', 1, 'Tunai', 'Lunas', NULL, 140000.00),
+('PJL000002', '2026-06-15', 2, 'Transfer', 'Lunas', NULL, 186000.00);
 
 INSERT INTO `detail_penjualan` (`no_penjualan`, `id_inventori`, `qty`, `harga_jual`, `subtotal`) VALUES
 ('PJL000001', 1, 2, 70000.00, 140000.00),

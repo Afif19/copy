@@ -14,7 +14,7 @@ const DB = {
      * Alur: Mengisi localStorage dengan seed data awal relasional.
      */
     init: function () {
-        const CURRENT_VERSION = 'v1.4';
+        const CURRENT_VERSION = 'v1.6';
         if (localStorage.getItem('db_version') !== CURRENT_VERSION) {
             localStorage.removeItem('users');
             localStorage.removeItem('kategori');
@@ -80,8 +80,8 @@ const DB = {
         // 6. Inisialisasi Tabel Pembelian (Header Barang Masuk)
         if (!localStorage.getItem('pembelian')) {
             localStorage.setItem('pembelian', JSON.stringify([
-                { no_pembelian: 'PBL000001', tanggal: '2026-06-10', id_supplier: 1, total_pembelian: 6500000 },
-                { no_pembelian: 'PBL000002', tanggal: '2026-06-12', id_supplier: 2, total_pembelian: 4400000 }
+                { no_pembelian: 'PBL000001', tanggal: '2026-06-10', id_supplier: 1, total_pembelian: 6500000, nomor_faktur_supplier: '0100/GCU', metode_pembayaran: 'Tunai', status_pembayaran: 'Lunas', jatuh_tempo: '-' },
+                { no_pembelian: 'PBL000002', tanggal: '2026-06-12', id_supplier: 2, total_pembelian: 4400000, nomor_faktur_supplier: '0200/GCU', metode_pembayaran: 'Tempo', status_pembayaran: 'Belum Lunas', jatuh_tempo: '2026-07-12' }
             ]));
         }
 
@@ -96,8 +96,8 @@ const DB = {
         // 8. Inisialisasi Tabel Penjualan (Header Nota)
         if (!localStorage.getItem('penjualan')) {
             localStorage.setItem('penjualan', JSON.stringify([
-                { id_penjualan: 1, no_penjualan: 'PJL000001', tanggal: '2026-06-14', id_pelanggan: 1, metode_pembayaran: 'Tunai', total_penjualan: 140000 },
-                { id_penjualan: 2, no_penjualan: 'PJL000002', tanggal: '2026-06-15', id_pelanggan: 2, metode_pembayaran: 'Transfer', total_penjualan: 186000 }
+                { id_penjualan: 1, no_penjualan: 'PJL000001', tanggal: '2026-06-14', id_pelanggan: 1, metode_pembayaran: 'Tunai', status_pembayaran: 'Lunas', jatuh_tempo: '-', total_penjualan: 140000 },
+                { id_penjualan: 2, no_penjualan: 'PJL000002', tanggal: '2026-06-15', id_pelanggan: 2, metode_pembayaran: 'Transfer', status_pembayaran: 'Lunas', jatuh_tempo: '-', total_penjualan: 186000 }
             ]));
         }
 
@@ -384,12 +384,16 @@ const DB = {
                 jumlah_masuk: dp.qty,
                 harga_beli: dp.harga_beli,
                 harga_jual: b.harga_jual || 0,
-                keterangan: s.nama_supplier || 'Supplier Dihapus'
+                keterangan: s.nama_supplier || 'Supplier Dihapus',
+                nomor_faktur_supplier: parent.nomor_faktur_supplier || '-',
+                metode_pembayaran: parent.metode_pembayaran || 'Tunai',
+                status_pembayaran: parent.status_pembayaran || 'Lunas',
+                jatuh_tempo: parent.jatuh_tempo || '-'
             };
         }).sort((a, b) => b.id_barang_masuk - a.id_barang_masuk);
     },
 
-    addBarangMasukMulti: function (tanggal, supplierParam, items) {
+    addBarangMasukMulti: function (tanggal, supplierParam, items, extraData) {
         if (!tanggal || !supplierParam || !items || items.length === 0) {
             throw new Error('Informasi data barang masuk tidak lengkap!');
         }
@@ -413,10 +417,13 @@ const DB = {
                 id_supplier: nextId,
                 kode_supplier: kode_supplier,
                 nama_supplier: supplierParam.toString().trim(),
-                alamat: '-',
+                alamat: extraData?.alamat_supplier || '-',
                 no_telp: '-'
             };
             suppliers.push(resolvedSupplier);
+            this.saveTable('supplier', suppliers);
+        } else if (extraData?.alamat_supplier && extraData.alamat_supplier !== '-' && resolvedSupplier.alamat !== extraData.alamat_supplier) {
+            resolvedSupplier.alamat = extraData.alamat_supplier;
             this.saveTable('supplier', suppliers);
         }
 
@@ -431,7 +438,7 @@ const DB = {
             const sell = parseFloat(item.harga_jual);
 
             if (qty <= 0 || buy < 0 || sell < 0) {
-                throw new Error('Masukkan data kuantitas dan harga dengan benar!');
+                throw new Error('Jumlah masuk dan harga beli/jual harus bernilai positif!');
             }
 
             // Jika barang belum terdaftar di database master
@@ -489,7 +496,11 @@ const DB = {
             no_pembelian: no_pembelian,
             tanggal: tanggal,
             id_supplier: resolvedSupplier.id_supplier,
-            total_pembelian: total_pembelian
+            total_pembelian: total_pembelian,
+            nomor_faktur_supplier: extraData?.nomor_faktur_supplier || '-',
+            metode_pembayaran: extraData?.metode_pembayaran || 'Tunai',
+            status_pembayaran: extraData?.status_pembayaran || 'Lunas',
+            jatuh_tempo: extraData?.jatuh_tempo || '-'
         });
 
         this.saveTable('pembelian', pembelian);
@@ -551,7 +562,10 @@ const DB = {
                 satuan: dp.satuan || b.satuan || '-',
                 jumlah: dp.qty,
                 harga_jual: dp.harga_jual,
-                subtotal: dp.subtotal
+                subtotal: dp.subtotal,
+                metode_pembayaran: parent.metode_pembayaran || 'Tunai',
+                status_pembayaran: parent.status_pembayaran || 'Lunas',
+                jatuh_tempo: parent.jatuh_tempo || '-'
             };
         }).sort((a, b) => b.id_penjualan - a.id_penjualan);
     },
@@ -587,10 +601,13 @@ const DB = {
                 kode_pelanggan: kode_pelanggan,
                 nama_pelanggan: nameTrimmed,
                 jenis_pelanggan: jenis,
-                alamat: '-',
+                alamat: transaction.alamat_pelanggan || '-',
                 no_telp: '-'
             };
             pelangganList.push(resolvedPelanggan);
+            this.saveTable('pelanggan', pelangganList);
+        } else if (transaction.alamat_pelanggan && transaction.alamat_pelanggan !== '-' && resolvedPelanggan.alamat !== transaction.alamat_pelanggan) {
+            resolvedPelanggan.alamat = transaction.alamat_pelanggan;
             this.saveTable('pelanggan', pelangganList);
         }
 
@@ -645,6 +662,8 @@ const DB = {
             tanggal: transaction.tanggal,
             id_pelanggan: resolvedPelanggan.id_pelanggan,
             metode_pembayaran: transaction.metode_pembayaran || 'Tunai',
+            status_pembayaran: transaction.status_pembayaran || 'Lunas',
+            jatuh_tempo: transaction.jatuh_tempo || '-',
             total_penjualan: total_penjualan
         });
 
@@ -803,6 +822,44 @@ const DB = {
                 label: 'Penjualan Tahunan'
             };
         }
+    },
+
+    getPembelianHeaders: function () {
+        const pembelian = this.getTable('pembelian');
+        const suppliers = this.getTable('supplier');
+
+        return pembelian.map(p => {
+            const s = suppliers.find(x => x.id_supplier === p.id_supplier) || {};
+            return {
+                no_pembelian: p.no_pembelian,
+                tanggal: p.tanggal,
+                supplier: s.nama_supplier || 'Supplier Dihapus',
+                total_pembelian: p.total_pembelian,
+                metode_pembayaran: p.metode_pembayaran || 'Tunai',
+                status_pembayaran: p.status_pembayaran || 'Lunas',
+                jatuh_tempo: p.jatuh_tempo || '-'
+            };
+        }).sort((a, b) => b.no_pembelian.localeCompare(a.no_pembelian));
+    },
+
+    getPenjualanHeaders: function () {
+        const penjualan = this.getTable('penjualan');
+        const pelangganList = this.getTable('pelanggan');
+
+        return penjualan.map(p => {
+            const pl = pelangganList.find(x => x.id_pelanggan === p.id_pelanggan) || {};
+            return {
+                id_penjualan: p.id_penjualan,
+                no_penjualan: p.no_penjualan,
+                tanggal: p.tanggal,
+                pelanggan: pl.nama_pelanggan || 'Umum',
+                alamat: pl.alamat || '-',
+                total_penjualan: p.total_penjualan,
+                metode_pembayaran: p.metode_pembayaran || 'Tunai',
+                status_pembayaran: p.status_pembayaran || 'Lunas',
+                jatuh_tempo: p.jatuh_tempo || '-'
+            };
+        }).sort((a, b) => b.no_penjualan.localeCompare(a.no_penjualan));
     },
 
     exportToExcel: function (htmlTableContent, filename) {
