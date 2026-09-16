@@ -108,6 +108,16 @@ const DB = {
                 { id_detail: 2, no_penjualan: 'PJL000002', id_inventori: 2, qty: 3, harga_jual: 62000, subtotal: 186000 }
             ]));
         }
+
+        // 10. Inisialisasi Tabel Pembayaran Pembelian (Hutang)
+        if (!localStorage.getItem('pembayaran_pembelian')) {
+            localStorage.setItem('pembayaran_pembelian', JSON.stringify([]));
+        }
+
+        // 11. Inisialisasi Tabel Pembayaran Penjualan (Piutang)
+        if (!localStorage.getItem('pembayaran_penjualan')) {
+            localStorage.setItem('pembayaran_penjualan', JSON.stringify([]));
+        }
     },
 
     // Middleware Autentikasi Client-Side
@@ -565,7 +575,7 @@ const DB = {
                 subtotal: dp.subtotal,
                 metode_pembayaran: parent.metode_pembayaran || 'Tunai',
                 status_pembayaran: parent.status_pembayaran || 'Lunas',
-                jatuh_tempo: parent.jatuh_tempo || '-'
+                jatuh_tempo: (parent.metode_pembayaran === 'Tempo' && parent.jatuh_tempo && parent.jatuh_tempo !== '-') ? parent.jatuh_tempo : null
             };
         }).sort((a, b) => b.id_penjualan - a.id_penjualan);
     },
@@ -860,6 +870,253 @@ const DB = {
                 jatuh_tempo: p.jatuh_tempo || '-'
             };
         }).sort((a, b) => b.no_penjualan.localeCompare(a.no_penjualan));
+    },
+
+    // ==========================================
+    // TAHAP 4: PEMBAYARAN HUTANG & PIUTANG ENGINE
+    // ==========================================
+
+    getTotalDibayarHutang: function (no_pembelian) {
+        const payments = this.getTable('pembayaran_pembelian');
+        return payments
+            .filter(p => p.no_pembelian === no_pembelian)
+            .reduce((sum, p) => sum + (parseFloat(p.jumlah_pembayaran) || 0), 0);
+    },
+
+    getTotalDibayarPiutang: function (no_penjualan) {
+        const payments = this.getTable('pembayaran_penjualan');
+        return payments
+            .filter(p => p.no_penjualan === no_penjualan)
+            .reduce((sum, p) => sum + (parseFloat(p.jumlah_pembayaran) || 0), 0);
+    },
+
+    getSisaHutang: function (no_pembelian) {
+        const pembelian = this.getTable('pembelian');
+        const p = pembelian.find(x => x.no_pembelian === no_pembelian);
+        if (!p) return 0;
+        const dibayar = this.getTotalDibayarHutang(no_pembelian);
+        return Math.max(0, (parseFloat(p.total_pembelian) || 0) - dibayar);
+    },
+
+    getSisaPiutang: function (no_penjualan) {
+        const penjualan = this.getTable('penjualan');
+        const p = penjualan.find(x => x.no_penjualan === no_penjualan);
+        if (!p) return 0;
+        const dibayar = this.getTotalDibayarPiutang(no_penjualan);
+        return Math.max(0, (parseFloat(p.total_penjualan) || 0) - dibayar);
+    },
+
+    calculateJatuhTempoStatus: function (jatuhTempoDateStr) {
+        if (!jatuhTempoDateStr || jatuhTempoDateStr === '-') {
+            return { status: 'Tanpa Jatuh Tempo', sisa_hari: null };
+        }
+        const todayStr = new Date().toISOString().split('T')[0];
+        const due = new Date(jatuhTempoDateStr);
+        const tdy = new Date(todayStr);
+        const diffTime = due - tdy;
+        const sisaHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        let status = 'Belum Jatuh Tempo';
+        if (sisaHari < 0) status = 'Sudah Lewat Jatuh Tempo';
+        else if (sisaHari === 0) status = 'Jatuh Tempo Hari Ini';
+
+        return { status: status, sisa_hari: sisaHari };
+    },
+
+    getHistoriPembayaranHutang: function (no_pembelian) {
+        const list = this.getTable('pembayaran_pembelian');
+        return list
+            .filter(p => p.no_pembelian === no_pembelian)
+            .sort((a, b) => a.id_pembayaran - b.id_pembayaran);
+    },
+
+    getHistoriPembayaranPiutang: function (no_penjualan) {
+        const list = this.getTable('pembayaran_penjualan');
+        return list
+            .filter(p => p.no_penjualan === no_penjualan)
+            .sort((a, b) => a.id_pembayaran - b.id_pembayaran);
+    },
+
+    addPembayaranHutang: function (data) {
+        if (!data || !data.no_pembelian) throw new Error('Nomor pembelian wajib diisi!');
+        const nominal = parseFloat(data.jumlah_pembayaran);
+        if (isNaN(nominal) || nominal <= 0) throw new Error('Jumlah pembayaran harus lebih dari 0!');
+
+        const sisa = this.getSisaHutang(data.no_pembelian);
+        if (sisa <= 0) throw new Error('Hutang untuk nota ini sudah LUNAS!');
+        if (nominal > sisa) {
+            throw new Error(`Nominal pembayaran tidak boleh melebihi sisa hutang (Rp ${sisa.toLocaleString('id-ID')})!`);
+        }
+
+        const list = this.getTable('pembayaran_pembelian');
+        const nextId = this.getNextId('pembayaran_pembelian', 'id_pembayaran');
+        const record = {
+            id_pembayaran: nextId,
+            no_pembelian: data.no_pembelian,
+            tanggal_pembayaran: data.tanggal_pembayaran || new Date().toISOString().split('T')[0],
+            jumlah_pembayaran: nominal,
+            metode_pembayaran: data.metode_pembayaran || 'Tunai',
+            keterangan: data.keterangan || ''
+        };
+        list.push(record);
+        this.saveTable('pembayaran_pembelian', list);
+
+        const sisaAfter = this.getSisaHutang(data.no_pembelian);
+        if (sisaAfter <= 0) {
+            const pembelian = this.getTable('pembelian');
+            const idx = pembelian.findIndex(p => p.no_pembelian === data.no_pembelian);
+            if (idx !== -1) {
+                pembelian[idx].status_pembayaran = 'Lunas';
+                this.saveTable('pembelian', pembelian);
+            }
+        }
+
+        return record;
+    },
+
+    addPembayaranPiutang: function (data) {
+        if (!data || !data.no_penjualan) throw new Error('Nomor penjualan wajib diisi!');
+        const nominal = parseFloat(data.jumlah_pembayaran);
+        if (isNaN(nominal) || nominal <= 0) throw new Error('Jumlah pembayaran harus lebih dari 0!');
+
+        const sisa = this.getSisaPiutang(data.no_penjualan);
+        if (sisa <= 0) throw new Error('Piutang untuk nota ini sudah LUNAS!');
+        if (nominal > sisa) {
+            throw new Error(`Nominal pembayaran tidak boleh melebihi sisa piutang (Rp ${sisa.toLocaleString('id-ID')})!`);
+        }
+
+        const list = this.getTable('pembayaran_penjualan');
+        const nextId = this.getNextId('pembayaran_penjualan', 'id_pembayaran');
+        const record = {
+            id_pembayaran: nextId,
+            no_penjualan: data.no_penjualan,
+            tanggal_pembayaran: data.tanggal_pembayaran || new Date().toISOString().split('T')[0],
+            jumlah_pembayaran: nominal,
+            metode_pembayaran: data.metode_pembayaran || 'Tunai',
+            keterangan: data.keterangan || ''
+        };
+        list.push(record);
+        this.saveTable('pembayaran_penjualan', list);
+
+        const sisaAfter = this.getSisaPiutang(data.no_penjualan);
+        if (sisaAfter <= 0) {
+            const penjualan = this.getTable('penjualan');
+            const idx = penjualan.findIndex(p => p.no_penjualan === data.no_penjualan);
+            if (idx !== -1) {
+                penjualan[idx].status_pembayaran = 'Lunas';
+                this.saveTable('penjualan', penjualan);
+            }
+        }
+
+        return record;
+    },
+
+    getHutangSupplier: function () {
+        const pembelian = this.getTable('pembelian');
+        const suppliers = this.getTable('supplier');
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const result = [];
+
+        pembelian.forEach(p => {
+            if (p.metode_pembayaran === 'Tempo' || p.status_pembayaran === 'Belum Lunas') {
+                const s = suppliers.find(x => x.id_supplier === p.id_supplier) || {};
+                const totalDibayar = this.getTotalDibayarHutang(p.no_pembelian);
+                const totalNota = parseFloat(p.total_pembelian) || 0;
+                const sisaHutang = Math.max(0, totalNota - totalDibayar);
+
+                if (sisaHutang > 0) {
+                    let statusTempo = 'Belum Jatuh Tempo';
+                    let sisaHari = null;
+
+                    if (p.jatuh_tempo && p.jatuh_tempo !== '-') {
+                        const due = new Date(p.jatuh_tempo);
+                        const tdy = new Date(todayStr);
+                        const diffTime = due - tdy;
+                        sisaHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (sisaHari < 0) statusTempo = 'Sudah Lewat Jatuh Tempo';
+                        else if (sisaHari === 0) statusTempo = 'Jatuh Tempo Hari Ini';
+                    }
+
+                    result.push({
+                        no_pembelian: p.no_pembelian,
+                        tanggal: p.tanggal,
+                        id_supplier: p.id_supplier,
+                        supplier: s.nama_supplier || 'Supplier Dihapus',
+                        nama_supplier: s.nama_supplier || 'Supplier Dihapus',
+                        kode_supplier: s.kode_supplier || '-',
+                        no_telp: s.no_telp || '-',
+                        nomor_faktur_supplier: p.nomor_faktur_supplier || '-',
+                        total_pembelian: totalNota,
+                        total_hutang: totalNota,
+                        total_dibayar: totalDibayar,
+                        sisa_hutang: sisaHutang,
+                        status_pembayaran: 'Belum Lunas',
+                        metode_pembayaran: p.metode_pembayaran || 'Tempo',
+                        jatuh_tempo: p.jatuh_tempo || '-',
+                        status_jatuh_tempo: statusTempo,
+                        sisa_hari: sisaHari
+                    });
+                }
+            }
+        });
+
+        return result.sort((a, b) => b.no_pembelian.localeCompare(a.no_pembelian));
+    },
+
+    getPiutangPelanggan: function () {
+        const penjualan = this.getTable('penjualan');
+        const pelangganList = this.getTable('pelanggan');
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const result = [];
+
+        penjualan.forEach(p => {
+            if (p.metode_pembayaran === 'Tempo' || p.status_pembayaran === 'Belum Lunas') {
+                const pl = pelangganList.find(x => x.id_pelanggan === p.id_pelanggan) || {};
+                const totalDibayar = this.getTotalDibayarPiutang(p.no_penjualan);
+                const totalNota = parseFloat(p.total_penjualan) || 0;
+                const sisaPiutang = Math.max(0, totalNota - totalDibayar);
+
+                if (sisaPiutang > 0) {
+                    let statusTempo = 'Belum Jatuh Tempo';
+                    let sisaHari = null;
+
+                    if (p.jatuh_tempo && p.jatuh_tempo !== '-') {
+                        const due = new Date(p.jatuh_tempo);
+                        const tdy = new Date(todayStr);
+                        const diffTime = due - tdy;
+                        sisaHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (sisaHari < 0) statusTempo = 'Sudah Lewat Jatuh Tempo';
+                        else if (sisaHari === 0) statusTempo = 'Jatuh Tempo Hari Ini';
+                    }
+
+                    result.push({
+                        no_penjualan: p.no_penjualan,
+                        id_penjualan: p.id_penjualan,
+                        tanggal: p.tanggal,
+                        id_pelanggan: p.id_pelanggan,
+                        pelanggan: pl.nama_pelanggan || 'Umum',
+                        nama_pelanggan: pl.nama_pelanggan || 'Umum',
+                        kode_pelanggan: pl.kode_pelanggan || '-',
+                        no_telp: pl.no_telp || '-',
+                        total_penjualan: totalNota,
+                        total_piutang: totalNota,
+                        total_dibayar: totalDibayar,
+                        sisa_piutang: sisaPiutang,
+                        status_pembayaran: 'Belum Lunas',
+                        metode_pembayaran: p.metode_pembayaran || 'Tempo',
+                        jatuh_tempo: p.jatuh_tempo || '-',
+                        status_jatuh_tempo: statusTempo,
+                        sisa_hari: sisaHari
+                    });
+                }
+            }
+        });
+
+        return result.sort((a, b) => b.no_penjualan.localeCompare(a.no_penjualan));
     },
 
     exportToExcel: function (htmlTableContent, filename) {

@@ -7,7 +7,8 @@ USE `db_toko_bangunan`;
 -- Menurunkan pemeriksaan Foreign Key sementara waktu untuk mencegah error saat proses DROP
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Menghapus tabel lama jika sudah ada di database untuk mencegah konflik kegagalan
+DROP TABLE IF EXISTS `pembayaran_penjualan`;
+DROP TABLE IF EXISTS `pembayaran_pembelian`;
 DROP TABLE IF EXISTS `detail_penjualan`;
 DROP TABLE IF EXISTS `detail_pembelian`;
 DROP TABLE IF EXISTS `penjualan`;
@@ -182,3 +183,25 @@ INSERT INTO `penjualan` (`no_penjualan`, `tanggal`, `id_pelanggan`, `metode_pemb
 INSERT INTO `detail_penjualan` (`no_penjualan`, `id_inventori`, `qty`, `harga_jual`, `subtotal`) VALUES
 ('PJL000001', 1, 2, 70000.00, 140000.00),
 ('PJL000002', 2, 3, 62000.00, 186000.00);
+
+-- 10. TABEL PEMBAYARAN PEMBELIAN (HUTANG SUPPLIER)
+CREATE TABLE IF NOT EXISTS `pembayaran_pembelian` (
+  `id_pembayaran` INT AUTO_INCREMENT PRIMARY KEY,
+  `no_pembelian` VARCHAR(20) NOT NULL,
+  `tanggal_pembayaran` DATE NOT NULL,
+  `jumlah_pembayaran` DECIMAL(12,2) NOT NULL,
+  `metode_pembayaran` VARCHAR(50) NOT NULL,
+  `keterangan` TEXT NULL,
+  FOREIGN KEY (`no_pembelian`) REFERENCES `pembelian` (`no_pembelian`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 11. TABEL PEMBAYARAN PENJUALAN (PIUTANG PELANGGAN)
+CREATE TABLE IF NOT EXISTS `pembayaran_penjualan` (
+  `id_pembayaran` INT AUTO_INCREMENT PRIMARY KEY,
+  `no_penjualan` VARCHAR(20) NOT NULL,
+  `tanggal_pembayaran` DATE NOT NULL,
+  `jumlah_pembayaran` DECIMAL(12,2) NOT NULL,
+  `metode_pembayaran` VARCHAR(50) NOT NULL,
+  `keterangan` TEXT NULL,
+  FOREIGN KEY (`no_penjualan`) REFERENCES `penjualan` (`no_penjualan`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

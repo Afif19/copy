@@ -244,7 +244,8 @@
                                              <div class="autocomplete-wrapper">
                                                  <div class="input-group input-group-sm">
                                                      <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                                     <input type="text" class="form-control border-start-0" id="search_barang" placeholder="Ketik nama barang...">
+                                                      <input type="text" class="form-control border-start-0" id="search_barang" placeholder="Ketik nama barang...">
+                                                     <button type="button" class="btn btn-primary" id="btnOpenKatalog" data-bs-toggle="modal" data-bs-target="#modalKatalogBarang" title="Katalog Data Barang"><i class="fa-solid fa-list me-1"></i> Cari</button>
                                                  </div>
                                                  <div id="suggestions" class="autocomplete-suggestions d-none"></div>
                                              </div>
@@ -411,6 +412,116 @@
                     $('#status_pembayaran').val('Lunas');
                     $('#jatuh_tempo').prop('disabled', true).val('').prop('required', false);
                 }
+            });
+
+            // ==========================================
+            // LOGIKA KATALOG BARANG MODAL + PAGINATION (TAHAP 1)
+            // ==========================================
+            let currentKatalogPage = 1;
+            const itemsPerPage = 10;
+            let filteredKatalogList = [];
+
+            function renderKatalogTable() {
+                const query = $('#modal_search_input').val().trim().toLowerCase();
+                const allBarang = DB.getBarang();
+                
+                if (query) {
+                    filteredKatalogList = allBarang.filter(b => 
+                        (b.nama_barang && b.nama_barang.toLowerCase().includes(query)) ||
+                        (b.kode_barang && b.kode_barang.toLowerCase().includes(query))
+                    );
+                } else {
+                    filteredKatalogList = [...allBarang];
+                }
+
+                const totalItems = filteredKatalogList.length;
+                $('#modal_total_items').text('Total: ' + totalItems + ' Barang');
+
+                const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+                if (currentKatalogPage > totalPages) currentKatalogPage = totalPages;
+                if (currentKatalogPage < 1) currentKatalogPage = 1;
+
+                const startIndex = (currentKatalogPage - 1) * itemsPerPage;
+                const pageItems = filteredKatalogList.slice(startIndex, startIndex + itemsPerPage);
+
+                const tbody = $('#modal_katalog_tbody');
+                tbody.empty();
+
+                if (pageItems.length === 0) {
+                    tbody.append('<tr><td colspan="7" class="text-center text-muted py-3">Tidak ada barang yang ditemukan.</td></tr>');
+                } else {
+                    pageItems.forEach((b, idx) => {
+                        const rowNo = startIndex + idx + 1;
+                        tbody.append('<tr>' +
+                            '<td class="text-center">' + rowNo + '</td>' +
+                            '<td><span class="badge bg-light text-dark font-monospace">' + escapeHtml(b.kode_barang) + '</span></td>' +
+                            '<td><span class="fw-semibold text-dark">' + escapeHtml(b.nama_barang) + '</span></td>' +
+                            '<td><span class="small text-muted">' + escapeHtml(b.nama_kategori) + '</span></td>' +
+                            '<td class="text-end fw-bold">' + b.stok + ' <span class="small fw-normal text-muted">' + escapeHtml(b.satuan) + '</span></td>' +
+                            '<td class="text-end">Rp ' + formatNumber(b.harga_jual) + '</td>' +
+                            '<td class="text-center">' +
+                                '<button type="button" class="btn btn-primary btn-sm px-3 select-katalog-item" data-id="' + b.id_inventori + '">' +
+                                    'Pilih' +
+                                '</button>' +
+                            '</td>' +
+                            '</tr>'
+                        );
+                    });
+                }
+
+                $('#modal_page_info').text('Halaman ' + currentKatalogPage + ' dari ' + totalPages);
+                const paginationUl = $('#modal_pagination');
+                paginationUl.empty();
+
+                if (totalPages > 1) {
+                    paginationUl.append('<li class="page-item ' + (currentKatalogPage === 1 ? 'disabled' : '') + '">' +
+                        '<a class="page-link" href="#" data-page="' + (currentKatalogPage - 1) + '">Previous</a></li>');
+
+                    for (let p = 1; p <= totalPages; p++) {
+                        paginationUl.append('<li class="page-item ' + (p === currentKatalogPage ? 'active' : '') + '">' +
+                            '<a class="page-link" href="#" data-page="' + p + '">' + p + '</a></li>');
+                    }
+
+                    paginationUl.append('<li class="page-item ' + (currentKatalogPage === totalPages ? 'disabled' : '') + '">' +
+                        '<a class="page-link" href="#" data-page="' + (currentKatalogPage + 1) + '">Next</a></li>');
+                    $('#modal_pagination_wrapper').removeClass('d-none');
+                } else {
+                    $('#modal_pagination_wrapper').addClass('d-none');
+                }
+            }
+
+            $('#modal_search_input').on('keyup input', function () {
+                currentKatalogPage = 1;
+                renderKatalogTable();
+            });
+
+            $(document).on('click', '#modal_pagination .page-link', function (e) {
+                e.preventDefault();
+                const page = parseInt($(this).data('page'));
+                if (page && page !== currentKatalogPage) {
+                    currentKatalogPage = page;
+                    renderKatalogTable();
+                }
+            });
+
+            $(document).on('click', '.select-katalog-item', function () {
+                const id = $(this).data('id');
+                const allBarang = DB.getBarang();
+                const item = allBarang.find(b => b.id_inventori === id);
+                if (item) {
+                    selectProduct(item);
+                    const modalEl = document.getElementById('modalKatalogBarang');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    if ($('#jumlah').length) $('#jumlah').focus();
+                    if ($('#jumlah_masuk').length) $('#jumlah_masuk').focus();
+                }
+            });
+
+            $('#modalKatalogBarang').on('show.bs.modal', function () {
+                $('#modal_search_input').val('');
+                currentKatalogPage = 1;
+                renderKatalogTable();
             });
 
             // ==========================================
@@ -882,6 +993,57 @@
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Katalog Data Barang (Tahap 1 Search + Pagination 10 Items) -->
+    <div class="modal fade" id="modalKatalogBarang" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-boxes-stacked me-2"></i>Katalog Data Barang</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" class="form-control" id="modal_search_input" placeholder="Cari berdasarkan kode atau nama barang...">
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end align-self-center">
+                            <span class="text-muted small fw-semibold" id="modal_total_items">Total: 0 Barang</span>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle mb-2">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;" class="text-center">No</th>
+                                    <th style="width: 120px;">Kode</th>
+                                    <th>Nama Barang</th>
+                                    <th>Kategori</th>
+                                    <th class="text-end" style="width: 100px;">Stok</th>
+                                    <th class="text-end" style="width: 130px;">Harga Jual</th>
+                                    <th class="text-center" style="width: 90px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal_katalog_tbody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3" id="modal_pagination_wrapper">
+                        <span class="small text-muted" id="modal_page_info">Halaman 1 dari 1</span>
+                        <ul class="pagination pagination-sm m-0" id="modal_pagination">
+                            <!-- Loaded dynamically -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>

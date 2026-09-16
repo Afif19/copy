@@ -92,7 +92,7 @@
                     </button>
                     
                     <h5 class="m-0 text-dark fw-semibold d-none d-sm-inline-block">
-                        Laporan Stok & Penjualan
+                        Laporan Toko Bangunan
                     </h5>
                     
                     <div class="ms-auto d-flex align-items-center">
@@ -125,8 +125,8 @@
                 <!-- Title and Navigation -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h4 class="fw-bold text-dark mb-1">Laporan Stok & Penjualan</h4>
-                        <p class="text-muted small mb-0">Lihat analisis omset penjualan harian/bulanan/tahunan serta status ketersediaan barang.</p>
+                        <h4 class="fw-bold text-dark mb-1">Laporan Toko Bangunan</h4>
+                        <p class="text-muted small mb-0">Analisis Penjualan, Pembelian, Hutang Supplier, Piutang Pelanggan & Stok Barang.</p>
                     </div>
                 </div>
 
@@ -135,6 +135,21 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-semibold" id="sales-report-tab" data-bs-toggle="tab" data-bs-target="#sales-report" type="button" role="tab" aria-controls="sales-report" aria-selected="true">
                             <i class="fa-solid fa-chart-bar me-1"></i> Laporan Penjualan
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="purchase-report-tab" data-bs-toggle="tab" data-bs-target="#purchase-report" type="button" role="tab" aria-controls="purchase-report" aria-selected="false">
+                            <i class="fa-solid fa-cart-shopping me-1"></i> Laporan Pembelian
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="debt-report-tab" data-bs-toggle="tab" data-bs-target="#debt-report" type="button" role="tab" aria-controls="debt-report" aria-selected="false">
+                            <i class="fa-solid fa-hand-holding-dollar me-1"></i> Hutang Supplier
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="receivable-report-tab" data-bs-toggle="tab" data-bs-target="#receivable-report" type="button" role="tab" aria-controls="receivable-report" aria-selected="false">
+                            <i class="fa-solid fa-file-invoice-dollar me-1"></i> Piutang Pelanggan
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -147,7 +162,6 @@
                 <div class="tab-content" id="reportTabContent">
                     <!-- TAB 1: SALES REPORT -->
                     <div class="tab-pane fade show active" id="sales-report" role="tabpanel" aria-labelledby="sales-report-tab">
-                        <!-- Filters panel -->
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-body p-4">
                                 <form id="salesFilterForm" class="row g-3 align-items-end">
@@ -159,27 +173,26 @@
                                             <option value="tahunan">Tahunan</option>
                                         </select>
                                     </div>
-
-                                    <!-- Dynamic Input: Harian -->
                                     <div class="col-md-4 filter-input-wrapper" id="wrapper-harian">
-                                        <label for="tanggal" class="form-label fw-medium">Pilih Tanggal</label>
-                                        <input type="date" class="form-control" name="tanggal" id="tanggal">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label for="tanggal_mulai" class="form-label fw-medium">Tanggal Mulai</label>
+                                                <input type="date" class="form-control" name="tanggal_mulai" id="tanggal_mulai">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="tanggal_akhir" class="form-label fw-medium">Tanggal Akhir</label>
+                                                <input type="date" class="form-control" name="tanggal_akhir" id="tanggal_akhir">
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <!-- Dynamic Input: Bulanan -->
                                     <div class="col-md-4 filter-input-wrapper d-none" id="wrapper-bulanan">
                                         <label for="bulan" class="form-label fw-medium">Pilih Bulan & Tahun</label>
                                         <input type="month" class="form-control" name="bulan" id="bulan">
                                     </div>
-
-                                    <!-- Dynamic Input: Tahunan -->
                                     <div class="col-md-4 filter-input-wrapper d-none" id="wrapper-tahunan">
                                         <label for="tahun" class="form-label fw-medium">Pilih Tahun</label>
-                                        <select class="form-select" name="tahun" id="tahun">
-                                            <!-- Loaded dynamically -->
-                                        </select>
+                                        <select class="form-select" name="tahun" id="tahun"></select>
                                     </div>
-
                                     <div class="col-md-5 d-flex gap-2">
                                         <button type="submit" class="btn btn-primary px-4 w-100 fw-semibold">
                                             <i class="fa-solid fa-filter me-1"></i> Terapkan Filter
@@ -192,7 +205,6 @@
                             </div>
                         </div>
 
-                        <!-- Metrics cards -->
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <div class="stat-card border-start border-primary border-4 py-3.5">
@@ -208,7 +220,6 @@
                             </div>
                         </div>
 
-                        <!-- Sales details table card -->
                         <div class="card card-table">
                             <div class="card-header bg-white border-bottom py-3">
                                 <h6 class="fw-bold text-dark m-0">Laporan Rincian Barang Terjual</h6>
@@ -225,18 +236,200 @@
                                                 <th class="text-end">Jumlah</th>
                                                 <th class="text-end">Harga Jual</th>
                                                 <th class="text-end">Total Penjualan</th>
+                                                <th class="text-center">Metode Bayar</th>
+                                                <th class="text-center">Status</th>
+                                                <th>Jatuh Tempo</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="sales-report-tbody">
-                                            <!-- Loaded dynamically -->
-                                        </tbody>
+                                        <tbody id="sales-report-tbody"></tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TAB 2: STOCK REPORT -->
+                    <!-- TAB 2: PURCHASE REPORT -->
+                    <div class="tab-pane fade" id="purchase-report" role="tabpanel" aria-labelledby="purchase-report-tab">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <form id="purchaseFilterForm" class="row g-3 align-items-end">
+                                    <div class="col-md-3">
+                                        <label for="purchase_filter_type" class="form-label fw-medium">Tipe Filter</label>
+                                        <select class="form-select" name="purchase_filter_type" id="purchase_filter_type">
+                                            <option value="harian">Harian</option>
+                                            <option value="bulanan">Bulanan</option>
+                                            <option value="tahunan">Tahunan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 purchase-filter-wrapper" id="p-wrapper-harian">
+                                        <label for="p_tanggal" class="form-label fw-medium">Pilih Tanggal</label>
+                                        <input type="date" class="form-control" id="p_tanggal">
+                                    </div>
+                                    <div class="col-md-4 purchase-filter-wrapper d-none" id="p-wrapper-bulanan">
+                                        <label for="p_bulan" class="form-label fw-medium">Pilih Bulan & Tahun</label>
+                                        <input type="month" class="form-control" id="p_bulan">
+                                    </div>
+                                    <div class="col-md-4 purchase-filter-wrapper d-none" id="p-wrapper-tahunan">
+                                        <label for="p_tahun" class="form-label fw-medium">Pilih Tahun</label>
+                                        <select class="form-select" id="p_tahun"></select>
+                                    </div>
+                                    <div class="col-md-5 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary px-4 w-100 fw-semibold">
+                                            <i class="fa-solid fa-filter me-1"></i> Terapkan Filter
+                                        </button>
+                                        <button type="button" id="btnExportPembelian" class="btn btn-success px-4 w-100 fw-semibold">
+                                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-danger border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Pengeluaran Pembelian</span>
+                                    <h3 class="fw-bold text-danger mb-0" id="purchase-total-amount">Rp 0</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-info border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Transaksi Pembelian</span>
+                                    <h3 class="fw-bold text-info mb-0" id="purchase-total-tx">0 Transaksi</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-table">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="fw-bold text-dark m-0">Laporan Rincian Barang Masuk / Pembelian</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="purchase-report-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No</th>
+                                                <th>No Pembelian</th>
+                                                <th>Tanggal</th>
+                                                <th>Supplier</th>
+                                                <th>No Faktur</th>
+                                                <th class="text-end">Total</th>
+                                                <th class="text-center">Metode Bayar</th>
+                                                <th class="text-center">Status</th>
+                                                <th>Jatuh Tempo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="purchase-report-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: DEBT REPORT (HUTANG SUPPLIER) -->
+                    <div class="tab-pane fade" id="debt-report" role="tabpanel" aria-labelledby="debt-report-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">Hutang Supplier (Pembelian Tempo)</h5>
+                                <p class="text-muted small mb-0">Daftar kewajiban hutang toko ke supplier yang belum lunas.</p>
+                            </div>
+                            <button type="button" id="btnExportHutang" class="btn btn-success px-4 fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                            </button>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-warning border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Sisa Hutang Aktif</span>
+                                    <h3 class="fw-bold text-warning mb-0" id="debt-total-amount">Rp 0</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-secondary border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Nota Belum Lunas</span>
+                                    <h3 class="fw-bold text-secondary mb-0" id="debt-total-tx">0 Nota</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-table">
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="debt-report-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No</th>
+                                                <th>No Pembelian</th>
+                                                <th>Tanggal</th>
+                                                <th>Supplier</th>
+                                                <th class="text-end">Total Nota</th>
+                                                <th class="text-end">Sudah Dibayar</th>
+                                                <th class="text-end">Sisa Hutang</th>
+                                                <th class="text-center">Jatuh Tempo</th>
+                                                <th class="text-center" style="width: 120px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="debt-report-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: RECEIVABLE REPORT (PIUTANG PELANGGAN) -->
+                    <div class="tab-pane fade" id="receivable-report" role="tabpanel" aria-labelledby="receivable-report-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">Piutang Pelanggan (Penjualan Tempo)</h5>
+                                <p class="text-muted small mb-0">Daftar tagihan piutang toko ke pelanggan yang belum lunas.</p>
+                            </div>
+                            <button type="button" id="btnExportPiutang" class="btn btn-success px-4 fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                            </button>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-info border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Sisa Piutang Aktif</span>
+                                    <h3 class="fw-bold text-info mb-0" id="receivable-total-amount">Rp 0</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-dark border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Nota Belum Lunas</span>
+                                    <h3 class="fw-bold text-dark mb-0" id="receivable-total-tx">0 Nota</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-table">
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle w-100" id="receivable-report-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No</th>
+                                                <th>No Penjualan</th>
+                                                <th>Tanggal</th>
+                                                <th>Pelanggan</th>
+                                                <th class="text-end">Total Nota</th>
+                                                <th class="text-end">Sudah Dibayar</th>
+                                                <th class="text-end">Sisa Piutang</th>
+                                                <th class="text-center">Jatuh Tempo</th>
+                                                <th class="text-center" style="width: 120px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="receivable-report-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: STOCK REPORT -->
                     <div class="tab-pane fade" id="stock-report" role="tabpanel" aria-labelledby="stock-report-tab">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -248,7 +441,6 @@
                             </button>
                         </div>
 
-                        <!-- Stock table card -->
                         <div class="card card-table">
                             <div class="card-body p-4">
                                 <div class="table-responsive">
@@ -263,14 +455,192 @@
                                                 <th style="width: 150px; text-align: center;">Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="stock-report-tbody">
-                                            <!-- Loaded dynamically -->
-                                        </tbody>
+                                        <tbody id="stock-report-tbody"></tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bayar Hutang -->
+    <div class="modal fade" id="modalBayarHutang" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Pembayaran Hutang Supplier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formBayarHutang">
+                    <div class="modal-body">
+                        <input type="hidden" id="bayar_no_pembelian">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">No Pembelian</label>
+                            <input type="text" class="form-control" id="display_bayar_no_pembelian" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Supplier</label>
+                            <input type="text" class="form-control" id="display_bayar_supplier" readonly>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-muted small">Total Nota</label>
+                                <input type="text" class="form-control" id="display_bayar_total_nota" readonly>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-muted small">Sisa Hutang</label>
+                                <input type="text" class="form-control fw-bold text-danger" id="display_bayar_sisa_hutang" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tanggal Pembayaran</label>
+                            <input type="date" class="form-control" id="bayar_tanggal_hutang" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Jumlah Pembayaran (Rp)</label>
+                            <input type="number" class="form-control" id="bayar_jumlah_hutang" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Metode Pembayaran</label>
+                            <select class="form-select" id="bayar_metode_hutang">
+                                <option value="Tunai">Tunai</option>
+                                <option value="Transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Keterangan / Catatan</label>
+                            <input type="text" class="form-control" id="bayar_keterangan_hutang" placeholder="Opsional">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary fw-semibold">Simpan Pembayaran</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat Hutang -->
+    <div class="modal fade" id="modalRiwayatHutang" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Riwayat Pembayaran Hutang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="riwayat_hutang_info" class="mb-3 p-3 bg-light rounded"></div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Metode</th>
+                                    <th class="text-end">Jumlah Pembayaran</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riwayat_hutang_tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bayar Piutang -->
+    <div class="modal fade" id="modalBayarPiutang" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Pembayaran Piutang Pelanggan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formBayarPiutang">
+                    <div class="modal-body">
+                        <input type="hidden" id="bayar_no_penjualan">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">No Penjualan</label>
+                            <input type="text" class="form-control" id="display_bayar_no_penjualan" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Pelanggan</label>
+                            <input type="text" class="form-control" id="display_bayar_pelanggan" readonly>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-muted small">Total Nota</label>
+                                <input type="text" class="form-control" id="display_bayar_total_nota_p" readonly>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-muted small">Sisa Piutang</label>
+                                <input type="text" class="form-control fw-bold text-info" id="display_bayar_sisa_piutang" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tanggal Pembayaran</label>
+                            <input type="date" class="form-control" id="bayar_tanggal_piutang" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Jumlah Pembayaran (Rp)</label>
+                            <input type="number" class="form-control" id="bayar_jumlah_piutang" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Metode Pembayaran</label>
+                            <select class="form-select" id="bayar_metode_piutang">
+                                <option value="Tunai">Tunai</option>
+                                <option value="Transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Keterangan / Catatan</label>
+                            <input type="text" class="form-control" id="bayar_keterangan_piutang" placeholder="Opsional">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary fw-semibold">Simpan Pembayaran</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat Piutang -->
+    <div class="modal fade" id="modalRiwayatPiutang" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Riwayat Pembayaran Piutang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="riwayat_piutang_info" class="mb-3 p-3 bg-light rounded"></div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Metode</th>
+                                    <th class="text-end">Jumlah Pembayaran</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riwayat_piutang_tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -282,102 +652,179 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        // FUNGSI: Instance variabel global untuk menampung instansi library DataTables.
-        // DETAIL: Digunakan untuk mempermudah penghancuran (destroy) instansi tabel lama saat memuat data baru / memfilter.
         let salesTableInstance = null;
+        let purchaseTableInstance = null;
+        let debtTableInstance = null;
+        let receivableTableInstance = null;
         let stockTableInstance = null;
 
-        // FUNGSI: Jalankan seluruh inisialisasi setelah seluruh DOM (Document Object Model) selesai dimuat.
-        // DETAIL: Mengatur state filter default dari parameter URL, memicu inisialisasi dropdown tahun, memicu pemuatan data laporan, dan meregister event listener.
         $(document).ready(function () {
-            // FUNGSI: Mengambil nama admin dari sessionStorage/localStorage dan menampilkan di navbar.
-            // DETAIL: Menggunakan nilai default 'Admin' jika tidak ditemukan username di storage sesi/lokal.
             const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'Admin';
             $('#logged-username').text(username);
             $('#logged-username-mobile').text('Hi, ' + username);
 
-            // FUNGSI: Mengatur aksi collapse/toggle sidebar navigation menu.
-            // DETAIL: Menambahkan atau menghapus kelas 'active' pada elemen sidebar dan container utama halaman.
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
             });
 
-            // FUNGSI: Membuka opsi dropdown pemilih tahun untuk filter laporan tahunan.
-            // DETAIL: Mengisi dropdown '#tahun' dengan tahun saat ini mundur hingga 10 tahun ke belakang.
             const currentYear = new Date().getFullYear();
             const yearSelect = $('#tahun');
+            const pYearSelect = $('#p_tahun');
             yearSelect.empty();
+            pYearSelect.empty();
             for (let y = currentYear; y >= currentYear - 9; y--) {
-                yearSelect.append(`<option value="${y}">${y}</option>`);
+                yearSelect.append('<option value="' + y + '">' + y + '</option>');
+                pYearSelect.append('<option value="' + y + '">' + y + '</option>');
             }
 
-            // FUNGSI: Sinkronisasi dan pemulihan nilai parameter filter laporan dari URL query string.
-            // DETAIL: Mencegah hilangnya state filter yang dipilih saat halaman memicu reload/refresh.
-            //         Jika parameter kosong di URL, maka default harian (hari ini) akan digunakan.
             const urlParams = new URLSearchParams(window.location.search);
             const filterType = urlParams.get('filter_type') || 'harian';
-            const filterTanggal = urlParams.get('tanggal') || new Date().toISOString().split('T')[0];
+            const todayStr = new Date().toISOString().split('T')[0];
+            const filterTanggalMulai = urlParams.get('tanggal_mulai') || urlParams.get('tanggal') || todayStr;
+            const filterTanggalAkhir = urlParams.get('tanggal_akhir') || urlParams.get('tanggal') || todayStr;
+            const filterTanggal = urlParams.get('p_tanggal') || urlParams.get('tanggal') || todayStr;
             const filterBulan = urlParams.get('bulan') || new Date().toISOString().substring(0, 7);
             const filterTahun = parseInt(urlParams.get('tahun')) || currentYear;
 
-            // FUNGSI: Mengisi nilai default input form filter berdasarkan parameter URL di atas.
             $('#filter_type').val(filterType);
-            $('#tanggal').val(filterTanggal);
+            $('#tanggal_mulai').val(filterTanggalMulai);
+            $('#tanggal_akhir').val(filterTanggalAkhir);
             $('#bulan').val(filterBulan);
             $('#tahun').val(filterTahun);
 
-            // FUNGSI: Menampilkan input filter yang sesuai pada load awal.
-            toggleFilterInputs(filterType);
+            $('#purchase_filter_type').val(filterType);
+            $('#p_tanggal').val(filterTanggal);
+            $('#p_bulan').val(filterBulan);
+            $('#p_tahun').val(filterTahun);
 
-            // FUNGSI: Mengubah tampilan input dinamis ketika tipe filter diubah oleh pengguna.
-            // DETAIL: Memanggil toggleFilterInputs dengan tipe filter yang baru dipilih (harian/bulanan/tahunan).
+            toggleFilterInputs(filterType);
+            togglePurchaseFilterInputs(filterType);
+
             $('#filter_type').on('change', function () {
                 toggleFilterInputs($(this).val());
             });
 
-            // FUNGSI: Menangani event submit form filter penjualan.
-            // DETAIL: Menghentikan aksi submit form default, menyusun parameter query URL baru, 
-            //         lalu memicu reload halaman menggunakan search query yang baru agar state terjaga.
+            $('#purchase_filter_type').on('change', function () {
+                togglePurchaseFilterInputs($(this).val());
+            });
+
             $('#salesFilterForm').on('submit', function (e) {
                 e.preventDefault();
                 const type = $('#filter_type').val();
-                const date = $('#tanggal').val();
+                const startDate = $('#tanggal_mulai').val();
+                const endDate = $('#tanggal_akhir').val();
                 const month = $('#bulan').val();
                 const year = $('#tahun').val();
-                
-                // Menyusun parameter query baru untuk URL
-                const searchParams = new URLSearchParams();
-                searchParams.set('filter_type', type);
-                if (type === 'harian') searchParams.set('tanggal', date);
-                if (type === 'bulanan') searchParams.set('bulan', month);
-                if (type === 'tahunan') searchParams.set('tahun', year);
-                
-                // Mengalihkan halaman dengan query parameter baru yang memicu reload
-                window.location.search = searchParams.toString();
+
+                if (type === 'harian') {
+                    if (startDate && endDate && startDate > endDate) {
+                        alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                        return;
+                    }
+                }
+
+                loadSalesReport(type, startDate, endDate, month, year);
             });
 
-            // FUNGSI: Memuat data awal untuk Laporan Rincian Penjualan dan Laporan Stok Barang.
-            // DETAIL: Mengambil data terfilter dari database localStorage untuk disajikan ke tabel HTML.
-            loadSalesReport(filterType, filterTanggal, filterBulan, filterTahun);
+            $('#purchaseFilterForm').on('submit', function (e) {
+                e.preventDefault();
+                const type = $('#purchase_filter_type').val();
+                const date = $('#p_tanggal').val();
+                const month = $('#p_bulan').val();
+                const year = $('#p_tahun').val();
+                loadPurchaseReport(type, date, month, year);
+            });
+
+            loadSalesReport(filterType, filterTanggalMulai, filterTanggalAkhir, filterBulan, filterTahun);
+            loadPurchaseReport(filterType, filterTanggal, filterBulan, filterTahun);
+            loadDebtReport();
+            loadReceivableReport();
             loadStockReport();
 
-            // FUNGSI: Menangani event click untuk tombol Export Penjualan ke Excel.
-            // DETAIL: Memanggil fungsi exportSalesToExcel dengan parameter filter aktif untuk menghasilkan berkas unduhan spreadsheet.
             $('#btnExportPenjualan').on('click', function () {
-                exportSalesToExcel(filterType, filterTanggal, filterBulan, filterTahun);
+                const startDate = $('#tanggal_mulai').val();
+                const endDate = $('#tanggal_akhir').val();
+                if ($('#filter_type').val() === 'harian' && startDate && endDate && startDate > endDate) {
+                    alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                    return;
+                }
+                exportSalesToExcel($('#filter_type').val(), startDate, endDate, $('#bulan').val(), $('#tahun').val());
             });
 
-            // FUNGSI: Menangani event click untuk tombol Export Laporan Stok ke Excel.
-            // DETAIL: Memanggil fungsi exportStockToExcel untuk menghasilkan berkas unduhan inventori saat ini.
+            $('#btnExportPembelian').on('click', function () {
+                exportPurchaseToExcel($('#purchase_filter_type').val(), $('#p_tanggal').val(), $('#p_bulan').val(), $('#p_tahun').val());
+            });
+
+            $('#btnExportHutang').on('click', function () {
+                exportDebtToExcel();
+            });
+
+            $('#btnExportPiutang').on('click', function () {
+                exportReceivableToExcel();
+            });
+
             $('#btnExportStok').on('click', function () {
                 exportStockToExcel();
             });
+
+            $('#formBayarHutang').on('submit', function (e) {
+                e.preventDefault();
+                try {
+                    const no_pembelian = $('#bayar_no_pembelian').val();
+                    const tanggal_pembayaran = $('#bayar_tanggal_hutang').val();
+                    const jumlah_pembayaran = parseFloat($('#bayar_jumlah_hutang').val());
+                    const metode_pembayaran = $('#bayar_metode_hutang').val();
+                    const keterangan = $('#bayar_keterangan_hutang').val();
+
+                    DB.addPembayaranHutang({
+                        no_pembelian,
+                        tanggal_pembayaran,
+                        jumlah_pembayaran,
+                        metode_pembayaran,
+                        keterangan
+                    });
+
+                    alert('Pembayaran hutang berhasil disimpan!');
+                    const modalEl = document.getElementById('modalBayarHutang');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    loadDebtReport();
+                    loadPurchaseReport($('#purchase_filter_type').val(), $('#p_tanggal').val(), $('#p_bulan').val(), $('#p_tahun').val());
+                } catch (err) {
+                    alert('Gagal: ' + err.message);
+                }
+            });
+
+            $('#formBayarPiutang').on('submit', function (e) {
+                e.preventDefault();
+                try {
+                    const no_penjualan = $('#bayar_no_penjualan').val();
+                    const tanggal_pembayaran = $('#bayar_tanggal_piutang').val();
+                    const jumlah_pembayaran = parseFloat($('#bayar_jumlah_piutang').val());
+                    const metode_pembayaran = $('#bayar_metode_piutang').val();
+                    const keterangan = $('#bayar_keterangan_piutang').val();
+
+                    DB.addPembayaranPiutang({
+                        no_penjualan,
+                        tanggal_pembayaran,
+                        jumlah_pembayaran,
+                        metode_pembayaran,
+                        keterangan
+                    });
+
+                    alert('Pembayaran piutang berhasil disimpan!');
+                    const modalEl = document.getElementById('modalBayarPiutang');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    loadReceivableReport();
+                    loadSalesReport($('#filter_type').val(), $('#tanggal_mulai').val(), $('#tanggal_akhir').val(), $('#bulan').val(), $('#tahun').val());
+                } catch (err) {
+                    alert('Gagal: ' + err.message);
+                }
+            });
         });
 
-        // FUNGSI: Menyembunyikan atau menampilkan elemen masukan filter yang sesuai.
-        // PARAMETER: type (string) - Tipe filter ('harian', 'bulanan', atau 'tahunan').
-        // DETAIL: Menggunakan kelas Bootstrap 'd-none' untuk menyembunyikan input lain dan hanya memperlihatkan input yang relevan.
         function toggleFilterInputs(type) {
             $('.filter-input-wrapper').addClass('d-none');
             if (type === 'harian') $('#wrapper-harian').removeClass('d-none');
@@ -385,87 +832,230 @@
             if (type === 'tahunan') $('#wrapper-tahunan').removeClass('d-none');
         }
 
-        // FUNGSI: Memuat data transaksi penjualan, memfilternya, menghitung metrik penjualan, dan memperbarui tabel UI.
-        // PARAMETER:
-        //   - type (string): Tipe filter ('harian', 'bulanan', 'tahunan')
-        //   - dateVal (string): Nilai tanggal berformat YYYY-MM-DD
-        //   - monthVal (string): Nilai bulan berformat YYYY-MM
-        //   - yearVal (number): Nilai tahun berformat YYYY
-        // DETAIL:
-        //   - Mengambil data gabungan riwayat transaksi menggunakan DB.getSalesHistoryCombined() dari db.js.
-        //   - Menyaring data penjualan secara client-side berdasarkan parameter yang dilewatkan.
-        //   - Menghitung total omset pendapatan dan total transaksi unik.
-        //   - Melakukan render baris tabel dan menginisialisasi plugin DataTables.
-        function loadSalesReport(type, dateVal, monthVal, yearVal) {
+        function togglePurchaseFilterInputs(type) {
+            $('.purchase-filter-wrapper').addClass('d-none');
+            if (type === 'harian') $('#p-wrapper-harian').removeClass('d-none');
+            if (type === 'bulanan') $('#p-wrapper-bulanan').removeClass('d-none');
+            if (type === 'tahunan') $('#p-wrapper-tahunan').removeClass('d-none');
+        }
+
+        function loadSalesReport(type, startDateVal, endDateVal, monthVal, yearVal) {
             const allSales = DB.getSalesHistoryCombined();
             let filteredSales = [];
 
-            // Memfilter data berdasarkan opsi tipe filter terpilih
             if (type === 'harian') {
-                filteredSales = allSales.filter(s => s.tanggal === dateVal);
+                if (startDateVal && endDateVal && startDateVal > endDateVal) {
+                    alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                    return;
+                }
+                filteredSales = allSales.filter(s => {
+                    if (startDateVal && endDateVal) return s.tanggal >= startDateVal && s.tanggal <= endDateVal;
+                    if (startDateVal) return s.tanggal >= startDateVal;
+                    if (endDateVal) return s.tanggal <= endDateVal;
+                    return true;
+                });
             } else if (type === 'bulanan') {
                 filteredSales = allSales.filter(s => s.tanggal.startsWith(monthVal));
             } else if (type === 'tahunan') {
                 filteredSales = allSales.filter(s => s.tanggal.startsWith(yearVal.toString()));
             }
 
-            // Menjumlahkan total pendapatan dari seluruh subtotal item terfilter
             const totalRevenue = filteredSales.reduce((sum, s) => sum + s.subtotal, 0);
-            
-            // Mencari jumlah transaksi unik (berdasarkan ID penjualan yang unik)
             const uniqueTxIds = new Set(filteredSales.map(s => s.id_penjualan));
             const totalTransactions = uniqueTxIds.size;
 
-            // Menampilkan metrik terhitung pada widget kartu di UI
             $('#sales-total-revenue').text(formatRupiah(totalRevenue));
             $('#sales-total-tx').text(totalTransactions + ' Transaksi');
 
             const tbody = $('#sales-report-tbody');
-            // Menghancurkan instansi DataTables yang sudah ada sebelumnya sebelum mengisi ulang tabel baru
-            if (salesTableInstance) {
-                salesTableInstance.destroy();
-            }
+            if (salesTableInstance) salesTableInstance.destroy();
             tbody.empty();
 
-            // Render data terfilter ke dalam baris tabel
             filteredSales.forEach((item, index) => {
-                tbody.append(`
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><span class="small text-muted">${formatDate(item.tanggal)}</span></td>
-                        <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_pembeli)}</span></td>
-                        <td><span class="text-dark">${escapeHtml(item.nama_barang)}</span></td>
-                        <td class="text-end">${item.jumlah} <span class="small text-muted">${escapeHtml(item.satuan)}</span></td>
-                        <td class="text-end">Rp ${formatNumber(item.harga_jual)}</td>
-                        <td class="text-end fw-bold text-primary">Rp ${formatNumber(item.subtotal)}</td>
-                    </tr>
-                `);
+                const metodePembayaran = item.metode_pembayaran || 'Tunai';
+                const metodeBadge = item.metode_pembayaran === 'Tempo'
+                    ? '<span class="badge bg-warning text-dark">Tempo</span>'
+                    : (item.metode_pembayaran === 'Transfer' ? '<span class="badge bg-info text-dark">Transfer</span>' : '<span class="badge bg-secondary">Tunai</span>');
+
+                const statusBadge = item.status_pembayaran === 'Belum Lunas'
+                    ? '<span class="badge bg-danger">Belum Lunas</span>'
+                    : '<span class="badge bg-success">Lunas</span>';
+
+                const formattedDue = (item.jatuh_tempo && item.jatuh_tempo !== '-') ? formatDate(item.jatuh_tempo) : '-';
+
+                tbody.append('<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><span class="small text-muted">' + formatDate(item.tanggal) + '</span></td>' +
+                    '<td><span class="fw-semibold text-dark">' + escapeHtml(item.nama_pembeli) + '</span></td>' +
+                    '<td><span class="text-dark">' + escapeHtml(item.nama_barang) + '</span></td>' +
+                    '<td class="text-end">' + item.jumlah + ' <span class="small text-muted">' + escapeHtml(item.satuan) + '</span></td>' +
+                    '<td class="text-end">Rp ' + formatNumber(item.harga_jual) + '</td>' +
+                    '<td class="text-end fw-bold text-primary">Rp ' + formatNumber(item.subtotal) + '</td>' +
+                    '<td class="text-center">' + metodeBadge + '</td>' +
+                    '<td class="text-center">' + statusBadge + '</td>' +
+                    '<td><span class="small text-muted">' + formattedDue + '</span></td>' +
+                    '</tr>'
+                );
             });
 
-            // Menginisialisasi ulang library DataTables agar fungsi pencarian dan pagination berjalan
             salesTableInstance = $('#sales-report-table').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
-                }
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
             });
         }
 
-        // FUNGSI: Memuat data stok barang saat ini dari database lokal dan menampilkan status aman/menipis/habis.
-        // DETAIL:
-        //   - Memanggil fungsi DB.getBarang() dari db.js.
-        //   - Menghitung status stok berdasarkan nilai batas 'stok_minimum' yang didefinisikan pengguna.
-        //   - Menginisialisasi DataTables pada tabel stok.
+        function loadPurchaseReport(type, dateVal, monthVal, yearVal) {
+            const purchaseHeaders = DB.getPembelianHeaders();
+            let filtered = [];
+
+            if (type === 'harian') {
+                filtered = purchaseHeaders.filter(p => p.tanggal === dateVal);
+            } else if (type === 'bulanan') {
+                filtered = purchaseHeaders.filter(p => p.tanggal.startsWith(monthVal));
+            } else if (type === 'tahunan') {
+                filtered = purchaseHeaders.filter(p => p.tanggal.startsWith(yearVal.toString()));
+            }
+
+            const totalAmount = filtered.reduce((sum, p) => sum + (parseFloat(p.total_pembelian) || 0), 0);
+            $('#purchase-total-amount').text(formatRupiah(totalAmount));
+            $('#purchase-total-tx').text(filtered.length + ' Transaksi');
+
+            const tbody = $('#purchase-report-tbody');
+            if (purchaseTableInstance) purchaseTableInstance.destroy();
+            tbody.empty();
+
+            filtered.forEach((p, index) => {
+                const statusBadge = p.status_pembayaran === 'Belum Lunas'
+                    ? '<span class="badge bg-danger">Belum Lunas</span>'
+                    : '<span class="badge bg-success">Lunas</span>';
+
+                const metodeBadge = p.metode_pembayaran === 'Tempo'
+                    ? '<span class="badge bg-warning text-dark">Tempo</span>'
+                    : '<span class="badge bg-secondary">Tunai</span>';
+
+                const formattedDue = (p.jatuh_tempo && p.jatuh_tempo !== '-') ? formatDate(p.jatuh_tempo) : '-';
+
+                tbody.append('<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-primary">' + escapeHtml(p.no_pembelian) + '</span></td>' +
+                    '<td><span class="small text-muted">' + formatDate(p.tanggal) + '</span></td>' +
+                    '<td><span class="fw-semibold text-dark">' + escapeHtml(p.supplier) + '</span></td>' +
+                    '<td><span class="small">' + escapeHtml(p.nomor_faktur_supplier || '-') + '</span></td>' +
+                    '<td class="text-end fw-bold">Rp ' + formatNumber(p.total_pembelian) + '</td>' +
+                    '<td class="text-center">' + metodeBadge + '</td>' +
+                    '<td class="text-center">' + statusBadge + '</td>' +
+                    '<td><span class="small text-muted">' + formattedDue + '</span></td>' +
+                    '</tr>'
+                );
+            });
+
+            purchaseTableInstance = $('#purchase-report-table').DataTable({
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+            });
+        }
+
+        function loadDebtReport() {
+            const debtList = DB.getHutangSupplier();
+            const totalSisa = debtList.reduce((sum, d) => sum + d.sisa_hutang, 0);
+
+            $('#debt-total-amount').text(formatRupiah(totalSisa));
+            $('#debt-total-tx').text(debtList.length + ' Nota');
+
+            const tbody = $('#debt-report-tbody');
+            if (debtTableInstance) debtTableInstance.destroy();
+            tbody.empty();
+
+            debtList.forEach((d, index) => {
+                let tempoBadge = '<span class="badge bg-success">Belum Jatuh Tempo</span>';
+                if (d.status_jatuh_tempo === 'Sudah Lewat Jatuh Tempo') {
+                    tempoBadge = '<span class="badge bg-danger">Lewat ' + Math.abs(d.sisa_hari) + ' Hari</span>';
+                } else if (d.status_jatuh_tempo === 'Jatuh Tempo Hari Ini') {
+                    tempoBadge = '<span class="badge bg-warning text-dark">Hari Ini</span>';
+                }
+
+                tbody.append('<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-primary">' + escapeHtml(d.no_pembelian) + '</span></td>' +
+                    '<td><span class="small text-muted">' + formatDate(d.tanggal) + '</span></td>' +
+                    '<td><span class="fw-semibold text-dark">' + escapeHtml(d.supplier) + '</span></td>' +
+                    '<td class="text-end">Rp ' + formatNumber(d.total_pembelian) + '</td>' +
+                    '<td class="text-end text-success">Rp ' + formatNumber(d.total_dibayar) + '</td>' +
+                    '<td class="text-end fw-bold text-danger">Rp ' + formatNumber(d.sisa_hutang) + '</td>' +
+                    '<td class="text-center">' +
+                        '<span class="small d-block">' + formatDate(d.jatuh_tempo) + '</span>' +
+                        tempoBadge +
+                    '</td>' +
+                    '<td class="text-center">' +
+                        '<button class="btn btn-sm btn-primary me-1" onclick="openModalBayarHutang(\'' + escapeHtml(d.no_pembelian) + '\')" title="Bayar Hutang">' +
+                            '<i class="fa-solid fa-money-bill-wave"></i> Bayar' +
+                        '</button>' +
+                        '<button class="btn btn-sm btn-outline-info" onclick="openModalRiwayatHutang(\'' + escapeHtml(d.no_pembelian) + '\')" title="Riwayat Pembayaran">' +
+                            '<i class="fa-solid fa-clock-rotate-left"></i>' +
+                        '</button>' +
+                    '</td>' +
+                    '</tr>'
+                );
+            });
+
+            debtTableInstance = $('#debt-report-table').DataTable({
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+            });
+        }
+
+        function loadReceivableReport() {
+            const list = DB.getPiutangPelanggan();
+            const totalSisa = list.reduce((sum, r) => sum + r.sisa_piutang, 0);
+
+            $('#receivable-total-amount').text(formatRupiah(totalSisa));
+            $('#receivable-total-tx').text(list.length + ' Nota');
+
+            const tbody = $('#receivable-report-tbody');
+            if (receivableTableInstance) receivableTableInstance.destroy();
+            tbody.empty();
+
+            list.forEach((r, index) => {
+                let tempoBadge = '<span class="badge bg-success">Belum Jatuh Tempo</span>';
+                if (r.status_jatuh_tempo === 'Sudah Lewat Jatuh Tempo') {
+                    tempoBadge = '<span class="badge bg-danger">Lewat ' + Math.abs(r.sisa_hari) + ' Hari</span>';
+                } else if (r.status_jatuh_tempo === 'Jatuh Tempo Hari Ini') {
+                    tempoBadge = '<span class="badge bg-warning text-dark">Hari Ini</span>';
+                }
+
+                tbody.append('<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-primary">' + escapeHtml(r.no_penjualan) + '</span></td>' +
+                    '<td><span class="small text-muted">' + formatDate(r.tanggal) + '</span></td>' +
+                    '<td><span class="fw-semibold text-dark">' + escapeHtml(r.pelanggan) + '</span></td>' +
+                    '<td class="text-end">Rp ' + formatNumber(r.total_penjualan) + '</td>' +
+                    '<td class="text-end text-success">Rp ' + formatNumber(r.total_dibayar) + '</td>' +
+                    '<td class="text-end fw-bold text-info">Rp ' + formatNumber(r.sisa_piutang) + '</td>' +
+                    '<td class="text-center">' +
+                        '<span class="small d-block">' + formatDate(r.jatuh_tempo) + '</span>' +
+                        tempoBadge +
+                    '</td>' +
+                    '<td class="text-center">' +
+                        '<button class="btn btn-sm btn-success me-1" onclick="openModalBayarPiutang(\'' + escapeHtml(r.no_penjualan) + '\')" title="Terima Pembayaran">' +
+                            '<i class="fa-solid fa-money-bill-wave"></i> Bayar' +
+                        '</button>' +
+                        '<button class="btn btn-sm btn-outline-info" onclick="openModalRiwayatPiutang(\'' + escapeHtml(r.no_penjualan) + '\')" title="Riwayat Pembayaran">' +
+                            '<i class="fa-solid fa-clock-rotate-left"></i>' +
+                        '</button>' +
+                    '</td>' +
+                    '</tr>'
+                );
+            });
+
+            receivableTableInstance = $('#receivable-report-table').DataTable({
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+            });
+        }
+
         function loadStockReport() {
             const barangList = DB.getBarang();
             const tbody = $('#stock-report-tbody');
 
-            // Menghancurkan instansi tabel stok yang lama sebelum rendering data baru
-            if (stockTableInstance) {
-                stockTableInstance.destroy();
-            }
+            if (stockTableInstance) stockTableInstance.destroy();
             tbody.empty();
 
-            // Render baris tabel barang beserta status level ketersediaannya
             barangList.forEach((b, index) => {
                 let badge = '';
                 if (b.stok === 0) {
@@ -476,43 +1066,143 @@
                     badge = '<span class="badge bg-success">Aman</span>';
                 }
 
-                tbody.append(`
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang)}</span></td>
-                        <td>${escapeHtml(b.nama_kategori)}</td>
-                        <td class="text-end fw-bold">${b.stok} <span class="small text-muted fw-normal">${escapeHtml(b.satuan)}</span></td>
-                        <td class="text-end">${b.stok_minimum}</td>
-                        <td class="text-center">${badge}</td>
-                    </tr>
-                `);
+                tbody.append('<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-dark">' + escapeHtml(b.nama_barang) + '</span></td>' +
+                    '<td>' + escapeHtml(b.nama_kategori) + '</td>' +
+                    '<td class="text-end fw-bold">' + b.stok + ' <span class="small text-muted fw-normal">' + escapeHtml(b.satuan) + '</span></td>' +
+                    '<td class="text-end">' + b.stok_minimum + '</td>' +
+                    '<td class="text-center">' + badge + '</td>' +
+                    '</tr>'
+                );
             });
 
-            // Menginisialisasi plugin DataTables dengan lokalisasi Bahasa Indonesia
             stockTableInstance = $('#stock-report-table').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
-                }
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
             });
         }
 
-        // FUNGSI: Membuat berkas Excel (.xls) berisi laporan rincian transaksi penjualan terfilter secara lokal/offline.
-        // PARAMETER:
-        //   - type (string): Tipe filter aktif
-        //   - dateVal, monthVal, yearVal (string/number): Parameter filter aktif
-        // DETAIL:
-        //   - Menyusun dokumen HTML bergaya spreadsheet dengan warna dan gridborder.
-        //   - Menyaring data penjualan secara manual di sisi client.
-        //   - Memanggil fungsi utilitas DB.exportToExcel() di db.js untuk mengunduh file spreadsheet langsung ke browser.
-        function exportSalesToExcel(type, dateVal, monthVal, yearVal) {
+        function openModalBayarHutang(no_pembelian) {
+            const list = DB.getHutangSupplier();
+            const d = list.find(x => x.no_pembelian === no_pembelian);
+            if (!d) return alert('Data hutang tidak ditemukan!');
+
+            $('#bayar_no_pembelian').val(d.no_pembelian);
+            $('#display_bayar_no_pembelian').val(d.no_pembelian);
+            $('#display_bayar_supplier').val(d.supplier);
+            $('#display_bayar_total_nota').val(formatRupiah(d.total_pembelian));
+            $('#display_bayar_sisa_hutang').val(formatRupiah(d.sisa_hutang));
+            $('#bayar_tanggal_hutang').val(new Date().toISOString().split('T')[0]);
+            $('#bayar_jumlah_hutang').val(d.sisa_hutang);
+            $('#bayar_keterangan_hutang').val('');
+
+            const modal = new bootstrap.Modal(document.getElementById('modalBayarHutang'));
+            modal.show();
+        }
+
+        function openModalRiwayatHutang(no_pembelian) {
+            const purchases = DB.getTable('pembelian');
+            const p = purchases.find(x => x.no_pembelian === no_pembelian);
+            const history = DB.getHistoriPembayaranHutang(no_pembelian);
+
+            $('#riwayat_hutang_info').html(
+                '<strong>No Pembelian:</strong> ' + escapeHtml(no_pembelian) + ' | ' +
+                '<strong>Total Nota:</strong> Rp ' + formatNumber(p ? p.total_pembelian : 0) + ' | ' +
+                '<strong>Sisa Hutang:</strong> Rp ' + formatNumber(DB.getSisaHutang(no_pembelian))
+            );
+
+            const tbody = $('#riwayat_hutang_tbody');
+            tbody.empty();
+
+            if (history.length === 0) {
+                tbody.append('<tr><td colspan="5" class="text-center text-muted">Belum ada riwayat pembayaran.</td></tr>');
+            } else {
+                history.forEach((h, index) => {
+                    tbody.append('<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + formatDate(h.tanggal_pembayaran) + '</td>' +
+                        '<td><span class="badge bg-secondary">' + escapeHtml(h.metode_pembayaran || 'Tunai') + '</span></td>' +
+                        '<td class="text-end fw-bold text-success">Rp ' + formatNumber(h.jumlah_pembayaran) + '</td>' +
+                        '<td>' + escapeHtml(h.keterangan || '-') + '</td>' +
+                        '</tr>'
+                    );
+                });
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalRiwayatHutang'));
+            modal.show();
+        }
+
+        function openModalBayarPiutang(no_penjualan) {
+            const list = DB.getPiutangPelanggan();
+            const r = list.find(x => x.no_penjualan === no_penjualan);
+            if (!r) return alert('Data piutang tidak ditemukan!');
+
+            $('#bayar_no_penjualan').val(r.no_penjualan);
+            $('#display_bayar_no_penjualan').val(r.no_penjualan);
+            $('#display_bayar_pelanggan').val(r.pelanggan);
+            $('#display_bayar_total_nota_p').val(formatRupiah(r.total_penjualan));
+            $('#display_bayar_sisa_piutang').val(formatRupiah(r.sisa_piutang));
+            $('#bayar_tanggal_piutang').val(new Date().toISOString().split('T')[0]);
+            $('#bayar_jumlah_piutang').val(r.sisa_piutang);
+            $('#bayar_keterangan_piutang').val('');
+
+            const modal = new bootstrap.Modal(document.getElementById('modalBayarPiutang'));
+            modal.show();
+        }
+
+        function openModalRiwayatPiutang(no_penjualan) {
+            const sales = DB.getTable('penjualan');
+            const s = sales.find(x => x.no_penjualan === no_penjualan);
+            const history = DB.getHistoriPembayaranPiutang(no_penjualan);
+
+            $('#riwayat_piutang_info').html(
+                '<strong>No Penjualan:</strong> ' + escapeHtml(no_penjualan) + ' | ' +
+                '<strong>Total Nota:</strong> Rp ' + formatNumber(s ? s.total_penjualan : 0) + ' | ' +
+                '<strong>Sisa Piutang:</strong> Rp ' + formatNumber(DB.getSisaPiutang(no_penjualan))
+            );
+
+            const tbody = $('#riwayat_piutang_tbody');
+            tbody.empty();
+
+            if (history.length === 0) {
+                tbody.append('<tr><td colspan="5" class="text-center text-muted">Belum ada riwayat pembayaran.</td></tr>');
+            } else {
+                history.forEach((h, index) => {
+                    tbody.append('<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + formatDate(h.tanggal_pembayaran) + '</td>' +
+                        '<td><span class="badge bg-secondary">' + escapeHtml(h.metode_pembayaran || 'Tunai') + '</span></td>' +
+                        '<td class="text-end fw-bold text-success">Rp ' + formatNumber(h.jumlah_pembayaran) + '</td>' +
+                        '<td>' + escapeHtml(h.keterangan || '-') + '</td>' +
+                        '</tr>'
+                    );
+                });
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalRiwayatPiutang'));
+            modal.show();
+        }
+
+        function exportSalesToExcel(type, startDateVal, endDateVal, monthVal, yearVal) {
             const allSales = DB.getSalesHistoryCombined();
             let filteredSales = [];
             let filterTitle = "";
 
-            // Memfilter data dan menyusun judul periode laporan berdasarkan filter aktif
             if (type === 'harian') {
-                filteredSales = allSales.filter(s => s.tanggal === dateVal);
-                filterTitle = "Hari/Tanggal: " + formatDate(dateVal);
+                if (startDateVal && endDateVal && startDateVal > endDateVal) {
+                    alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                    return;
+                }
+                filteredSales = allSales.filter(s => {
+                    if (startDateVal && endDateVal) return s.tanggal >= startDateVal && s.tanggal <= endDateVal;
+                    if (startDateVal) return s.tanggal >= startDateVal;
+                    if (endDateVal) return s.tanggal <= endDateVal;
+                    return true;
+                });
+                filterTitle = (startDateVal === endDateVal || !endDateVal) 
+                    ? "Hari/Tanggal: " + formatDate(startDateVal) 
+                    : "Periode: " + formatDate(startDateVal) + " s/d " + formatDate(endDateVal);
             } else if (type === 'bulanan') {
                 filteredSales = allSales.filter(s => s.tanggal.startsWith(monthVal));
                 const parts = monthVal.split('-');
@@ -529,69 +1219,236 @@
 
             let rowHtml = '';
             if (filteredSales.length === 0) {
-                rowHtml = '<tr><td colspan="7" align="center">Tidak ada data transaksi penjualan pada periode ini.</td></tr>';
+                rowHtml = '<tr><td colspan="10" align="center">Tidak ada data transaksi penjualan pada periode ini.</td></tr>';
             } else {
                 filteredSales.forEach((item, index) => {
-                    rowHtml += `
-                        <tr>
-                            <td align="center">${index + 1}</td>
-                            <td align="center">${formatDate(item.tanggal)}</td>
-                            <td>${escapeHtml(item.nama_pembeli)}</td>
-                            <td>${escapeHtml(item.nama_barang)}</td>
-                            <td align="right">${item.jumlah} ${escapeHtml(item.satuan)}</td>
-                            <td align="right">${item.harga_jual}</td>
-                            <td align="right" style="font-weight: bold; color: #1E3A8A;">${item.subtotal}</td>
-                        </tr>
-                    `;
+                    rowHtml += '<tr>' +
+                        '<td align="center">' + (index + 1) + '</td>' +
+                        '<td align="center">' + formatDate(item.tanggal) + '</td>' +
+                        '<td>' + escapeHtml(item.nama_pembeli) + '</td>' +
+                        '<td>' + escapeHtml(item.nama_barang) + '</td>' +
+                        '<td align="right">' + item.jumlah + ' ' + escapeHtml(item.satuan) + '</td>' +
+                        '<td align="right">' + item.harga_jual + '</td>' +
+                        '<td align="right" style="font-weight: bold; color: #1E3A8A;">' + item.subtotal + '</td>' +
+                        '<td align="center">' + (item.metode_pembayaran || 'Tunai') + '</td>' +
+                        '<td align="center">' + (item.status_pembayaran || 'Lunas') + '</td>' +
+                        '<td align="center">' + ((item.jatuh_tempo && item.jatuh_tempo !== '-') ? formatDate(item.jatuh_tempo) : '-') + '</td>' +
+                        '</tr>';
                 });
             }
 
             const today = new Date();
             const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
 
-            // Membuat kerangka template Excel HTML/XML dengan header bergaya biru tua (#1E3A8A)
-            const excelTemplate = `
-                <h3>LAPORAN PENJUALAN TOKO BANGUNAN</h3>
-                <h4>TB SUMBER JAYA</h4>
-                <p>${filterTitle}</p>
-                <p>Di-export pada: ${exportDate}</p>
-
-                <table border="1" cellpadding="5" cellspacing="0">
-                    <thead>
-                        <tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">
-                            <th style="width: 50px;">No</th>
-                            <th style="width: 120px;">Tanggal</th>
-                            <th style="width: 180px;">Nama Pembeli</th>
-                            <th style="width: 200px;">Nama Barang</th>
-                            <th style="width: 100px;">Jumlah</th>
-                            <th style="width: 150px;">Harga Jual</th>
-                            <th style="width: 150px;">Total Penjualan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowHtml}
-                        <tr style="background-color: #F3F4F6; font-weight: bold;">
-                            <td colspan="6" align="right">Total Pendapatan</td>
-                            <td align="right">${totalRevenue}</td>
-                        </tr>
-                        <tr style="background-color: #F3F4F6; font-weight: bold;">
-                            <td colspan="6" align="right">Total Transaksi</td>
-                            <td align="right">${totalTransactions} Transaksi</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
+            const excelTemplate =
+                '<h3>LAPORAN PENJUALAN TOKO BANGUNAN</h3>' +
+                '<h4>TB AA BAROKAH</h4>' +
+                '<p>' + filterTitle + '</p>' +
+                '<p>Di-export pada: ' + exportDate + '</p>' +
+                '<table border="1" cellpadding="5" cellspacing="0">' +
+                    '<thead>' +
+                        '<tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">' +
+                            '<th style="width: 50px;">No</th>' +
+                            '<th style="width: 120px;">Tanggal</th>' +
+                            '<th style="width: 180px;">Nama Pembeli</th>' +
+                            '<th style="width: 200px;">Nama Barang</th>' +
+                            '<th style="width: 100px;">Jumlah</th>' +
+                            '<th style="width: 150px;">Harga Jual</th>' +
+                            '<th style="width: 150px;">Total Penjualan</th>' +
+                            '<th style="width: 120px;">Metode Bayar</th>' +
+                            '<th style="width: 120px;">Status</th>' +
+                            '<th style="width: 120px;">Jatuh Tempo</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' +
+                        rowHtml +
+                        '<tr style="background-color: #F3F4F6; font-weight: bold;">' +
+                            '<td colspan="9" align="right">Total Pendapatan</td>' +
+                            '<td align="right">' + totalRevenue + '</td>' +
+                        '</tr>' +
+                        '<tr style="background-color: #F3F4F6; font-weight: bold;">' +
+                            '<td colspan="9" align="right">Total Transaksi</td>' +
+                            '<td align="right">' + totalTransactions + ' Transaksi</td>' +
+                        '</tr>' +
+                    '</tbody>' +
+                '</table>';
 
             const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
-            // Memicu download berkas excel (.xls)
-            DB.exportToExcel(excelTemplate, `Laporan_Penjualan_${timestamp}.xls`);
+            DB.exportToExcel(excelTemplate, 'Laporan_Penjualan_' + timestamp + '.xls');
         }
 
-        // FUNGSI: Membuat berkas Excel (.xls) berisi status inventori dan level stok barang secara offline.
-        // DETAIL:
-        //   - Menyusun dokumen HTML berstruktur tabel.
-        //   - Menghitung status persediaan barang ("Aman", "Menipis", "Habis") dengan warna teks yang sesuai.
-        //   - Memanggil fungsi ekspor file Excel DB.exportToExcel() di db.js.
+        function exportPurchaseToExcel(type, dateVal, monthVal, yearVal) {
+            const purchaseHeaders = DB.getPembelianHeaders();
+            let filtered = [];
+            let filterTitle = "";
+
+            if (type === 'harian') {
+                filtered = purchaseHeaders.filter(p => p.tanggal === dateVal);
+                filterTitle = "Hari/Tanggal: " + formatDate(dateVal);
+            } else if (type === 'bulanan') {
+                filtered = purchaseHeaders.filter(p => p.tanggal.startsWith(monthVal));
+                const parts = monthVal.split('-');
+                const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                filterTitle = "Bulan: " + monthNames[parseInt(parts[1]) - 1] + " " + parts[0];
+            } else if (type === 'tahunan') {
+                filtered = purchaseHeaders.filter(p => p.tanggal.startsWith(yearVal.toString()));
+                filterTitle = "Tahun: " + yearVal;
+            }
+
+            const totalAmount = filtered.reduce((sum, p) => sum + (parseFloat(p.total_pembelian) || 0), 0);
+
+            let rowHtml = '';
+            if (filtered.length === 0) {
+                rowHtml = '<tr><td colspan="8" align="center">Tidak ada data transaksi pembelian pada periode ini.</td></tr>';
+            } else {
+                filtered.forEach((p, index) => {
+                    rowHtml += '<tr>' +
+                        '<td align="center">' + (index + 1) + '</td>' +
+                        '<td align="center">' + escapeHtml(p.no_pembelian) + '</td>' +
+                        '<td align="center">' + formatDate(p.tanggal) + '</td>' +
+                        '<td>' + escapeHtml(p.supplier) + '</td>' +
+                        '<td>' + escapeHtml(p.nomor_faktur_supplier || '-') + '</td>' +
+                        '<td align="right" style="font-weight: bold;">' + p.total_pembelian + '</td>' +
+                        '<td align="center">' + (p.metode_pembayaran || 'Tunai') + '</td>' +
+                        '<td align="center">' + (p.status_pembayaran || 'Lunas') + '</td>' +
+                        '</tr>';
+                });
+            }
+
+            const today = new Date();
+            const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
+
+            const excelTemplate =
+                '<h3>LAPORAN PEMBELIAN BARANG TOKO BANGUNAN</h3>' +
+                '<h4>TB AA BAROKAH</h4>' +
+                '<p>' + filterTitle + '</p>' +
+                '<p>Di-export pada: ' + exportDate + '</p>' +
+                '<table border="1" cellpadding="5" cellspacing="0">' +
+                    '<thead>' +
+                        '<tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">' +
+                            '<th style="width: 50px;">No</th>' +
+                            '<th style="width: 140px;">No Pembelian</th>' +
+                            '<th style="width: 120px;">Tanggal</th>' +
+                            '<th style="width: 180px;">Supplier</th>' +
+                            '<th style="width: 150px;">No Faktur</th>' +
+                            '<th style="width: 150px;">Total Pembelian</th>' +
+                            '<th style="width: 120px;">Metode Bayar</th>' +
+                            '<th style="width: 120px;">Status</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' +
+                        rowHtml +
+                        '<tr style="background-color: #F3F4F6; font-weight: bold;">' +
+                            '<td colspan="7" align="right">Total Pengeluaran Pembelian</td>' +
+                            '<td align="right">' + totalAmount + '</td>' +
+                        '</tr>' +
+                    '</tbody>' +
+                '</table>';
+
+            const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            DB.exportToExcel(excelTemplate, 'Laporan_Pembelian_' + timestamp + '.xls');
+        }
+
+        function exportDebtToExcel() {
+            const list = DB.getHutangSupplier();
+            let rowHtml = '';
+
+            if (list.length === 0) {
+                rowHtml = '<tr><td colspan="8" align="center">Tidak ada hutang supplier aktif.</td></tr>';
+            } else {
+                list.forEach((d, index) => {
+                    rowHtml += '<tr>' +
+                        '<td align="center">' + (index + 1) + '</td>' +
+                        '<td align="center">' + escapeHtml(d.no_pembelian) + '</td>' +
+                        '<td align="center">' + formatDate(d.tanggal) + '</td>' +
+                        '<td>' + escapeHtml(d.supplier) + '</td>' +
+                        '<td align="right">' + d.total_pembelian + '</td>' +
+                        '<td align="right">' + d.total_dibayar + '</td>' +
+                        '<td align="right" style="font-weight: bold; color: #DC2626;">' + d.sisa_hutang + '</td>' +
+                        '<td align="center">' + formatDate(d.jatuh_tempo) + ' (' + d.status_jatuh_tempo + ')</td>' +
+                        '</tr>';
+                });
+            }
+
+            const today = new Date();
+            const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
+
+            const excelTemplate =
+                '<h3>LAPORAN HUTANG SUPPLIER TOKO BANGUNAN</h3>' +
+                '<h4>TB AA BAROKAH</h4>' +
+                '<p>Di-export pada: ' + exportDate + '</p>' +
+                '<table border="1" cellpadding="5" cellspacing="0">' +
+                    '<thead>' +
+                        '<tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">' +
+                            '<th style="width: 50px;">No</th>' +
+                            '<th style="width: 140px;">No Pembelian</th>' +
+                            '<th style="width: 120px;">Tanggal</th>' +
+                            '<th style="width: 180px;">Supplier</th>' +
+                            '<th style="width: 150px;">Total Nota</th>' +
+                            '<th style="width: 150px;">Sudah Dibayar</th>' +
+                            '<th style="width: 150px;">Sisa Hutang</th>' +
+                            '<th style="width: 180px;">Jatuh Tempo</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' +
+                        rowHtml +
+                    '</tbody>' +
+                '</table>';
+
+            const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            DB.exportToExcel(excelTemplate, 'Laporan_Hutang_Supplier_' + timestamp + '.xls');
+        }
+
+        function exportReceivableToExcel() {
+            const list = DB.getPiutangPelanggan();
+            let rowHtml = '';
+
+            if (list.length === 0) {
+                rowHtml = '<tr><td colspan="8" align="center">Tidak ada piutang pelanggan aktif.</td></tr>';
+            } else {
+                list.forEach((r, index) => {
+                    rowHtml += '<tr>' +
+                        '<td align="center">' + (index + 1) + '</td>' +
+                        '<td align="center">' + escapeHtml(r.no_penjualan) + '</td>' +
+                        '<td align="center">' + formatDate(r.tanggal) + '</td>' +
+                        '<td>' + escapeHtml(r.pelanggan) + '</td>' +
+                        '<td align="right">' + r.total_penjualan + '</td>' +
+                        '<td align="right">' + r.total_dibayar + '</td>' +
+                        '<td align="right" style="font-weight: bold; color: #0284C7;">' + r.sisa_piutang + '</td>' +
+                        '<td align="center">' + formatDate(r.jatuh_tempo) + ' (' + r.status_jatuh_tempo + ')</td>' +
+                        '</tr>';
+                });
+            }
+
+            const today = new Date();
+            const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
+
+            const excelTemplate =
+                '<h3>LAPORAN PIUTANG PELANGGAN TOKO BANGUNAN</h3>' +
+                '<h4>TB AA BAROKAH</h4>' +
+                '<p>Di-export pada: ' + exportDate + '</p>' +
+                '<table border="1" cellpadding="5" cellspacing="0">' +
+                    '<thead>' +
+                        '<tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">' +
+                            '<th style="width: 50px;">No</th>' +
+                            '<th style="width: 140px;">No Penjualan</th>' +
+                            '<th style="width: 120px;">Tanggal</th>' +
+                            '<th style="width: 180px;">Pelanggan</th>' +
+                            '<th style="width: 150px;">Total Nota</th>' +
+                            '<th style="width: 150px;">Sudah Dibayar</th>' +
+                            '<th style="width: 150px;">Sisa Piutang</th>' +
+                            '<th style="width: 180px;">Jatuh Tempo</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' +
+                        rowHtml +
+                    '</tbody>' +
+                '</table>';
+
+            const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
+            DB.exportToExcel(excelTemplate, 'Laporan_Piutang_Pelanggan_' + timestamp + '.xls');
+        }
+
         function exportStockToExcel() {
             const barangList = DB.getBarang();
             let rowHtml = '';
@@ -601,86 +1458,68 @@
             } else {
                 barangList.forEach((b, index) => {
                     let status = 'Aman';
-                    let color = '#16A34A'; // Hijau
+                    let color = '#16A34A';
                     if (b.stok === 0) {
                         status = 'Habis';
-                        color = '#DC2626'; // Merah
+                        color = '#DC2626';
                     } else if (b.stok <= b.stok_minimum) {
                         status = 'Menipis';
-                        color = '#D97706'; // Oranye
+                        color = '#D97706';
                     }
 
-                    rowHtml += `
-                        <tr>
-                            <td align="center">${index + 1}</td>
-                            <td>${escapeHtml(b.nama_barang)}</td>
-                            <td>${escapeHtml(b.nama_kategori)}</td>
-                            <td align="right" style="font-weight: bold;">${b.stok} ${escapeHtml(b.satuan)}</td>
-                            <td align="right">${b.stok_minimum}</td>
-                            <td align="center" style="font-weight: bold; color: ${color};">${status}</td>
-                        </tr>
-                    `;
+                    rowHtml += '<tr>' +
+                        '<td align="center">' + (index + 1) + '</td>' +
+                        '<td>' + escapeHtml(b.nama_barang) + '</td>' +
+                        '<td>' + escapeHtml(b.nama_kategori) + '</td>' +
+                        '<td align="right" style="font-weight: bold;">' + b.stok + ' ' + escapeHtml(b.satuan) + '</td>' +
+                        '<td align="right">' + b.stok_minimum + '</td>' +
+                        '<td align="center" style="font-weight: bold; color: ' + color + ';">' + status + '</td>' +
+                        '</tr>';
                 });
             }
 
             const today = new Date();
             const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
 
-            // Membuat kerangka template Excel HTML/XML untuk daftar inventori
-            const excelTemplate = `
-                <h3>LAPORAN STOK BARANG TOKO BANGUNAN</h3>
-                <h4>TB SUMBER JAYA</h4>
-                <p>Di-export pada: ${exportDate}</p>
-
-                <table border="1" cellpadding="5" cellspacing="0">
-                    <thead>
-                        <tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">
-                            <th style="width: 50px;">No</th>
-                            <th style="width: 250px;">Nama Barang</th>
-                            <th style="width: 150px;">Kategori</th>
-                            <th style="width: 120px;">Stok Saat Ini</th>
-                            <th style="width: 120px;">Stok Minimum</th>
-                            <th style="width: 120px;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowHtml}
-                    </tbody>
-                </table>
-            `;
+            const excelTemplate =
+                '<h3>LAPORAN STOK BARANG TOKO BANGUNAN</h3>' +
+                '<h4>TB AA BAROKAH</h4>' +
+                '<p>Di-export pada: ' + exportDate + '</p>' +
+                '<table border="1" cellpadding="5" cellspacing="0">' +
+                    '<thead>' +
+                        '<tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">' +
+                            '<th style="width: 50px;">No</th>' +
+                            '<th style="width: 250px;">Nama Barang</th>' +
+                            '<th style="width: 150px;">Kategori</th>' +
+                            '<th style="width: 120px;">Stok Saat Ini</th>' +
+                            '<th style="width: 120px;">Stok Minimum</th>' +
+                            '<th style="width: 120px;">Status</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' +
+                        rowHtml +
+                    '</tbody>' +
+                '</table>';
 
             const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
-            // Memicu download berkas excel (.xls)
-            DB.exportToExcel(excelTemplate, `Laporan_Stok_Barang_${timestamp}.xls`);
+            DB.exportToExcel(excelTemplate, 'Laporan_Stok_Barang_' + timestamp + '.xls');
         }
 
-        // FUNGSI UTILITAS: Memformat nilai nominal angka ke string representasi mata uang Rupiah.
-        // PARAMETER: value (number) - Angka nominal.
-        // RETURN VALUE: String mata uang rupiah berformat (misal: "Rp 150.000").
         function formatRupiah(value) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
         }
 
-        // FUNGSI UTILITAS: Mengubah format string tanggal ISO ke format tampilan Indonesia.
-        // PARAMETER: dateStr (string) - Tanggal berformat "YYYY-MM-DD"
-        // RETURN VALUE: Tanggal berformat "DD/MM/YYYY"
         function formatDate(dateStr) {
             if (!dateStr) return '-';
             const parts = dateStr.split('-');
             if (parts.length !== 3) return dateStr;
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return parts[2] + '/' + parts[1] + '/' + parts[0];
         }
 
-        // FUNGSI UTILITAS: Memformat angka desimal/bulat biasa ke format ribuan dipisah titik.
-        // PARAMETER: num (number) - Angka kuantitas atau nominal.
-        // RETURN VALUE: String angka terformat (misal: "1.250").
         function formatNumber(num) {
             return new Intl.NumberFormat('id-ID').format(num);
         }
 
-        // FUNGSI UTILITAS: Melakukan sanitasi karakter string HTML agar aman dari ancaman eksploitasi XSS.
-        // PARAMETER: text (string) - Teks string mentah.
-        // RETURN VALUE: String ter-escape yang aman untuk dirender ke halaman web.
         function escapeHtml(text) {
             if (!text) return '';
             return text
