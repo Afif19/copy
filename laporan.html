@@ -262,8 +262,16 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4 purchase-filter-wrapper" id="p-wrapper-harian">
-                                        <label for="p_tanggal" class="form-label fw-medium">Pilih Tanggal</label>
-                                        <input type="date" class="form-control" id="p_tanggal">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label for="p_tanggal_mulai" class="form-label fw-medium">Tanggal Mulai</label>
+                                                <input type="date" class="form-control" name="p_tanggal_mulai" id="p_tanggal_mulai">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="p_tanggal_akhir" class="form-label fw-medium">Tanggal Akhir</label>
+                                                <input type="date" class="form-control" name="p_tanggal_akhir" id="p_tanggal_akhir">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-4 purchase-filter-wrapper d-none" id="p-wrapper-bulanan">
                                         <label for="p_bulan" class="form-label fw-medium">Pilih Bulan & Tahun</label>
@@ -300,9 +308,9 @@
                             </div>
                         </div>
 
-                        <div class="card card-table">
+                        <div class="card card-table border-0 shadow-sm">
                             <div class="card-header bg-white border-bottom py-3">
-                                <h6 class="fw-bold text-dark m-0">Laporan Rincian Barang Masuk / Pembelian</h6>
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-cart-flatbed me-2 text-primary"></i>Laporan Rincian Barang Masuk / Pembelian</h6>
                             </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
@@ -329,16 +337,6 @@
 
                     <!-- TAB 3: DEBT REPORT (HUTANG SUPPLIER) -->
                     <div class="tab-pane fade" id="debt-report" role="tabpanel" aria-labelledby="debt-report-tab">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h5 class="fw-bold text-dark mb-0">Hutang Supplier (Pembelian Tempo)</h5>
-                                <p class="text-muted small mb-0">Daftar kewajiban hutang toko ke supplier yang belum lunas.</p>
-                            </div>
-                            <button type="button" id="btnExportHutang" class="btn btn-success px-4 fw-semibold">
-                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
-                            </button>
-                        </div>
-
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <div class="stat-card border-start border-warning border-4 py-3.5">
@@ -354,7 +352,13 @@
                             </div>
                         </div>
 
-                        <div class="card card-table">
+                        <div class="card card-table border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-hand-holding-dollar me-2 text-primary"></i>Daftar Hutang Supplier (Pembelian Tempo)</h6>
+                                <button type="button" id="btnExportHutang" class="btn btn-success px-4 fw-semibold">
+                                    <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                </button>
+                            </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle w-100" id="debt-report-table">
@@ -380,16 +384,6 @@
 
                     <!-- TAB 4: RECEIVABLE REPORT (PIUTANG PELANGGAN) -->
                     <div class="tab-pane fade" id="receivable-report" role="tabpanel" aria-labelledby="receivable-report-tab">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h5 class="fw-bold text-dark mb-0">Piutang Pelanggan (Penjualan Tempo)</h5>
-                                <p class="text-muted small mb-0">Daftar tagihan piutang toko ke pelanggan yang belum lunas.</p>
-                            </div>
-                            <button type="button" id="btnExportPiutang" class="btn btn-success px-4 fw-semibold">
-                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
-                            </button>
-                        </div>
-
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <div class="stat-card border-start border-info border-4 py-3.5">
@@ -405,7 +399,13 @@
                             </div>
                         </div>
 
-                        <div class="card card-table">
+                        <div class="card card-table border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i>Daftar Piutang Pelanggan (Penjualan Tempo)</h6>
+                                <button type="button" id="btnExportPiutang" class="btn btn-success px-4 fw-semibold">
+                                    <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                </button>
+                            </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle w-100" id="receivable-report-table">
@@ -431,17 +431,28 @@
 
                     <!-- TAB 5: STOCK REPORT -->
                     <div class="tab-pane fade" id="stock-report" role="tabpanel" aria-labelledby="stock-report-tab">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h5 class="fw-bold text-dark mb-0">Status Inventori Barang Saat Ini</h5>
-                                <p class="text-muted small mb-0">Informasi stok barang secara real-time berdasarkan stok minimum yang diatur.</p>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-primary border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Jenis Barang Terdaftar</span>
+                                    <h3 class="fw-bold text-primary mb-0" id="stock-total-items">0 Item</h3>
+                                </div>
                             </div>
-                            <button type="button" id="btnExportStok" class="btn btn-success px-4 fw-semibold">
-                                <i class="fa-solid fa-file-excel me-1"></i> Export Laporan Stok
-                            </button>
+                            <div class="col-md-6">
+                                <div class="stat-card border-start border-warning border-4 py-3.5">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Barang Stok Kritis / Minimum</span>
+                                    <h3 class="fw-bold text-warning mb-0" id="stock-warning-items">0 Item</h3>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="card card-table">
+                        <div class="card card-table border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>Status Inventori & Stok Barang</h6>
+                                <button type="button" id="btnExportStok" class="btn btn-success px-4 fw-semibold">
+                                    <i class="fa-solid fa-file-excel me-1"></i> Export Laporan Stok
+                                </button>
+                            </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle w-100" id="stock-report-table">
@@ -683,7 +694,6 @@
             const todayStr = new Date().toISOString().split('T')[0];
             const filterTanggalMulai = urlParams.get('tanggal_mulai') || urlParams.get('tanggal') || todayStr;
             const filterTanggalAkhir = urlParams.get('tanggal_akhir') || urlParams.get('tanggal') || todayStr;
-            const filterTanggal = urlParams.get('p_tanggal') || urlParams.get('tanggal') || todayStr;
             const filterBulan = urlParams.get('bulan') || new Date().toISOString().substring(0, 7);
             const filterTahun = parseInt(urlParams.get('tahun')) || currentYear;
 
@@ -694,7 +704,8 @@
             $('#tahun').val(filterTahun);
 
             $('#purchase_filter_type').val(filterType);
-            $('#p_tanggal').val(filterTanggal);
+            $('#p_tanggal_mulai').val(filterTanggalMulai);
+            $('#p_tanggal_akhir').val(filterTanggalAkhir);
             $('#p_bulan').val(filterBulan);
             $('#p_tahun').val(filterTahun);
 
@@ -730,14 +741,23 @@
             $('#purchaseFilterForm').on('submit', function (e) {
                 e.preventDefault();
                 const type = $('#purchase_filter_type').val();
-                const date = $('#p_tanggal').val();
+                const startDate = $('#p_tanggal_mulai').val();
+                const endDate = $('#p_tanggal_akhir').val();
                 const month = $('#p_bulan').val();
                 const year = $('#p_tahun').val();
-                loadPurchaseReport(type, date, month, year);
+
+                if (type === 'harian') {
+                    if (startDate && endDate && startDate > endDate) {
+                        alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                        return;
+                    }
+                }
+
+                loadPurchaseReport(type, startDate, endDate, month, year);
             });
 
             loadSalesReport(filterType, filterTanggalMulai, filterTanggalAkhir, filterBulan, filterTahun);
-            loadPurchaseReport(filterType, filterTanggal, filterBulan, filterTahun);
+            loadPurchaseReport(filterType, filterTanggalMulai, filterTanggalAkhir, filterBulan, filterTahun);
             loadDebtReport();
             loadReceivableReport();
             loadStockReport();
@@ -753,7 +773,13 @@
             });
 
             $('#btnExportPembelian').on('click', function () {
-                exportPurchaseToExcel($('#purchase_filter_type').val(), $('#p_tanggal').val(), $('#p_bulan').val(), $('#p_tahun').val());
+                const startDate = $('#p_tanggal_mulai').val();
+                const endDate = $('#p_tanggal_akhir').val();
+                if ($('#purchase_filter_type').val() === 'harian' && startDate && endDate && startDate > endDate) {
+                    alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                    return;
+                }
+                exportPurchaseToExcel($('#purchase_filter_type').val(), startDate, endDate, $('#p_bulan').val(), $('#p_tahun').val());
             });
 
             $('#btnExportHutang').on('click', function () {
@@ -903,12 +929,26 @@
             });
         }
 
-        function loadPurchaseReport(type, dateVal, monthVal, yearVal) {
+        function loadPurchaseReport(type, startDateVal, endDateVal, monthVal, yearVal) {
+            if (arguments.length === 4) {
+                yearVal = monthVal;
+                monthVal = endDateVal;
+                endDateVal = startDateVal;
+            }
             const purchaseHeaders = DB.getPembelianHeaders();
             let filtered = [];
 
             if (type === 'harian') {
-                filtered = purchaseHeaders.filter(p => p.tanggal === dateVal);
+                if (startDateVal && endDateVal && startDateVal > endDateVal) {
+                    alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                    return;
+                }
+                filtered = purchaseHeaders.filter(p => {
+                    if (startDateVal && endDateVal) return p.tanggal >= startDateVal && p.tanggal <= endDateVal;
+                    if (startDateVal) return p.tanggal >= startDateVal;
+                    if (endDateVal) return p.tanggal <= endDateVal;
+                    return true;
+                });
             } else if (type === 'bulanan') {
                 filtered = purchaseHeaders.filter(p => p.tanggal.startsWith(monthVal));
             } else if (type === 'tahunan') {
@@ -1051,6 +1091,12 @@
 
         function loadStockReport() {
             const barangList = DB.getBarang();
+            const totalItems = barangList.length;
+            const warningItems = barangList.filter(b => b.stok <= b.stok_minimum).length;
+
+            $('#stock-total-items').text(totalItems + ' Item');
+            $('#stock-warning-items').text(warningItems + ' Item');
+
             const tbody = $('#stock-report-tbody');
 
             if (stockTableInstance) stockTableInstance.destroy();
@@ -1277,14 +1323,30 @@
             DB.exportToExcel(excelTemplate, 'Laporan_Penjualan_' + timestamp + '.xls');
         }
 
-        function exportPurchaseToExcel(type, dateVal, monthVal, yearVal) {
+        function exportPurchaseToExcel(type, startDateVal, endDateVal, monthVal, yearVal) {
+            if (arguments.length === 4) {
+                yearVal = monthVal;
+                monthVal = endDateVal;
+                endDateVal = startDateVal;
+            }
             const purchaseHeaders = DB.getPembelianHeaders();
             let filtered = [];
             let filterTitle = "";
 
             if (type === 'harian') {
-                filtered = purchaseHeaders.filter(p => p.tanggal === dateVal);
-                filterTitle = "Hari/Tanggal: " + formatDate(dateVal);
+                filtered = purchaseHeaders.filter(p => {
+                    if (startDateVal && endDateVal) return p.tanggal >= startDateVal && p.tanggal <= endDateVal;
+                    if (startDateVal) return p.tanggal >= startDateVal;
+                    if (endDateVal) return p.tanggal <= endDateVal;
+                    return true;
+                });
+                if (startDateVal && endDateVal) {
+                    filterTitle = "Periode Tanggal: " + formatDate(startDateVal) + " s/d " + formatDate(endDateVal);
+                } else if (startDateVal) {
+                    filterTitle = "Mulai Tanggal: " + formatDate(startDateVal);
+                } else {
+                    filterTitle = "Sampai Tanggal: " + formatDate(endDateVal);
+                }
             } else if (type === 'bulanan') {
                 filtered = purchaseHeaders.filter(p => p.tanggal.startsWith(monthVal));
                 const parts = monthVal.split('-');
