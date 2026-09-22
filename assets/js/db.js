@@ -604,10 +604,20 @@ const DB = {
             // Update stok dan harga di master barang
             const bIdx = barangList.findIndex(x => x.id_inventori === id_inventori);
             if (bIdx !== -1) {
-                barangList[bIdx].stok += qty;
-                barangList[bIdx].harga_beli = buy;
-                barangList[bIdx].harga_jual = sell;
-                barangList[bIdx].satuan = item.satuan;
+                const targetBarang = barangList[bIdx];
+                const isEceranPurchase = targetBarang.satuan_eceran && item.satuan === targetBarang.satuan_eceran;
+
+                if (isEceranPurchase) {
+                    targetBarang.stok_eceran = (parseInt(targetBarang.stok_eceran) || 0) + qty;
+                } else {
+                    const currentStokUtuh = targetBarang.stok_utuh !== undefined ? parseInt(targetBarang.stok_utuh) : (parseInt(targetBarang.stok) || 0);
+                    const newStokUtuh = currentStokUtuh + qty;
+                    targetBarang.stok_utuh = newStokUtuh;
+                    targetBarang.stok = newStokUtuh; // alias kompatibilitas
+                    targetBarang.harga_beli = buy;
+                    if (sell > 0) targetBarang.harga_jual = sell;
+                    if (item.satuan) targetBarang.satuan = item.satuan;
+                }
             }
         });
 
@@ -672,17 +682,22 @@ const DB = {
             const b = barangList.find(x => x.id_inventori === dp.id_inventori) || {};
             const pl = pelangganList.find(x => x.id_pelanggan === parent.id_pelanggan) || {};
 
+            const isDipakai = dp.is_dipakai_sendiri || parent.jenis_transaksi === 'DIPAKAI_SENDIRI';
+
             return {
                 id_penjualan: parent.id_penjualan || 0,
                 no_penjualan: dp.no_penjualan,
                 tanggal: parent.tanggal || '',
-                nama_pembeli: pl.nama_pelanggan || 'Umum',
+                nama_pembeli: isDipakai ? (pl.nama_pelanggan || 'Penggunaan Internal (Toko)') : (pl.nama_pelanggan || 'Umum'),
                 alamat: pl.alamat || '-',
                 nama_barang: b.nama_barang || 'Barang Dihapus',
                 satuan: dp.satuan || b.satuan || '-',
                 jumlah: dp.qty,
                 harga_jual: dp.harga_jual,
-                subtotal: dp.subtotal,
+                subtotal: isDipakai ? 0 : dp.subtotal,
+                is_dipakai_sendiri: !!isDipakai,
+                jenis_transaksi: isDipakai ? 'DIPAKAI_SENDIRI' : 'PENJUALAN',
+                keterangan: dp.keterangan || parent.keterangan || '-',
                 metode_pembayaran: parent.metode_pembayaran || 'Tunai',
                 status_pembayaran: parent.status_pembayaran || 'Lunas',
                 jatuh_tempo: (parent.metode_pembayaran === 'Tempo' && parent.jatuh_tempo && parent.jatuh_tempo !== '-') ? parent.jatuh_tempo : null
@@ -736,24 +751,45 @@ const DB = {
         let nextDetailId = this.getNextId('detail_penjualan', 'id_detail');
         let total_penjualan = 0;
 
-        // Validasi stok dahulu sebelum memodifikasi
+        // Validasi stok & Keterangan Dipakai Sendiri dahulu sebelum memodifikasi
         items.forEach(item => {
             const id_inventori = parseInt(item.id_inventori);
             const qty = parseInt(item.qty);
 
             const b = barangList.find(x => x.id_inventori === id_inventori);
             if (!b) throw new Error('Barang tidak ditemukan!');
-            if (b.stok < qty) {
-                throw new Error(`Stok barang '${b.nama_barang}' tidak mencukupi! Tersedia: ${b.stok}`);
+
+            const isDipakai = item.is_dipakai_sendiri || transaction.jenis_transaksi === 'DIPAKAI_SENDIRI';
+            if (isDipakai) {
+                const ketNote = (item.keterangan || transaction.keterangan || '').trim();
+                if (!ketNote) {
+                    throw new Error('Keterangan / alasan penggunaan wajib diisi untuk barang yang dipakai sendiri!');
+                }
+            }
+
+            const isEceranSale = b.satuan_eceran && item.satuan === b.satuan_eceran;
+            if (isEceranSale) {
+                const stokEceranAvail = parseInt(b.stok_eceran || 0);
+                if (stokEceranAvail < qty) {
+                    throw new Error(`Stok eceran '${b.nama_barang}' (${stokEceranAvail} ${b.satuan_eceran}) tidak mencukupi untuk ${isDipakai ? 'pemakaian' : 'penjualan'} sebanyak ${qty} ${b.satuan_eceran}! Lakukan pemecahan satuan utuh terlebih dahulu jika stok eceran kurang.`);
+                }
+            } else {
+                const stokUtuhAvail = b.stok_utuh !== undefined ? parseInt(b.stok_utuh) : (parseInt(b.stok) || 0);
+                if (stokUtuhAvail < qty) {
+                    throw new Error(`Stok utuh '${b.nama_barang}' (${stokUtuhAvail} ${b.satuan}) tidak mencukupi untuk ${isDipakai ? 'pemakaian' : 'penjualan'} sebanyak ${qty} ${b.satuan}!`);
+                }
             }
         });
+
+        const isAnyDipakai = items.some(item => item.is_dipakai_sendiri) || transaction.jenis_transaksi === 'DIPAKAI_SENDIRI';
 
         items.forEach(item => {
             const id_inventori = parseInt(item.id_inventori);
             const qty = parseInt(item.qty);
             const sell = parseFloat(item.harga_jual);
-            const subtotal = qty * sell;
+            const isDipakaiItem = item.is_dipakai_sendiri || transaction.jenis_transaksi === 'DIPAKAI_SENDIRI';
 
+            const subtotal = isDipakaiItem ? 0 : (qty * sell);
             total_penjualan += subtotal;
 
             // Simpan detail
@@ -764,14 +800,26 @@ const DB = {
                 qty: qty,
                 harga_jual: sell,
                 satuan: item.satuan,
-                subtotal: subtotal
+                subtotal: subtotal,
+                is_dipakai_sendiri: isDipakaiItem ? 1 : 0,
+                diskon_percent: isDipakaiItem ? 100 : 0,
+                keterangan: (item.keterangan || transaction.keterangan || '-').trim()
             });
 
             // Potong stok
             const bIdx = barangList.findIndex(x => x.id_inventori === id_inventori);
             if (bIdx !== -1) {
-                barangList[bIdx].stok -= qty;
-                barangList[bIdx].satuan = item.satuan;
+                const targetBarang = barangList[bIdx];
+                const isEceranSale = targetBarang.satuan_eceran && item.satuan === targetBarang.satuan_eceran;
+
+                if (isEceranSale) {
+                    targetBarang.stok_eceran = (parseInt(targetBarang.stok_eceran) || 0) - qty;
+                } else {
+                    const currentStokUtuh = targetBarang.stok_utuh !== undefined ? parseInt(targetBarang.stok_utuh) : (parseInt(targetBarang.stok) || 0);
+                    const newStokUtuh = currentStokUtuh - qty;
+                    targetBarang.stok_utuh = newStokUtuh;
+                    targetBarang.stok = newStokUtuh; // alias kompatibilitas
+                }
             }
         });
 
@@ -781,10 +829,12 @@ const DB = {
             no_penjualan: no_penjualan,
             tanggal: transaction.tanggal,
             id_pelanggan: resolvedPelanggan.id_pelanggan,
-            metode_pembayaran: transaction.metode_pembayaran || 'Tunai',
-            status_pembayaran: transaction.status_pembayaran || 'Lunas',
-            jatuh_tempo: transaction.jatuh_tempo || '-',
-            total_penjualan: total_penjualan
+            jenis_transaksi: isAnyDipakai ? 'DIPAKAI_SENDIRI' : 'PENJUALAN',
+            metode_pembayaran: isAnyDipakai ? 'Tunai' : (transaction.metode_pembayaran || 'Tunai'),
+            status_pembayaran: isAnyDipakai ? 'Lunas' : (transaction.status_pembayaran || 'Lunas'),
+            jatuh_tempo: isAnyDipakai ? '-' : (transaction.jatuh_tempo || '-'),
+            total_penjualan: total_penjualan,
+            keterangan: (transaction.keterangan || items.map(i => i.keterangan).filter(Boolean).join('; ') || '-').trim()
         });
 
         this.saveTable('penjualan', penjualan);
@@ -968,13 +1018,16 @@ const DB = {
 
         return penjualan.map(p => {
             const pl = pelangganList.find(x => x.id_pelanggan === p.id_pelanggan) || {};
+            const isDipakai = p.jenis_transaksi === 'DIPAKAI_SENDIRI';
             return {
                 id_penjualan: p.id_penjualan,
                 no_penjualan: p.no_penjualan,
                 tanggal: p.tanggal,
-                pelanggan: pl.nama_pelanggan || 'Umum',
+                pelanggan: isDipakai ? (pl.nama_pelanggan || 'Penggunaan Internal (Toko)') : (pl.nama_pelanggan || 'Umum'),
                 alamat: pl.alamat || '-',
                 total_penjualan: p.total_penjualan,
+                jenis_transaksi: p.jenis_transaksi || 'PENJUALAN',
+                keterangan: p.keterangan || '-',
                 metode_pembayaran: p.metode_pembayaran || 'Tunai',
                 status_pembayaran: p.status_pembayaran || 'Lunas',
                 jatuh_tempo: p.jatuh_tempo || '-'

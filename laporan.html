@@ -909,17 +909,21 @@
 
                 const formattedDue = (item.jatuh_tempo && item.jatuh_tempo !== '-') ? formatDate(item.jatuh_tempo) : '-';
 
+                const isDipakai = item.is_dipakai_sendiri || item.jenis_transaksi === 'DIPAKAI_SENDIRI';
+                const subtotalStr = isDipakai ? '<span class="badge bg-success">Rp 0 (100% Disc)</span>' : ('Rp ' + formatNumber(item.subtotal));
+                const pembeliStr = isDipakai ? (escapeHtml(item.nama_pembeli) + ' <span class="badge bg-info text-dark">Dipakai Sendiri</span>') : escapeHtml(item.nama_pembeli);
+
                 tbody.append('<tr>' +
                     '<td>' + (index + 1) + '</td>' +
                     '<td><span class="small text-muted">' + formatDate(item.tanggal) + '</span></td>' +
-                    '<td><span class="fw-semibold text-dark">' + escapeHtml(item.nama_pembeli) + '</span></td>' +
+                    '<td><span class="fw-semibold text-dark">' + pembeliStr + '</span></td>' +
                     '<td><span class="text-dark">' + escapeHtml(item.nama_barang) + '</span></td>' +
                     '<td class="text-end">' + item.jumlah + ' <span class="small text-muted">' + escapeHtml(item.satuan) + '</span></td>' +
                     '<td class="text-end">Rp ' + formatNumber(item.harga_jual) + '</td>' +
-                    '<td class="text-end fw-bold text-primary">Rp ' + formatNumber(item.subtotal) + '</td>' +
-                    '<td class="text-center">' + metodeBadge + '</td>' +
+                    '<td class="text-end fw-bold text-primary">' + subtotalStr + '</td>' +
+                    '<td class="text-center">' + (isDipakai ? '<span class="badge bg-secondary">Dipakai Sendiri</span>' : metodeBadge) + '</td>' +
                     '<td class="text-center">' + statusBadge + '</td>' +
-                    '<td><span class="small text-muted">' + formattedDue + '</span></td>' +
+                    '<td><span class="small text-muted">' + (isDipakai ? (escapeHtml(item.keterangan || '-')) : formattedDue) + '</span></td>' +
                     '</tr>'
                 );
             });

@@ -591,28 +591,63 @@
                 }
             });
 
+            let selectedProductObj = null;
+
             function selectProduct(item) {
+                selectedProductObj = item;
                 $('#selected_id_inventori').val(item.id_inventori);
                 $('#selected_satuan').val(item.satuan);
                 searchInput.val(item.nama_barang);
                 
-                $('#harga_beli').val(parseFloat(item.harga_beli));
-                $('#harga_jual').val(parseFloat(item.harga_jual));
-                
                 const selectUnit = $('#satuan-addon');
-                if (item.satuan) {
-                    if (selectUnit.find(`option[value="${item.satuan}"]`).length === 0) {
-                        selectUnit.append(`<option value="${item.satuan}">${item.satuan}</option>`);
-                    }
+                selectUnit.empty();
+
+                if (item.satuan_eceran && item.nilai_konversi > 0) {
+                    selectUnit.append(`<option value="${escapeHtml(item.satuan)}">${escapeHtml(item.satuan)} (Utuh)</option>`);
+                    selectUnit.append(`<option value="${escapeHtml(item.satuan_eceran)}">${escapeHtml(item.satuan_eceran)} (Eceran)</option>`);
+                    selectUnit.val(item.satuan);
+                } else if (item.satuan) {
+                    selectUnit.append(`<option value="${escapeHtml(item.satuan)}">${escapeHtml(item.satuan)}</option>`);
                     selectUnit.val(item.satuan);
                 } else {
+                    selectUnit.append(`<option value="-">-</option>`);
                     selectUnit.val('-');
                 }
+
+                updateProductUnitView();
+            }
+
+            function updateProductUnitView() {
+                if (!selectedProductObj) return;
+
+                const selectedUnit = $('#satuan-addon').val();
+                const isEceran = selectedProductObj.satuan_eceran && selectedUnit === selectedProductObj.satuan_eceran;
+
+                if (isEceran) {
+                    const buyEceran = selectedProductObj.nilai_konversi > 0 ? Math.round(selectedProductObj.harga_beli / selectedProductObj.nilai_konversi) : selectedProductObj.harga_beli;
+                    const sellEceran = selectedProductObj.nilai_konversi > 0 ? Math.round(selectedProductObj.harga_jual / selectedProductObj.nilai_konversi) : selectedProductObj.harga_jual;
+                    
+                    $('#harga_beli').val(buyEceran);
+                    $('#harga_jual').val(sellEceran);
+
+                    const stokEceran = selectedProductObj.stok_eceran || 0;
+                    $('#info-stok').text(stokEceran);
+                    $('#info-satuan').text(selectedProductObj.satuan_eceran);
+                } else {
+                    $('#harga_beli').val(parseFloat(selectedProductObj.harga_beli));
+                    $('#harga_jual').val(parseFloat(selectedProductObj.harga_jual));
+
+                    const stokUtuh = selectedProductObj.stok_utuh !== undefined ? selectedProductObj.stok_utuh : selectedProductObj.stok;
+                    $('#info-stok').text(stokUtuh);
+                    $('#info-satuan').text(selectedProductObj.satuan);
+                }
                 
-                $('#info-stok').text(item.stok);
-                $('#info-satuan').text(item.satuan);
                 $('#stok-info-wrapper').removeClass('d-none');
             }
+
+            $('#satuan-addon').on('change', function () {
+                updateProductUnitView();
+            });
 
             // ==========================================
             // LOGIKA DRAFT SEMENTARA (CART) & SUBMIT
@@ -635,8 +670,9 @@
                 }
 
                 const existingIdx = cartItems.findIndex(item => 
-                    (id_inventori && item.id_inventori === id_inventori) || 
-                    (!id_inventori && item.nama_barang.toLowerCase() === nama_barang.toLowerCase())
+                    ((id_inventori && item.id_inventori === id_inventori) || 
+                    (!id_inventori && item.nama_barang.toLowerCase() === nama_barang.toLowerCase())) &&
+                    item.satuan === satuan
                 );
 
                 if (existingIdx !== -1) {
@@ -657,13 +693,14 @@
                 }
 
                 // Reset form input item
+                selectedProductObj = null;
                 $('#selected_id_inventori').val('');
                 $('#selected_satuan').val('');
                 searchInput.val('');
                 $('#jumlah_masuk').val('');
                 $('#harga_beli').val('');
                 $('#harga_jual').val('');
-                $('#satuan-addon').val('-');
+                $('#satuan-addon').empty().append('<option value="-">-</option>');
                 $('#stok-info-wrapper').addClass('d-none');
                 
                 searchInput.focus();

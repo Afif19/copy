@@ -582,30 +582,63 @@
                 }
             });
 
+            let selectedProductObj = null;
+
             function selectProduct(item) {
+                selectedProductObj = item;
                 $('#selected_id_inventori').val(item.id_inventori);
                 $('#selected_satuan').val(item.satuan);
-                $('#max_stock_limit').val(item.stok);
                 searchInput.val(item.nama_barang);
                 
-                $('#harga_jual').val(parseFloat(item.harga_jual));
-                
                 const selectUnit = $('#satuan-addon');
-                if (item.satuan) {
-                    if (selectUnit.find(`option[value="${item.satuan}"]`).length === 0) {
-                        selectUnit.append(`<option value="${item.satuan}">${item.satuan}</option>`);
-                    }
+                selectUnit.empty();
+
+                if (item.satuan_eceran && item.nilai_konversi > 0) {
+                    selectUnit.append(`<option value="${escapeHtml(item.satuan)}">${escapeHtml(item.satuan)} (Utuh)</option>`);
+                    selectUnit.append(`<option value="${escapeHtml(item.satuan_eceran)}">${escapeHtml(item.satuan_eceran)} (Eceran)</option>`);
+                    selectUnit.val(item.satuan);
+                } else if (item.satuan) {
+                    selectUnit.append(`<option value="${escapeHtml(item.satuan)}">${escapeHtml(item.satuan)}</option>`);
                     selectUnit.val(item.satuan);
                 } else {
+                    selectUnit.append(`<option value="-">-</option>`);
                     selectUnit.val('-');
                 }
+
+                updateProductUnitView();
+            }
+
+            function updateProductUnitView() {
+                if (!selectedProductObj) return;
+
+                const selectedUnit = $('#satuan-addon').val();
+                const isEceran = selectedProductObj.satuan_eceran && selectedUnit === selectedProductObj.satuan_eceran;
+
+                if (isEceran) {
+                    const sellEceran = selectedProductObj.nilai_konversi > 0 ? Math.round(selectedProductObj.harga_jual / selectedProductObj.nilai_konversi) : selectedProductObj.harga_jual;
+                    $('#harga_jual').val(sellEceran);
+
+                    const stokEceran = selectedProductObj.stok_eceran || 0;
+                    $('#max_stock_limit').val(stokEceran);
+                    $('#jumlah').attr('max', stokEceran);
+                    $('#info-stok').text(stokEceran);
+                    $('#info-satuan').text(selectedProductObj.satuan_eceran);
+                } else {
+                    $('#harga_jual').val(parseFloat(selectedProductObj.harga_jual));
+
+                    const stokUtuh = selectedProductObj.stok_utuh !== undefined ? selectedProductObj.stok_utuh : selectedProductObj.stok;
+                    $('#max_stock_limit').val(stokUtuh);
+                    $('#jumlah').attr('max', stokUtuh);
+                    $('#info-stok').text(stokUtuh);
+                    $('#info-satuan').text(selectedProductObj.satuan);
+                }
                 
-                $('#jumlah').attr('max', item.stok);
-                
-                $('#info-stok').text(item.stok);
-                $('#info-satuan').text(item.satuan);
                 $('#stok-info-wrapper').removeClass('d-none');
             }
+
+            $('#satuan-addon').on('change', function () {
+                updateProductUnitView();
+            });
 
             // ==========================================
             // LOGIKA DRAFT SEMENTARA (CART) & SUBMIT
@@ -627,14 +660,26 @@
                     return;
                 }
 
-                // Cek total qty yang sudah ada di keranjang untuk barang ini
-                const existingIdx = cartItems.findIndex(item => item.id_inventori === id_inventori);
+                // Cek total qty yang sudah ada di keranjang untuk (id_inventori, satuan)
+                const isDipakai = $('#is_dipakai_sendiri').is(':checked');
+                const keteranganNote = $('#keterangan_item').val().trim();
+
+                if (isDipakai && !keteranganNote) {
+                    alert('Keterangan / alasan penggunaan wajib diisi untuk barang yang dipakai sendiri!');
+                    return;
+                }
+
+                const existingIdx = cartItems.findIndex(item => 
+                    item.id_inventori === id_inventori && 
+                    item.satuan === satuan && 
+                    item.is_dipakai_sendiri === isDipakai
+                );
                 const currentQtyInCart = existingIdx !== -1 ? cartItems[existingIdx].qty : 0;
                 const totalTargetQty = currentQtyInCart + qty;
 
                 // Validasi kritis stok agar tidak melebihi stok tersedia
                 if (maxStock < totalTargetQty) {
-                    alert(`Stok tidak mencukupi! Stok tersedia: ${maxStock}, total di keranjang Anda: ${currentQtyInCart}.`);
+                    alert(`Stok tidak mencukupi! Stok tersedia (${satuan}): ${maxStock}, total di keranjang Anda: ${currentQtyInCart}.`);
                     return;
                 }
 
@@ -654,13 +699,14 @@
                 }
 
                 // Reset form input item
+                selectedProductObj = null;
                 $('#selected_id_inventori').val('');
                 $('#selected_satuan').val('');
                 $('#max_stock_limit').val('0');
                 searchInput.val('');
                 $('#jumlah').val('').removeAttr('max');
                 $('#harga_jual').val('');
-                $('#satuan-addon').val('-');
+                $('#satuan-addon').empty().append('<option value="-">-</option>');
                 $('#stok-info-wrapper').addClass('d-none');
                 
                 searchInput.focus();

@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `detail_pembelian` (
   `no_pembelian` VARCHAR(20) NOT NULL,
   `id_inventori` INT NOT NULL,
   `qty` INT NOT NULL,
+  `satuan` VARCHAR(20) DEFAULT NULL,
   `harga_beli` DECIMAL(12,2) NOT NULL,
   `subtotal` DECIMAL(12,2) NOT NULL,
   FOREIGN KEY (`no_pembelian`) REFERENCES `pembelian` (`no_pembelian`) ON DELETE CASCADE,
@@ -125,10 +126,12 @@ CREATE TABLE IF NOT EXISTS `penjualan` (
   `no_penjualan` VARCHAR(20) PRIMARY KEY,
   `tanggal` DATE NOT NULL,
   `id_pelanggan` INT NOT NULL,
+  `jenis_transaksi` VARCHAR(50) NOT NULL DEFAULT 'PENJUALAN', -- PENJUALAN, DIPAKAI_SENDIRI
   `metode_pembayaran` VARCHAR(50) NOT NULL DEFAULT 'Tunai', -- Tunai, Transfer, Tempo
   `status_pembayaran` VARCHAR(50) NOT NULL DEFAULT 'Lunas', -- Lunas, Belum Lunas
   `jatuh_tempo` VARCHAR(50) DEFAULT NULL,
   `total_penjualan` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `keterangan` TEXT NULL,
   FOREIGN KEY (`id_pelanggan`) REFERENCES `pelanggan` (`id_pelanggan`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -139,8 +142,12 @@ CREATE TABLE IF NOT EXISTS `detail_penjualan` (
   `no_penjualan` VARCHAR(20) NOT NULL,
   `id_inventori` INT NOT NULL,
   `qty` INT NOT NULL,
+  `satuan` VARCHAR(20) DEFAULT NULL,
   `harga_jual` DECIMAL(12,2) NOT NULL,
   `subtotal` DECIMAL(12,2) NOT NULL,
+  `is_dipakai_sendiri` TINYINT(1) DEFAULT 0,
+  `diskon_percent` DECIMAL(5,2) DEFAULT 0.00,
+  `keterangan` TEXT NULL,
   FOREIGN KEY (`no_penjualan`) REFERENCES `penjualan` (`no_penjualan`) ON DELETE CASCADE,
   FOREIGN KEY (`id_inventori`) REFERENCES `barang` (`id_inventori`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
