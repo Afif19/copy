@@ -51,11 +51,11 @@ const DB = {
         // 3. Inisialisasi Tabel Barang (Master Inventori)
         if (!localStorage.getItem('barang')) {
             localStorage.setItem('barang', JSON.stringify([
-                { id_inventori: 1, kode_barang: 'BRG0001', nama_barang: 'Semen Tiga Roda 50kg', kategori: 'Semen', satuan: 'Sak', harga_beli: 65000, harga_jual: 70000, stok: 120, stok_minimum: 10 },
-                { id_inventori: 2, kode_barang: 'BRG0002', nama_barang: 'Besi Beton 10mm', kategori: 'Besi & Baja', satuan: 'Batang', harga_beli: 55000, harga_jual: 62000, stok: 85, stok_minimum: 15 },
-                { id_inventori: 3, kode_barang: 'BRG0003', nama_barang: 'Cat Tembok Dulux 5kg', kategori: 'Cat & Perlengkapan', satuan: 'PCS', harga_beli: 145000, harga_jual: 160000, stok: 4, stok_minimum: 5 },
-                { id_inventori: 4, kode_barang: 'BRG0004', nama_barang: 'Pipa PVC Wavin 1/2"', kategori: 'Pipa & Fitting', satuan: 'Batang', harga_beli: 18000, harga_jual: 22000, stok: 50, stok_minimum: 10 },
-                { id_inventori: 5, kode_barang: 'BRG0005', nama_barang: 'Kayu Kaso 4x6', kategori: 'Kayu', satuan: 'Batang', harga_beli: 12000, harga_jual: 15000, stok: 0, stok_minimum: 5 }
+                { id_inventori: 1, kode_barang: 'BRG0001', nama_barang: 'Semen Tiga Roda 50kg', kategori: 'Semen', satuan: 'Sak', satuan_eceran: 'Kg', nilai_konversi: 50, harga_beli: 65000, harga_jual: 70000, stok: 120, stok_utuh: 120, stok_eceran: 0, stok_minimum: 10 },
+                { id_inventori: 2, kode_barang: 'BRG0002', nama_barang: 'Besi Beton 10mm', kategori: 'Besi & Baja', satuan: 'Batang', satuan_eceran: null, nilai_konversi: 1, harga_beli: 55000, harga_jual: 62000, stok: 85, stok_utuh: 85, stok_eceran: 0, stok_minimum: 15 },
+                { id_inventori: 3, kode_barang: 'BRG0003', nama_barang: 'Cat Tembok Dulux 5kg', kategori: 'Cat & Perlengkapan', satuan: 'PCS', satuan_eceran: null, nilai_konversi: 1, harga_beli: 145000, harga_jual: 160000, stok: 4, stok_utuh: 4, stok_eceran: 0, stok_minimum: 5 },
+                { id_inventori: 4, kode_barang: 'BRG0004', nama_barang: 'Pipa PVC Wavin 1/2"', kategori: 'Pipa & Fitting', satuan: 'Batang', satuan_eceran: 'Meter', nilai_konversi: 4, harga_beli: 18000, harga_jual: 22000, stok: 50, stok_utuh: 50, stok_eceran: 0, stok_minimum: 10 },
+                { id_inventori: 5, kode_barang: 'BRG0005', nama_barang: 'Kayu Kaso 4x6', kategori: 'Kayu', satuan: 'Batang', satuan_eceran: null, nilai_konversi: 1, harga_beli: 12000, harga_jual: 15000, stok: 0, stok_utuh: 0, stok_eceran: 0, stok_minimum: 5 }
             ]));
         }
 
@@ -117,6 +117,11 @@ const DB = {
         // 11. Inisialisasi Tabel Pembayaran Penjualan (Piutang)
         if (!localStorage.getItem('pembayaran_penjualan')) {
             localStorage.setItem('pembayaran_penjualan', JSON.stringify([]));
+        }
+
+        // 12. Inisialisasi Tabel Pemecahan Barang
+        if (!localStorage.getItem('pemecahan_barang')) {
+            localStorage.setItem('pemecahan_barang', JSON.stringify([]));
         }
     },
 
@@ -242,15 +247,25 @@ const DB = {
     },
 
     // ==========================================
-    // REVISI DATA BARANG
+    // REVISI DATA BARANG & MULTI-SATUAN
     // ==========================================
     getBarang: function () {
         const barangList = this.getTable('barang');
         
         // Return data dengan mapping kompatibilitas ke halaman dashboard dan laporan lama
         return barangList.map(b => {
+            const stokUtuhVal = b.stok_utuh !== undefined ? parseInt(b.stok_utuh) : parseInt(b.stok || 0);
+            const stokEceranVal = parseInt(b.stok_eceran || 0);
+            const konversiVal = parseInt(b.nilai_konversi) || 1;
+
             return {
                 ...b,
+                satuan_utuh: b.satuan,
+                satuan_eceran: b.satuan_eceran || null,
+                nilai_konversi: konversiVal,
+                stok_utuh: stokUtuhVal,
+                stok_eceran: stokEceranVal,
+                stok: stokUtuhVal, // Alias kompatibilitas
                 id_barang: b.id_inventori, // Alias id_barang untuk menghindari error visual dashboard
                 nama_kategori: b.kategori  // Alias nama_kategori
             };
@@ -282,15 +297,23 @@ const DB = {
             if (c) catName = c.nama_kategori;
         }
 
+        const stokUtuhVal = item.stok_utuh !== undefined ? parseInt(item.stok_utuh) : (parseInt(item.stok) || 0);
+        const stokEceranVal = parseInt(item.stok_eceran) || 0;
+        const konversiVal = parseInt(item.nilai_konversi) || 1;
+
         barangList.push({
             id_inventori: nextId,
             kode_barang: autoCode,
             nama_barang: item.nama_barang,
             kategori: catName,
-            satuan: item.satuan,
+            satuan: item.satuan, // Satuan Utuh
+            satuan_eceran: item.satuan_eceran || null,
+            nilai_konversi: konversiVal,
             harga_beli: parseFloat(item.harga_beli) || 0,
             harga_jual: parseFloat(item.harga_jual) || 0,
-            stok: parseInt(item.stok) || 0,
+            stok: stokUtuhVal,
+            stok_utuh: stokUtuhVal,
+            stok_eceran: stokEceranVal,
             stok_minimum: parseInt(item.stok_minimum) || 5
         });
         
@@ -310,19 +333,106 @@ const DB = {
             if (c) catName = c.nama_kategori;
         }
 
+        const currentBarang = barangList[index];
+        const stokUtuhVal = item.stok_utuh !== undefined ? parseInt(item.stok_utuh) : (item.stok !== undefined ? parseInt(item.stok) : (currentBarang.stok_utuh !== undefined ? currentBarang.stok_utuh : currentBarang.stok));
+        const stokEceranVal = item.stok_eceran !== undefined ? parseInt(item.stok_eceran) : (currentBarang.stok_eceran || 0);
+        const konversiVal = item.nilai_konversi !== undefined ? parseInt(item.nilai_konversi) : (currentBarang.nilai_konversi || 1);
+
         barangList[index] = {
-            ...barangList[index],
+            ...currentBarang,
             nama_barang: item.nama_barang,
             kategori: catName,
             satuan: item.satuan,
+            satuan_eceran: item.satuan_eceran !== undefined ? (item.satuan_eceran || null) : currentBarang.satuan_eceran,
+            nilai_konversi: konversiVal,
             harga_beli: parseFloat(item.harga_beli),
             harga_jual: parseFloat(item.harga_jual),
-            stok: parseInt(item.stok),
+            stok: stokUtuhVal,
+            stok_utuh: stokUtuhVal,
+            stok_eceran: stokEceranVal,
             stok_minimum: parseInt(item.stok_minimum)
         };
         
         this.saveTable('barang', barangList);
         return true;
+    },
+
+    // ==========================================
+    // LOGIKA PEMECAHAN SATUAN BARANG
+    // ==========================================
+    addPemecahanSatuan: function (data) {
+        const { id_inventori, qty_utuh, keterangan } = data;
+        const idInt = parseInt(id_inventori);
+        const qtyUtuhInt = parseInt(qty_utuh);
+
+        if (!idInt || !qtyUtuhInt || qtyUtuhInt <= 0) {
+            throw new Error('Jumlah utuh yang dipecah harus bernilai angka positif (> 0)!');
+        }
+
+        const barangList = this.getTable('barang');
+        const index = barangList.findIndex(b => b.id_inventori === idInt);
+        if (index === -1) throw new Error('Barang tidak ditemukan!');
+
+        const item = barangList[index];
+        const satuanUtuh = item.satuan || 'Sak';
+        const satuanEceran = item.satuan_eceran;
+        const nilaiKonversi = parseInt(item.nilai_konversi) || 0;
+        const currentStokUtuh = item.stok_utuh !== undefined ? parseInt(item.stok_utuh) : parseInt(item.stok || 0);
+        const currentStokEceran = parseInt(item.stok_eceran || 0);
+
+        if (!satuanEceran || nilaiKonversi <= 0) {
+            throw new Error(`Barang '${item.nama_barang}' belum memiliki konfigurasi Satuan Eceran dan Nilai Konversi yang valid!`);
+        }
+
+        if (currentStokUtuh < qtyUtuhInt) {
+            throw new Error(`Stok utuh (${currentStokUtuh} ${satuanUtuh}) tidak mencukupi untuk dipecah sebanyak ${qtyUtuhInt} ${satuanUtuh}!`);
+        }
+
+        const qtyEceranHasil = qtyUtuhInt * nilaiKonversi;
+        const newStokUtuh = currentStokUtuh - qtyUtuhInt;
+        const newStokEceran = currentStokEceran + qtyEceranHasil;
+
+        // Update stok pada master barang
+        barangList[index].stok_utuh = newStokUtuh;
+        barangList[index].stok = newStokUtuh; // alias kompatibilitas
+        barangList[index].stok_eceran = newStokEceran;
+
+        this.saveTable('barang', barangList);
+
+        // Simpan record histori pemecahan
+        const pemecahanList = this.getTable('pemecahan_barang');
+        const nextId = this.getNextId('pemecahan_barang', 'id_pemecahan');
+        const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+        pemecahanList.push({
+            id_pemecahan: nextId,
+            tanggal: nowStr,
+            id_inventori: idInt,
+            nama_barang: item.nama_barang,
+            qty_utuh: qtyUtuhInt,
+            satuan_utuh: satuanUtuh,
+            qty_eceran: qtyEceranHasil,
+            satuan_eceran: satuanEceran,
+            nilai_konversi: nilaiKonversi,
+            keterangan: keterangan || `Pemecahan ${qtyUtuhInt} ${satuanUtuh} menjadi ${qtyEceranHasil} ${satuanEceran}`
+        });
+
+        this.saveTable('pemecahan_barang', pemecahanList);
+        return true;
+    },
+
+    getPemecahanHistory: function () {
+        const list = this.getTable('pemecahan_barang');
+        const barangList = this.getTable('barang');
+
+        return list.map(p => {
+            const b = barangList.find(x => x.id_inventori === p.id_inventori) || {};
+            return {
+                ...p,
+                nama_barang: p.nama_barang || b.nama_barang || 'Barang Dihapus',
+                kode_barang: b.kode_barang || '-'
+            };
+        }).sort((a, b) => b.id_pemecahan - a.id_pemecahan);
     },
 
     deleteBarang: function (id) {

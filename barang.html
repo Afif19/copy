@@ -127,6 +127,12 @@
                         <a href="kategori.html" class="btn btn-outline-primary me-2">
                             <i class="fa-solid fa-tags me-1"></i> Kelola Kategori
                         </a>
+                        <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#modalHistoriPemecahan" id="btnHistoriPemecahan">
+                            <i class="fa-solid fa-clock-rotate-left me-1"></i> Histori Pemecahan
+                        </button>
+                        <button type="button" class="btn btn-warning text-dark me-2" data-bs-toggle="modal" data-bs-target="#modalPemecahanSatuan" id="btnOpenPemecahan">
+                            <i class="fa-solid fa-boxes-packing me-1"></i> Pecah Satuan
+                        </button>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBarangModal">
                             <i class="fa-solid fa-plus me-1"></i> Tambah Barang
                         </button>
@@ -144,16 +150,17 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">No</th>
-                                        <th style="width: 100px;">Kode</th>
+                                        <th style="width: 90px;">Kode</th>
                                         <th>Nama Barang</th>
                                         <th>Kategori</th>
-                                        <th>Satuan</th>
-                                        <th>Harga Beli</th>
-                                        <th>Harga Jual</th>
-                                        <th>Stok</th>
-                                        <th>Min. Stok</th>
-                                        <th>Status</th>
-                                        <th style="width: 120px; text-align: center;">Aksi</th>
+                                        <th>Satuan Utuh</th>
+                                        <th>Satuan Eceran</th>
+                                        <th class="text-end">Stok Utuh</th>
+                                        <th class="text-end">Stok Eceran</th>
+                                        <th class="text-end">Harga Beli</th>
+                                        <th class="text-end">Harga Jual</th>
+                                        <th class="text-center">Status</th>
+                                        <th style="width: 140px; text-align: center;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="barang-tbody">
@@ -190,17 +197,16 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="add_satuan" class="form-label fw-medium">Satuan</label>
-                                <select class="form-select" name="satuan" id="add_satuan" required>
-                                    <option value="" disabled selected>Pilih Satuan...</option>
-                                    <option value="Sak">Sak</option>
-                                    <option value="PCS">PCS</option>
-                                    <option value="Batang">Batang</option>
-                                    <option value="Kg">Kg</option>
-                                    <option value="Roll">Roll</option>
-                                    <option value="Biji">Biji</option>
-                                    <option value="Meter">Meter</option>
-                                </select>
+                                <label for="add_satuan" class="form-label fw-medium">Satuan Utuh</label>
+                                <input type="text" class="form-control" name="satuan" id="add_satuan" placeholder="Contoh: Sak, Batang, Dus" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_satuan_eceran" class="form-label fw-medium">Satuan Eceran (Opsional)</label>
+                                <input type="text" class="form-control" name="satuan_eceran" id="add_satuan_eceran" placeholder="Contoh: Kg, Pcs, Meter">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_nilai_konversi" class="form-label fw-medium">Konversi (1 Utuh = X Eceran)</label>
+                                <input type="number" class="form-control" name="nilai_konversi" id="add_nilai_konversi" value="1" min="1" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="add_harga_beli" class="form-label fw-medium">Harga Beli (Rp)</label>
@@ -211,7 +217,7 @@
                                 <input type="number" class="form-control" name="harga_jual" id="add_harga_jual" placeholder="0" required min="0">
                             </div>
                             <div class="col-md-6">
-                                <label for="add_stok" class="form-label fw-medium">Stok Awal</label>
+                                <label for="add_stok" class="form-label fw-medium">Stok Utuh Awal</label>
                                 <input type="number" class="form-control" name="stok" id="add_stok" value="0" required min="0">
                             </div>
                             <div class="col-md-6">
@@ -256,16 +262,16 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="edit_satuan" class="form-label fw-medium">Satuan</label>
-                                <select class="form-select" name="satuan" id="edit_satuan" required>
-                                    <option value="Sak">Sak</option>
-                                    <option value="PCS">PCS</option>
-                                    <option value="Batang">Batang</option>
-                                    <option value="Kg">Kg</option>
-                                    <option value="Roll">Roll</option>
-                                    <option value="Biji">Biji</option>
-                                    <option value="Meter">Meter</option>
-                                </select>
+                                <label for="edit_satuan" class="form-label fw-medium">Satuan Utuh</label>
+                                <input type="text" class="form-control" name="satuan" id="edit_satuan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_satuan_eceran" class="form-label fw-medium">Satuan Eceran (Opsional)</label>
+                                <input type="text" class="form-control" name="satuan_eceran" id="edit_satuan_eceran">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_nilai_konversi" class="form-label fw-medium">Konversi (1 Utuh = X Eceran)</label>
+                                <input type="number" class="form-control" name="nilai_konversi" id="edit_nilai_konversi" min="1" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_harga_beli" class="form-label fw-medium">Harga Beli (Rp)</label>
@@ -276,7 +282,7 @@
                                 <input type="number" class="form-control" name="harga_jual" id="edit_harga_jual" required min="0">
                             </div>
                             <div class="col-md-6">
-                                <label for="edit_stok" class="form-label fw-medium">Stok</label>
+                                <label for="edit_stok" class="form-label fw-medium">Stok Utuh</label>
                                 <input type="number" class="form-control" name="stok" id="edit_stok" required min="0">
                             </div>
                             <div class="col-md-6">
@@ -290,6 +296,89 @@
                         <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Pecah Satuan Barang -->
+    <div class="modal fade" id="modalPemecahanSatuan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark py-3">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-boxes-packing me-2"></i> Pemecahan Satuan Barang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPemecahanSatuan">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="pemecahan_id_inventori" class="form-label fw-medium">Pilih Barang</label>
+                            <select class="form-select" id="pemecahan_id_inventori" required>
+                                <option value="" disabled selected>Pilih Barang yang akan dipecah...</option>
+                            </select>
+                        </div>
+                        <div class="card bg-light border-0 p-3 mb-3 d-none" id="pemecahan_info_card">
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <span class="text-muted d-block">Stok Utuh Saat Ini:</span>
+                                    <strong class="text-primary fs-6" id="info_stok_utuh">0 Sak</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block">Stok Eceran Saat Ini:</span>
+                                    <strong class="text-success fs-6" id="info_stok_eceran">0 Kg</strong>
+                                </div>
+                                <div class="col-12 border-top pt-2 mt-2">
+                                    <span class="text-muted">Konversi:</span>
+                                    <span class="badge bg-secondary ms-1" id="info_konversi">1 Sak = 50 Kg</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pemecahan_qty_utuh" class="form-label fw-medium">Jumlah Utuh yang Dipecah</label>
+                            <input type="number" class="form-control" id="pemecahan_qty_utuh" min="1" placeholder="Masukkan jumlah satuan utuh" required>
+                        </div>
+                        <div class="p-2.5 bg-success bg-opacity-10 border border-success rounded d-none mb-3" id="pemecahan_preview_card">
+                            <span class="small text-secondary d-block">Hasil Konversi Eceran:</span>
+                            <strong class="text-success fs-5" id="pemecahan_preview_text">+ 50 Kg</strong>
+                        </div>
+                        <div>
+                            <label for="pemecahan_keterangan" class="form-label small text-muted">Keterangan (Opsional)</label>
+                            <input type="text" class="form-control form-control-sm" id="pemecahan_keterangan" placeholder="Contoh: Pemecahan 1 Sak menjadi Kg">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning fw-semibold px-4">Proses Pemecahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Histori Pemecahan -->
+    <div class="modal fade" id="modalHistoriPemecahan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-info text-dark py-3">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-clock-rotate-left me-2"></i> Riwayat Pemecahan Satuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle w-100" id="histori-pemecahan-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">No</th>
+                                    <th>Tanggal</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-center">Jumlah Dipecah</th>
+                                    <th class="text-center">Hasil Eceran</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="histori-pemecahan-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -319,14 +408,14 @@
             loadBarangTable();
 
             // FUNGSI: Form Submit: Tambah Barang Baru.
-            // DETAIL: Mencegah submit standar, menyusun objek 'item', memanggil fungsi DB.addBarang() di db.js,
-            //         dan merender ulang tabel barang jika sukses.
             $('#addBarangForm').on('submit', function (e) {
                 e.preventDefault();
                 const item = {
                     nama_barang: $('#add_nama_barang').val().trim(),
                     id_kategori: $('#add_id_kategori').val(),
-                    satuan: $('#add_satuan').val(),
+                    satuan: $('#add_satuan').val().trim(),
+                    satuan_eceran: $('#add_satuan_eceran').val().trim() || null,
+                    nilai_konversi: $('#add_nilai_konversi').val(),
                     harga_beli: $('#add_harga_beli').val(),
                     harga_jual: $('#add_harga_jual').val(),
                     stok: $('#add_stok').val(),
@@ -345,14 +434,15 @@
             });
 
             // FUNGSI: Form Submit: Edit data barang.
-            // DETAIL: Memanggil fungsi DB.updateBarang() di db.js dan merender ulang tabel barang jika sukses.
             $('#editBarangForm').on('submit', function (e) {
                 e.preventDefault();
                 const id = $('#edit_id_barang').val();
                 const item = {
                     nama_barang: $('#edit_nama_barang').val().trim(),
                     id_kategori: $('#edit_id_kategori').val(),
-                    satuan: $('#edit_satuan').val(),
+                    satuan: $('#edit_satuan').val().trim(),
+                    satuan_eceran: $('#edit_satuan_eceran').val().trim() || null,
+                    nilai_konversi: $('#edit_nilai_konversi').val(),
                     harga_beli: $('#edit_harga_beli').val(),
                     harga_jual: $('#edit_harga_jual').val(),
                     stok: $('#edit_stok').val(),
@@ -370,13 +460,14 @@
             });
 
             // FUNGSI: Event listener click untuk tombol Edit (.btn-edit).
-            // DETAIL: Mengambil data atribut HTML row terpilih dan memasukkannya (pre-fill) ke form modal Edit.
             $(document).on('click', '.btn-edit', function () {
                 const id = $(this).data('id');
                 const code = $(this).data('code');
                 const name = $(this).data('name');
                 const cat = $(this).data('cat');
                 const unit = $(this).data('unit');
+                const unitEceran = $(this).data('uniteceran');
+                const konversi = $(this).data('konversi');
                 const buy = $(this).data('buy');
                 const sell = $(this).data('sell');
                 const stock = $(this).data('stock');
@@ -387,6 +478,8 @@
                 $('#edit_nama_barang').val(name);
                 $('#edit_id_kategori').val(cat);
                 $('#edit_satuan').val(unit);
+                $('#edit_satuan_eceran').val(unitEceran || '');
+                $('#edit_nilai_konversi').val(konversi || 1);
                 $('#edit_harga_beli').val(buy);
                 $('#edit_harga_jual').val(sell);
                 $('#edit_stok').val(stock);
@@ -394,7 +487,6 @@
             });
 
             // FUNGSI: Event listener click untuk tombol Hapus (.btn-delete).
-            // DETAIL: Memanggil fungsi DB.deleteBarang() di db.js yang memiliki validasi database relasional.
             $(document).on('click', '.btn-delete', function (e) {
                 e.preventDefault();
                 const id = $(this).data('id');
@@ -410,11 +502,126 @@
                     }
                 }
             });
+
+            // ==========================================
+            // EVENT HANDLERS PEMECAHAN SATUAN BARANG
+            // ==========================================
+            $('#modalPemecahanSatuan').on('show.bs.modal', function () {
+                populatePemecahanSelect();
+                $('#formPemecahanSatuan')[0].reset();
+                $('#pemecahan_info_card').addClass('d-none');
+                $('#pemecahan_preview_card').addClass('d-none');
+            });
+
+            $('#pemecahan_id_inventori').on('change', function () {
+                const idInt = parseInt($(this).val());
+                const barangList = DB.getBarang();
+                const item = barangList.find(b => b.id_inventori === idInt);
+
+                if (item) {
+                    const sUtuh = item.satuan || 'Utuh';
+                    const sEceran = item.satuan_eceran || '-';
+                    const konversi = parseInt(item.nilai_konversi) || 1;
+                    const stokUtuh = item.stok_utuh !== undefined ? item.stok_utuh : item.stok;
+                    const stokEceran = item.stok_eceran || 0;
+
+                    $('#info_stok_utuh').text(`${stokUtuh} ${sUtuh}`);
+                    $('#info_stok_eceran').text(`${stokEceran} ${sEceran}`);
+                    $('#info_konversi').text(`1 ${sUtuh} = ${konversi} ${sEceran}`);
+                    $('#pemecahan_info_card').removeClass('d-none');
+
+                    if (!item.satuan_eceran || konversi <= 1) {
+                        alert(`Perhatian: Barang '${item.nama_barang}' belum memiliki konfigurasi Satuan Eceran dan Nilai Konversi yang valid. Silakan edit data barang terlebih dahulu jika ingin dipecah.`);
+                    }
+
+                    calculatePemecahanPreview();
+                } else {
+                    $('#pemecahan_info_card').addClass('d-none');
+                    $('#pemecahan_preview_card').addClass('d-none');
+                }
+            });
+
+            $('#pemecahan_qty_utuh').on('input keyup', function () {
+                calculatePemecahanPreview();
+            });
+
+            function calculatePemecahanPreview() {
+                const idInt = parseInt($('#pemecahan_id_inventori').val());
+                const qtyUtuh = parseInt($('#pemecahan_qty_utuh').val()) || 0;
+                const barangList = DB.getBarang();
+                const item = barangList.find(b => b.id_inventori === idInt);
+
+                if (item && item.satuan_eceran && qtyUtuh > 0) {
+                    const konversi = parseInt(item.nilai_konversi) || 1;
+                    const totalHasil = qtyUtuh * konversi;
+                    $('#pemecahan_preview_text').text(`+ ${formatNumber(totalHasil)} ${item.satuan_eceran}`);
+                    $('#pemecahan_preview_card').removeClass('d-none');
+                } else {
+                    $('#pemecahan_preview_card').addClass('d-none');
+                }
+            }
+
+            $('#formPemecahanSatuan').on('submit', function (e) {
+                e.preventDefault();
+                const id = $('#pemecahan_id_inventori').val();
+                const qtyUtuh = $('#pemecahan_qty_utuh').val();
+                const ket = $('#pemecahan_keterangan').val().trim();
+
+                try {
+                    DB.addPemecahanSatuan({
+                        id_inventori: id,
+                        qty_utuh: qtyUtuh,
+                        keterangan: ket
+                    });
+                    $('#modalPemecahanSatuan').modal('hide');
+                    showAlert('Pemecahan satuan barang berhasil diproses dan disimpan!', 'success');
+                    loadBarangTable();
+                } catch (err) {
+                    alert('Gagal memproses pemecahan: ' + err.message);
+                }
+            });
+
+            $('#modalHistoriPemecahan').on('show.bs.modal', function () {
+                loadHistoriPemecahanTable();
+            });
         });
 
+        function populatePemecahanSelect() {
+            const barangList = DB.getBarang();
+            const select = $('#pemecahan_id_inventori');
+            select.empty().append('<option value="" disabled selected>Pilih Barang yang akan dipecah...</option>');
+
+            barangList.forEach(b => {
+                const sEceran = b.satuan_eceran ? ` (${b.satuan} -> ${b.satuan_eceran})` : '';
+                select.append(`<option value="${b.id_inventori}">${escapeHtml(b.kode_barang)} - ${escapeHtml(b.nama_barang)}${sEceran}</option>`);
+            });
+        }
+
+        function loadHistoriPemecahanTable() {
+            const history = DB.getPemecahanHistory();
+            const tbody = $('#histori-pemecahan-tbody');
+            tbody.empty();
+
+            if (history.length === 0) {
+                tbody.append('<tr><td colspan="6" class="text-center text-muted py-3">Belum ada riwayat pemecahan barang.</td></tr>');
+                return;
+            }
+
+            history.forEach((h, idx) => {
+                tbody.append(`
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><span class="small text-muted">${h.tanggal}</span></td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(h.nama_barang)}</span></td>
+                        <td class="text-center"><span class="badge bg-warning text-dark">${h.qty_utuh} ${escapeHtml(h.satuan_utuh)}</span></td>
+                        <td class="text-center"><span class="badge bg-success">+ ${formatNumber(h.qty_eceran)} ${escapeHtml(h.satuan_eceran)}</span></td>
+                        <td><span class="small text-secondary">${escapeHtml(h.keterangan || '-')}</span></td>
+                    </tr>
+                `);
+            });
+        }
+
         // FUNGSI: loadKategoriDropdowns()
-        // MEMANGGIL: DB.getCategories() di db.js
-        // DETAIL: Mengambil data kategori untuk dirender sebagai opsi pilihan dropdown di modal Tambah/Edit Barang.
         function loadKategoriDropdowns() {
             const categories = DB.getCategories();
             const addSelect = $('#add_id_kategori');
@@ -431,14 +638,10 @@
         }
 
         // FUNGSI: loadBarangTable()
-        // MEMANGGIL: DB.getBarang() di db.js
-        // DETAIL: Mengambil data gabungan barang & kategori, menentukan badge status stok (Aman/Menipis/Habis),
-        //         memasukkannya ke tabel tbody, dan menyalakan library jQuery DataTables.
         function loadBarangTable() {
             const barangList = DB.getBarang();
             const tbody = $('#barang-tbody');
 
-            // Hancurkan instance DataTable lama jika ada (untuk mereset pencarian & pagination)
             if (dataTableInstance) {
                 dataTableInstance.destroy();
             }
@@ -447,26 +650,33 @@
 
             barangList.forEach((b, index) => {
                 let badge = '';
-                if (b.stok === 0) {
+                const stokUtuhVal = b.stok_utuh !== undefined ? b.stok_utuh : b.stok;
+                const stokEceranVal = b.stok_eceran || 0;
+
+                if (stokUtuhVal === 0 && stokEceranVal === 0) {
                     badge = '<span class="badge bg-danger">Habis</span>';
-                } else if (b.stok <= b.stok_minimum) {
+                } else if (stokUtuhVal <= b.stok_minimum) {
                     badge = '<span class="badge bg-warning text-dark">Menipis</span>';
                 } else {
                     badge = '<span class="badge bg-success">Aman</span>';
                 }
  
+                const sEceranDisplay = b.satuan_eceran ? `<span class="badge bg-light text-dark">${escapeHtml(b.satuan_eceran)} (1=${b.nilai_konversi})</span>` : '<span class="text-muted small">-</span>';
+                const stokEceranDisplay = b.satuan_eceran ? `<span class="fw-bold text-success">${formatNumber(stokEceranVal)}</span> <span class="small text-muted">${escapeHtml(b.satuan_eceran)}</span>` : '<span class="text-muted small">-</span>';
+
                 tbody.append(`
                     <tr>
                         <td>${index + 1}</td>
                         <td><span class="badge bg-secondary">${escapeHtml(b.kode_barang)}</span></td>
                         <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang)}</span></td>
                         <td>${escapeHtml(b.nama_kategori)}</td>
-                        <td>${escapeHtml(b.satuan)}</td>
-                        <td>Rp ${formatNumber(b.harga_beli)}</td>
-                        <td>Rp ${formatNumber(b.harga_jual)}</td>
-                        <td class="fw-bold">${b.stok}</td>
-                        <td>${b.stok_minimum}</td>
-                        <td>${badge}</td>
+                        <td><span class="fw-medium text-dark">${escapeHtml(b.satuan)}</span></td>
+                        <td>${sEceranDisplay}</td>
+                        <td class="text-end fw-bold text-primary">${formatNumber(stokUtuhVal)} <span class="small text-muted fw-normal">${escapeHtml(b.satuan)}</span></td>
+                        <td class="text-end">${stokEceranDisplay}</td>
+                        <td class="text-end">Rp ${formatNumber(b.harga_beli)}</td>
+                        <td class="text-end">Rp ${formatNumber(b.harga_jual)}</td>
+                        <td class="text-center">${badge}</td>
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit"
                                     data-id="${b.id_barang}"
@@ -474,16 +684,20 @@
                                     data-name="${escapeHtml(b.nama_barang)}"
                                     data-cat="${b.id_kategori}"
                                     data-unit="${escapeHtml(b.satuan)}"
+                                    data-uniteceran="${escapeHtml(b.satuan_eceran || '')}"
+                                    data-konversi="${b.nilai_konversi || 1}"
                                     data-buy="${b.harga_beli}"
                                     data-sell="${b.harga_jual}"
-                                    data-stock="${b.stok}"
+                                    data-stock="${stokUtuhVal}"
                                     data-min="${b.stok_minimum}"
-                                    data-bs-toggle="modal" data-bs-target="#editBarangModal">
+                                    data-bs-toggle="modal" data-bs-target="#editBarangModal"
+                                    title="Edit Barang">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
                                     data-id="${b.id_barang}"
-                                    data-name="${escapeHtml(b.nama_barang)}">
+                                    data-name="${escapeHtml(b.nama_barang)}"
+                                    title="Hapus Barang">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
@@ -499,8 +713,6 @@
             });
         }
 
-        // FUNGSI: showAlert(message, type)
-        // DETAIL: Menampilkan notifikasi banner keberhasilan atau kegagalan di bagian atas.
         function showAlert(message, type) {
             $('#alert-container').html(`
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">

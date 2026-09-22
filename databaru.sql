@@ -45,11 +45,30 @@ CREATE TABLE IF NOT EXISTS `barang` (
   `kode_barang` VARCHAR(20) UNIQUE NOT NULL,
   `nama_barang` VARCHAR(150) NOT NULL,
   `kategori` VARCHAR(100) NOT NULL, -- Disimpan langsung sebagai string VARCHAR sesuai instruksi revisi
-  `satuan` VARCHAR(20) NOT NULL,
+  `satuan` VARCHAR(20) NOT NULL, -- Satuan Utuh (misal: Sak)
+  `satuan_eceran` VARCHAR(20) DEFAULT NULL, -- Satuan Eceran/Dasar (misal: Kg)
+  `nilai_konversi` INT DEFAULT 1, -- Konversi: 1 Satuan Utuh = X Satuan Eceran
   `harga_beli` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
   `harga_jual` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  `stok` INT NOT NULL DEFAULT 0,
+  `stok` INT NOT NULL DEFAULT 0, -- Stok Utuh (Alias kompatibilitas)
+  `stok_utuh` INT NOT NULL DEFAULT 0,
+  `stok_eceran` INT NOT NULL DEFAULT 0,
   `stok_minimum` INT NOT NULL DEFAULT 5
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 12. TABEL PEMECAHAN BARANG
+-- Menyimpan riwayat aktivitas pemecahan stok utuh menjadi stok eceran.
+CREATE TABLE IF NOT EXISTS `pemecahan_barang` (
+  `id_pemecahan` INT AUTO_INCREMENT PRIMARY KEY,
+  `tanggal` DATETIME NOT NULL,
+  `id_inventori` INT NOT NULL,
+  `qty_utuh` INT NOT NULL,
+  `satuan_utuh` VARCHAR(20) NOT NULL,
+  `qty_eceran` INT NOT NULL,
+  `satuan_eceran` VARCHAR(20) NOT NULL,
+  `nilai_konversi` INT NOT NULL,
+  `keterangan` TEXT NULL,
+  FOREIGN KEY (`id_inventori`) REFERENCES `barang` (`id_inventori`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 4. TABEL SUPPLIER
