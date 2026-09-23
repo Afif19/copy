@@ -273,10 +273,27 @@
                                                 <input type="number" class="form-control border-start-0" id="harga_jual" placeholder="0" required min="0">
                                             </div>
                                         </div>
+                                        <div class="col-md-2 d-flex align-items-end pb-1">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="is_dipakai_sendiri" value="1">
+                                                <label class="form-check-label small fw-medium text-warning" for="is_dipakai_sendiri">
+                                                    <i class="fa-solid fa-home-user me-1"></i>Dipakai Sendiri
+                                                </label>
+                                            </div>
+                                        </div>
                                         <div class="col-md-2 d-grid">
                                             <button type="submit" class="btn btn-outline-primary btn-sm fw-semibold">
                                                 <i class="fa-solid fa-plus me-1"></i> Tambah
                                             </button>
+                                        </div>
+                                        <!-- Keterangan Dipakai Sendiri (wajib jika centang) -->
+                                        <div class="col-12 d-none" id="keterangan-wrapper">
+                                            <div class="p-2 bg-warning bg-opacity-10 rounded border border-warning mt-1">
+                                                <label for="keterangan_item" class="form-label small fw-medium text-warning mb-1">
+                                                    <i class="fa-solid fa-circle-exclamation me-1"></i>Keterangan Penggunaan <span class="text-danger">*wajib</span>
+                                                </label>
+                                                <input type="text" class="form-control form-control-sm" id="keterangan_item" placeholder="Contoh: Semen digunakan untuk pagar toko...">
+                                            </div>
                                         </div>
                                         <!-- Box informasi stok sisa -->
                                         <div class="col-12 d-none" id="stok-info-wrapper">
@@ -311,13 +328,14 @@
                                         </thead>
                                         <tbody id="cart-tbody">
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted py-3">Keranjang kosong. Tambahkan barang di atas.</td>
+                                                <td colspan="7" class="text-center text-muted py-3">Keranjang kosong. Tambahkan barang di atas.</td>
                                             </tr>
                                         </tbody>
                                         <tfoot>
                                             <tr class="fw-bold table-light">
                                                 <td colspan="4" class="text-end">Total Transaksi:</td>
                                                 <td class="text-end text-primary" id="cart-total">Rp 0</td>
+                                                <td></td>
                                                 <td></td>
                                             </tr>
                                         </tfoot>
@@ -402,6 +420,17 @@
                 } else {
                     $('#status_pembayaran').val('Lunas');
                     $('#jatuh_tempo').prop('disabled', true).val('').prop('required', false);
+                }
+            });
+
+            // Dipakai Sendiri: tampilkan/sembunyikan keterangan
+            $(document).on('change', '#is_dipakai_sendiri', function () {
+                if ($(this).is(':checked')) {
+                    $('#keterangan-wrapper').removeClass('d-none');
+                    $('#keterangan_item').prop('required', true).focus();
+                } else {
+                    $('#keterangan-wrapper').addClass('d-none');
+                    $('#keterangan_item').prop('required', false).val('');
                 }
             });
 
@@ -666,6 +695,7 @@
 
                 if (isDipakai && !keteranganNote) {
                     alert('Keterangan / alasan penggunaan wajib diisi untuk barang yang dipakai sendiri!');
+                    $('#keterangan_item').focus();
                     return;
                 }
 
@@ -686,7 +716,8 @@
                 if (existingIdx !== -1) {
                     cartItems[existingIdx].qty += qty;
                     cartItems[existingIdx].harga_jual = harga_jual;
-                    cartItems[existingIdx].subtotal = cartItems[existingIdx].qty * harga_jual;
+                    // Subtotal tetap 0 jika dipakai sendiri
+                    cartItems[existingIdx].subtotal = isDipakai ? 0 : (cartItems[existingIdx].qty * harga_jual);
                 } else {
                     cartItems.push({
                         id_inventori: id_inventori,
@@ -694,7 +725,9 @@
                         qty: qty,
                         satuan: satuan,
                         harga_jual: harga_jual,
-                        subtotal: qty * harga_jual
+                        subtotal: isDipakai ? 0 : (qty * harga_jual),
+                        is_dipakai_sendiri: isDipakai,
+                        keterangan: keteranganNote
                     });
                 }
 
@@ -709,6 +742,11 @@
                 $('#satuan-addon').empty().append('<option value="-">-</option>');
                 $('#stok-info-wrapper').addClass('d-none');
                 
+                // Reset checkbox & keterangan
+                $('#is_dipakai_sendiri').prop('checked', false);
+                $('#keterangan_item').val('');
+                $('#keterangan-wrapper').addClass('d-none');
+
                 searchInput.focus();
                 renderCartTable();
             });
@@ -746,13 +784,18 @@
                     return;
                 }
 
+                // Cek apakah ada item Dipakai Sendiri
+                const isAnyDipakai = cartItems.some(item => item.is_dipakai_sendiri);
+
                 const transaction = {
                     tanggal: tanggal,
                     id_pelanggan: pelangganVal,
                     alamat_pelanggan: alamatPelanggan,
-                    metode_pembayaran: metode_pembayaran,
-                    status_pembayaran: status_pembayaran,
-                    jatuh_tempo: jatuh_tempo
+                    metode_pembayaran: isAnyDipakai ? 'Tunai' : metode_pembayaran,
+                    status_pembayaran: isAnyDipakai ? 'Lunas' : status_pembayaran,
+                    jatuh_tempo: isAnyDipakai ? '-' : jatuh_tempo,
+                    jenis_transaksi: isAnyDipakai ? 'DIPAKAI_SENDIRI' : 'PENJUALAN',
+                    keterangan: isAnyDipakai ? cartItems.filter(i => i.is_dipakai_sendiri && i.keterangan).map(i => i.keterangan).join('; ') : ''
                 };
 
                 if (confirm('Apakah Anda yakin ingin menyimpan seluruh transaksi penjualan ini?')) {
@@ -771,7 +814,7 @@
                         $('#tanggal').val(new Date().toISOString().split('T')[0]);
                         $('#no_penjualan').val(DB.generateNoPenjualan());
 
-                        showAlert('Transaksi penjualan berhasil disimpan dan stok otomatis dikurangi!', 'success');
+                        showAlert(isAnyDipakai ? 'Barang Dipakai Sendiri berhasil dicatat. Stok otomatis dikurangi, total transaksi Rp 0.' : 'Transaksi penjualan berhasil disimpan dan stok otomatis dikurangi!', 'success');
                         loadHistoryTable();
                     } catch (err) {
                         alert('Gagal menyimpan transaksi: ' + err.message);
@@ -787,7 +830,7 @@
             if (cartItems.length === 0) {
                 tbody.append(`
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-3">Keranjang kosong. Tambahkan barang di atas.</td>
+                        <td colspan="7" class="text-center text-muted py-3">Keranjang kosong. Tambahkan barang di atas.</td>
                     </tr>
                 `);
                 $('#cart-total').text('Rp 0');
@@ -875,15 +918,25 @@
             tbody.empty();
 
             historyList.forEach((bm, index) => {
+                const isDipakaiRow = bm.jenis_transaksi === 'DIPAKAI_SENDIRI';
+                const tipeBadge = isDipakaiRow
+                    ? '<span class="badge bg-warning text-dark ms-1"><i class="fa-solid fa-home-user me-1"></i>Dipakai Sendiri</span>'
+                    : '';
+                const totalDisplay = isDipakaiRow
+                    ? '<span class="text-success fw-bold">Rp 0</span>'
+                    : `Rp ${formatNumber(bm.total_penjualan)}`;
+                const metodeBadge = isDipakaiRow
+                    ? '<span class="badge bg-warning text-dark">Dipakai Sendiri</span>'
+                    : `<span class="badge bg-secondary">${escapeHtml(bm.metode_pembayaran)}</span>`;
                 tbody.append(`
-                    <tr class="cursor-pointer" onclick="showPenjualanDetail('${escapeHtml(bm.no_penjualan)}')" title="Klik untuk detail" style="cursor: pointer;">
+                    <tr class="cursor-pointer${isDipakaiRow ? ' table-warning' : ''}" onclick="showPenjualanDetail('${escapeHtml(bm.no_penjualan)}')" title="Klik untuk detail" style="cursor: pointer;">
                         <td>${index + 1}</td>
                         <td><span class="fw-bold font-monospace text-primary">${escapeHtml(bm.no_penjualan)}</span></td>
                         <td><span class="small text-muted">${formatDate(bm.tanggal)}</span></td>
-                        <td><span class="fw-semibold text-dark">${escapeHtml(bm.pelanggan)}</span></td>
+                        <td><span class="fw-semibold text-dark">${escapeHtml(bm.pelanggan)}</span>${tipeBadge}</td>
                         <td><span class="small text-muted">${escapeHtml(bm.alamat)}</span></td>
-                        <td class="fw-bold text-end text-dark">Rp ${formatNumber(bm.total_penjualan)}</td>
-                        <td><span class="badge bg-secondary">${escapeHtml(bm.metode_pembayaran)}</span></td>
+                        <td class="fw-bold text-end text-dark">${totalDisplay}</td>
+                        <td>${metodeBadge}</td>
                         <td>
                             <span class="badge ${bm.status_pembayaran === 'Lunas' ? 'bg-success' : 'bg-warning'} text-white">
                                 ${escapeHtml(bm.status_pembayaran)}
@@ -911,12 +964,29 @@
 
             const pl = pelangganList.find(x => x.id_pelanggan === parent.id_pelanggan) || {};
 
+            const isDipakaiTx = parent.jenis_transaksi === 'DIPAKAI_SENDIRI';
             $('#detail-no-penjualan').text(parent.no_penjualan);
             $('#detail-pelanggan').text(pl.nama_pelanggan || 'Umum');
             $('#detail-alamat').text(pl.alamat || '-');
             $('#detail-tanggal').text(formatDate(parent.tanggal));
-            $('#detail-metode').text(parent.metode_pembayaran || 'Tunai');
+            $('#detail-metode').text(isDipakaiTx ? 'Dipakai Sendiri (Rp 0)' : (parent.metode_pembayaran || 'Tunai'));
             $('#detail-status').text(parent.status_pembayaran || 'Lunas');
+            // Show/hide dipakai sendiri info row
+            if (isDipakaiTx) {
+                const ket = parent.keterangan || '-';
+                if ($('#detail-dipakai-row').length === 0) {
+                    // Inject row if not exist
+                    $('#detail-status').closest('tr').after(
+                        '<tr><td class="fw-bold text-warning"><i class="fa-solid fa-home-user me-1"></i>Jenis:</td><td><span class="badge bg-warning text-dark">Dipakai Sendiri</span></td></tr>' +
+                        '<tr id="detail-keterangan-row"><td class="fw-bold text-secondary">Keterangan:</td><td id="detail-keterangan">' + escapeHtml(ket) + '</td></tr>'
+                    );
+                } else {
+                    $('#detail-keterangan').text(ket);
+                }
+                $('#detail-dipakai-row, #detail-keterangan-row').show();
+            } else {
+                $('#detail-dipakai-row, #detail-keterangan-row').hide();
+            }
             
             if (parent.metode_pembayaran === 'Tempo') {
                 $('#detail-jatuh-tempo').text(formatDate(parent.jatuh_tempo));
@@ -932,14 +1002,21 @@
             let index = 1;
             items.forEach(dp => {
                 const b = barangList.find(x => x.id_inventori === dp.id_inventori) || {};
+                const isDipakaiItem = dp.is_dipakai_sendiri || isDipakaiTx;
+                const subtotalItemDisplay = isDipakaiItem
+                    ? '<span class="text-success fw-bold">Rp 0</span> <small class="text-muted">(Diskon 100%)</small>'
+                    : `Rp ${formatNumber(dp.subtotal)}`;
+                const hargaItemDisplay = isDipakaiItem
+                    ? `<span class="text-muted text-decoration-line-through">Rp ${formatNumber(dp.harga_jual)}</span>`
+                    : `Rp ${formatNumber(dp.harga_jual)}`;
                 tbody.append(`
-                    <tr>
+                    <tr${isDipakaiItem ? ' class="table-warning"' : ''}>
                         <td>${index++}</td>
                         <td><span class="fw-semibold text-dark">${escapeHtml(b.nama_barang || 'Barang Dihapus')}</span></td>
                         <td class="text-end fw-medium">${dp.qty}</td>
                         <td>${escapeHtml(dp.satuan || b.satuan || '-')}</td>
-                        <td class="text-end">Rp ${formatNumber(dp.harga_jual)}</td>
-                        <td class="text-end fw-bold text-primary">Rp ${formatNumber(dp.subtotal)}</td>
+                        <td class="text-end">${hargaItemDisplay}</td>
+                        <td class="text-end fw-bold">${subtotalItemDisplay}</td>
                     </tr>
                 `);
             });
