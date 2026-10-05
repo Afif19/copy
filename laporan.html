@@ -326,6 +326,7 @@
                                                 <th class="text-center">Metode Bayar</th>
                                                 <th class="text-center">Status</th>
                                                 <th>Jatuh Tempo</th>
+                                                <th class="text-center" style="width: 140px;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="purchase-report-tbody"></tbody>
@@ -337,42 +338,112 @@
 
                     <!-- TAB 3: DEBT REPORT (HUTANG SUPPLIER) -->
                     <div class="tab-pane fade" id="debt-report" role="tabpanel" aria-labelledby="debt-report-tab">
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <div class="stat-card border-start border-warning border-4 py-3.5">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <form id="debtFilterForm" class="row g-3 align-items-end">
+                                    <div class="col-md-2">
+                                        <label for="debt_filter_type" class="form-label fw-medium">Tipe Filter</label>
+                                        <select class="form-select" name="debt_filter_type" id="debt_filter_type">
+                                            <option value="semua" selected>Semua Periode</option>
+                                            <option value="harian">Rentang Tanggal</option>
+                                            <option value="bulanan">Bulanan</option>
+                                            <option value="tahunan">Tahunan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 debt-filter-wrapper d-none" id="debt-wrapper-harian">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label for="debt_tanggal_mulai" class="form-label fw-medium">Tgl Mulai</label>
+                                                <input type="date" class="form-control" id="debt_tanggal_mulai">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="debt_tanggal_akhir" class="form-label fw-medium">Tgl Akhir</label>
+                                                <input type="date" class="form-control" id="debt_tanggal_akhir">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 debt-filter-wrapper d-none" id="debt-wrapper-bulanan">
+                                        <label for="debt_bulan" class="form-label fw-medium">Pilih Bulan & Tahun</label>
+                                        <input type="month" class="form-control" id="debt_bulan">
+                                    </div>
+                                    <div class="col-md-3 debt-filter-wrapper d-none" id="debt-wrapper-tahunan">
+                                        <label for="debt_tahun" class="form-label fw-medium">Pilih Tahun</label>
+                                        <select class="form-select" id="debt_tahun"></select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="debt_status_filter" class="form-label fw-medium">Status Hutang</label>
+                                        <select class="form-select" id="debt_status_filter">
+                                            <option value="semua">Semua Status</option>
+                                            <option value="belum_lunas" selected>Belum Lunas (Aktif)</option>
+                                            <option value="lunas">Lunas (Selesai)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="debt_supplier_filter" class="form-label fw-medium">Supplier</label>
+                                        <select class="form-select" id="debt_supplier_filter">
+                                            <option value="semua">Semua Supplier</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary px-3 w-100 fw-semibold">
+                                            <i class="fa-solid fa-filter me-1"></i> Terapkan
+                                        </button>
+                                        <button type="button" id="btnExportHutang" class="btn btn-success px-3 w-100 fw-semibold">
+                                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-warning border-4 py-3">
                                     <span class="text-muted small fw-medium d-block mb-1">Total Sisa Hutang Aktif</span>
-                                    <h3 class="fw-bold text-warning mb-0" id="debt-total-amount">Rp 0</h3>
+                                    <h4 class="fw-bold text-warning mb-0" id="debt-total-amount">Rp 0</h4>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="stat-card border-start border-secondary border-4 py-3.5">
-                                    <span class="text-muted small fw-medium d-block mb-1">Total Nota Belum Lunas</span>
-                                    <h3 class="fw-bold text-secondary mb-0" id="debt-total-tx">0 Nota</h3>
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-success border-4 py-3">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Hutang Terbayar</span>
+                                    <h4 class="fw-bold text-success mb-0" id="debt-total-paid">Rp 0</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-danger border-4 py-3">
+                                    <span class="text-muted small fw-medium d-block mb-1">Nota Belum Lunas</span>
+                                    <h4 class="fw-bold text-danger mb-0" id="debt-total-tx">0 Nota</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-primary border-4 py-3">
+                                    <span class="text-muted small fw-medium d-block mb-1">Nota Lunas / Selesai</span>
+                                    <h4 class="fw-bold text-primary mb-0" id="debt-total-lunas">0 Nota</h4>
                                 </div>
                             </div>
                         </div>
 
                         <div class="card card-table border-0 shadow-sm">
                             <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-hand-holding-dollar me-2 text-primary"></i>Daftar Hutang Supplier (Pembelian Tempo)</h6>
-                                <button type="button" id="btnExportHutang" class="btn btn-success px-4 fw-semibold">
-                                    <i class="fa-solid fa-file-excel me-1"></i> Export Excel
-                                </button>
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-hand-holding-dollar me-2 text-primary"></i>Daftar Hutang Supplier (Pembelian Tempo & Riwayat Transaksi Barang Masuk)</h6>
+                                <span class="badge bg-light text-muted border" id="debt-table-badge">Semua Transaksi Terhubung</span>
                             </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle w-100" id="debt-report-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 50px;">No</th>
+                                                <th style="width: 40px;">No</th>
                                                 <th>No Pembelian</th>
                                                 <th>Tanggal</th>
                                                 <th>Supplier</th>
+                                                <th>No Faktur</th>
                                                 <th class="text-end">Total Nota</th>
                                                 <th class="text-end">Sudah Dibayar</th>
                                                 <th class="text-end">Sisa Hutang</th>
                                                 <th class="text-center">Jatuh Tempo</th>
-                                                <th class="text-center" style="width: 120px;">Aksi</th>
+                                                <th class="text-center">Status</th>
+                                                <th class="text-center" style="width: 140px;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="debt-report-tbody"></tbody>
@@ -384,34 +455,102 @@
 
                     <!-- TAB 4: RECEIVABLE REPORT (PIUTANG PELANGGAN) -->
                     <div class="tab-pane fade" id="receivable-report" role="tabpanel" aria-labelledby="receivable-report-tab">
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <div class="stat-card border-start border-info border-4 py-3.5">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <form id="receivableFilterForm" class="row g-3 align-items-end">
+                                    <div class="col-md-2">
+                                        <label for="r_filter_type" class="form-label fw-medium">Tipe Filter</label>
+                                        <select class="form-select" id="r_filter_type">
+                                            <option value="semua" selected>Semua Periode</option>
+                                            <option value="harian">Rentang Tanggal</option>
+                                            <option value="bulanan">Bulanan</option>
+                                            <option value="tahunan">Tahunan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 r-filter-wrapper d-none" id="r-wrapper-harian">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label for="r_tanggal_mulai" class="form-label fw-medium">Tgl Mulai</label>
+                                                <input type="date" class="form-control" id="r_tanggal_mulai">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="r_tanggal_akhir" class="form-label fw-medium">Tgl Akhir</label>
+                                                <input type="date" class="form-control" id="r_tanggal_akhir">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 r-filter-wrapper d-none" id="r-wrapper-bulanan">
+                                        <label for="r_bulan" class="form-label fw-medium">Pilih Bulan & Tahun</label>
+                                        <input type="month" class="form-control" id="r_bulan">
+                                    </div>
+                                    <div class="col-md-3 r-filter-wrapper d-none" id="r-wrapper-tahunan">
+                                        <label for="r_tahun" class="form-label fw-medium">Pilih Tahun</label>
+                                        <select class="form-select" id="r_tahun"></select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="r_status_filter" class="form-label fw-medium">Status Piutang</label>
+                                        <select class="form-select" id="r_status_filter">
+                                            <option value="semua">Semua Status</option>
+                                            <option value="belum_lunas" selected>Belum Lunas (Aktif)</option>
+                                            <option value="lunas">Lunas (Selesai)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="r_pelanggan_filter" class="form-label fw-medium">Pelanggan</label>
+                                        <select class="form-select" id="r_pelanggan_filter">
+                                            <option value="semua">Semua Pelanggan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary px-3 w-100 fw-semibold">
+                                            <i class="fa-solid fa-filter me-1"></i> Terapkan
+                                        </button>
+                                        <button type="button" id="btnExportPiutang" class="btn btn-success px-3 w-100 fw-semibold">
+                                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-info border-4 py-3">
                                     <span class="text-muted small fw-medium d-block mb-1">Total Sisa Piutang Aktif</span>
-                                    <h3 class="fw-bold text-info mb-0" id="receivable-total-amount">Rp 0</h3>
+                                    <h4 class="fw-bold text-info mb-0" id="receivable-total-amount">Rp 0</h4>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="stat-card border-start border-dark border-4 py-3.5">
-                                    <span class="text-muted small fw-medium d-block mb-1">Total Nota Belum Lunas</span>
-                                    <h3 class="fw-bold text-dark mb-0" id="receivable-total-tx">0 Nota</h3>
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-success border-4 py-3">
+                                    <span class="text-muted small fw-medium d-block mb-1">Total Piutang Terbayar</span>
+                                    <h4 class="fw-bold text-success mb-0" id="receivable-total-paid">Rp 0</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-dark border-4 py-3">
+                                    <span class="text-muted small fw-medium d-block mb-1">Nota Belum Lunas</span>
+                                    <h4 class="fw-bold text-dark mb-0" id="receivable-total-tx">0 Nota</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card border-start border-primary border-4 py-3">
+                                    <span class="text-muted small fw-medium d-block mb-1">Nota Lunas / Selesai</span>
+                                    <h4 class="fw-bold text-primary mb-0" id="receivable-total-lunas">0 Nota</h4>
                                 </div>
                             </div>
                         </div>
 
                         <div class="card card-table border-0 shadow-sm">
                             <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i>Daftar Piutang Pelanggan (Penjualan Tempo)</h6>
-                                <button type="button" id="btnExportPiutang" class="btn btn-success px-4 fw-semibold">
-                                    <i class="fa-solid fa-file-excel me-1"></i> Export Excel
-                                </button>
+                                <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i>Daftar Piutang Pelanggan (Penjualan Tempo & Riwayat Penjualan)</h6>
+                                <span class="badge bg-light text-muted border" id="receivable-table-badge">Semua Transaksi Terhubung</span>
                             </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle w-100" id="receivable-report-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 50px;">No</th>
+                                                <th style="width: 40px;">No</th>
                                                 <th>No Penjualan</th>
                                                 <th>Tanggal</th>
                                                 <th>Pelanggan</th>
@@ -419,7 +558,8 @@
                                                 <th class="text-end">Sudah Dibayar</th>
                                                 <th class="text-end">Sisa Piutang</th>
                                                 <th class="text-center">Jatuh Tempo</th>
-                                                <th class="text-center" style="width: 120px;">Aksi</th>
+                                                <th class="text-center">Status</th>
+                                                <th class="text-center" style="width: 140px;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="receivable-report-tbody"></tbody>
@@ -458,12 +598,18 @@
                                     <table class="table table-hover align-middle w-100" id="stock-report-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 50px;">No</th>
+                                                <th style="width: 40px;">No</th>
                                                 <th>Nama Barang</th>
                                                 <th>Kategori</th>
                                                 <th class="text-end">Stok Saat Ini</th>
-                                                <th class="text-end">Stok Minimum</th>
-                                                <th style="width: 150px; text-align: center;">Status</th>
+                                                <th class="text-end">Pemakaian/Hr</th>
+                                                <th class="text-center">Lead Time</th>
+                                                <th class="text-end">Safety Stock</th>
+                                                <th class="text-end">Min Stok</th>
+                                                <th class="text-end">Max Stok</th>
+                                                <th class="text-end fw-bold text-warning text-dark">ROP</th>
+                                                <th class="text-end fw-bold text-success">Pesan (Q)</th>
+                                                <th style="width: 130px; text-align: center;">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody id="stock-report-tbody"></tbody>
@@ -651,6 +797,217 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+    <!-- Modal: Detail Transaksi Pembelian / Barang Masuk -->
+    <div class="modal fade" id="modalDetailPembelian" tabindex="-1" aria-labelledby="modalDetailPembelianLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h5 class="modal-title fw-bold" id="modalDetailPembelianLabel">
+                        <i class="fa-solid fa-file-invoice me-2"></i> Detail Transaksi Pembelian <span id="dtl-pembelian-no"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-3 g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <table class="table table-borderless table-sm small mb-0">
+                                    <tr><td class="fw-bold text-secondary" style="width: 140px;">No Pembelian:</td><td class="font-monospace fw-bold text-primary" id="dtl-no-pembelian"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Supplier:</td><td class="fw-semibold" id="dtl-supplier"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Alamat Supplier:</td><td id="dtl-alamat-supplier"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Tanggal Masuk:</td><td id="dtl-tanggal"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <table class="table table-borderless table-sm small mb-0">
+                                    <tr><td class="fw-bold text-secondary" style="width: 140px;">No. Faktur:</td><td id="dtl-faktur"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Metode Bayar:</td><td id="dtl-metode"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Status Bayar:</td><td id="dtl-status"></td></tr>
+                                    <tr id="dtl-jatuh-tempo-row"><td class="fw-bold text-secondary">Jatuh Tempo:</td><td id="dtl-jatuh-tempo"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment summary card if tempo / debt -->
+                    <div id="dtl-hutang-summary" class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white">
+                                <span class="text-muted small d-block">Total Nota</span>
+                                <strong class="text-dark" id="dtl-total-nota">Rp 0</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white">
+                                <span class="text-muted small d-block">Sudah Dibayar</span>
+                                <strong class="text-success" id="dtl-sudah-dibayar">Rp 0</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white">
+                                <span class="text-muted small d-block">Sisa Hutang</span>
+                                <strong class="text-danger" id="dtl-sisa-hutang">Rp 0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-dark mt-3 mb-2"><i class="fa-solid fa-boxes-stacked me-1 text-primary"></i> Rincian Barang Masuk</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle table-sm small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;" class="text-center">No</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-end" style="width: 90px;">Jumlah</th>
+                                    <th style="width: 80px;">Satuan</th>
+                                    <th class="text-end" style="width: 130px;">Harga Beli</th>
+                                    <th class="text-end" style="width: 140px;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dtl-items-tbody"></tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light">
+                                    <td colspan="5" class="text-end">Total Pembelian:</td>
+                                    <td class="text-end text-primary" id="dtl-grand-total">Rp 0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Riwayat Pembayaran Angsuran di dalam detail modal -->
+                    <div id="dtl-payment-history-wrapper" class="mt-3">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-clock-rotate-left me-1 text-info"></i> Riwayat Pembayaran Angsuran</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-striped small align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;" class="text-center">No</th>
+                                        <th>Tanggal Pembayaran</th>
+                                        <th>Metode</th>
+                                        <th class="text-end">Nominal Dibayar</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dtl-payment-history-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-primary fw-semibold" id="btnDtlBayarHutang">
+                            <i class="fa-solid fa-money-bill-wave me-1"></i> Bayar Hutang Sekarang
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detail Transaksi Penjualan -->
+    <div class="modal fade" id="modalDetailPenjualan" tabindex="-1" aria-labelledby="modalDetailPenjualanLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white py-3">
+                    <h5 class="modal-title fw-bold" id="modalDetailPenjualanLabel">
+                        <i class="fa-solid fa-file-invoice-dollar me-2"></i> Detail Transaksi Penjualan <span id="dtl-penjualan-no"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-3 g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <table class="table table-borderless table-sm small mb-0">
+                                    <tr><td class="fw-bold text-secondary" style="width: 140px;">No Penjualan:</td><td class="font-monospace fw-bold text-success" id="dtl-p-no"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Pelanggan:</td><td class="fw-semibold" id="dtl-p-pelanggan"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Alamat:</td><td id="dtl-p-alamat"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Tanggal:</td><td id="dtl-p-tanggal"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <table class="table table-borderless table-sm small mb-0">
+                                    <tr><td class="fw-bold text-secondary" style="width: 140px;">Metode Bayar:</td><td id="dtl-p-metode"></td></tr>
+                                    <tr><td class="fw-bold text-secondary">Status Bayar:</td><td id="dtl-p-status"></td></tr>
+                                    <tr id="dtl-p-jatuh-tempo-row"><td class="fw-bold text-secondary">Jatuh Tempo:</td><td id="dtl-p-jatuh-tempo"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dtl-piutang-summary" class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white">
+                                <span class="text-muted small d-block">Total Nota</span>
+                                <strong class="text-dark" id="dtl-p-total-nota">Rp 0</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white">
+                                <span class="text-muted small d-block">Sudah Dibayar</span>
+                                <strong class="text-success" id="dtl-p-sudah-dibayar">Rp 0</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white">
+                                <span class="text-muted small d-block">Sisa Piutang</span>
+                                <strong class="text-info" id="dtl-p-sisa-piutang">Rp 0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-dark mt-3 mb-2"><i class="fa-solid fa-boxes-stacked me-1 text-success"></i> Rincian Barang Terjual</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle table-sm small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;" class="text-center">No</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-end" style="width: 90px;">Jumlah</th>
+                                    <th style="width: 80px;">Satuan</th>
+                                    <th class="text-end" style="width: 130px;">Harga Jual</th>
+                                    <th class="text-end" style="width: 140px;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dtl-p-items-tbody"></tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light">
+                                    <td colspan="5" class="text-end">Total Penjualan:</td>
+                                    <td class="text-end text-success" id="dtl-p-grand-total">Rp 0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div id="dtl-p-payment-history-wrapper" class="mt-3">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-clock-rotate-left me-1 text-info"></i> Riwayat Pembayaran Angsuran</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-striped small align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;" class="text-center">No</th>
+                                        <th>Tanggal Pembayaran</th>
+                                        <th>Metode</th>
+                                        <th class="text-end">Nominal Diterima</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dtl-p-payment-history-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-success fw-semibold" id="btnDtlBayarPiutang">
+                            <i class="fa-solid fa-money-bill-wave me-1"></i> Terima Pembayaran Sekarang
+                        </button>
+                    </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
@@ -682,19 +1039,32 @@
             const currentYear = new Date().getFullYear();
             const yearSelect = $('#tahun');
             const pYearSelect = $('#p_tahun');
+            const debtYearSelect = $('#debt_tahun');
+            const rYearSelect = $('#r_tahun');
+
             yearSelect.empty();
             pYearSelect.empty();
+            debtYearSelect.empty();
+            rYearSelect.empty();
+
             for (let y = currentYear; y >= currentYear - 9; y--) {
                 yearSelect.append('<option value="' + y + '">' + y + '</option>');
                 pYearSelect.append('<option value="' + y + '">' + y + '</option>');
+                debtYearSelect.append('<option value="' + y + '">' + y + '</option>');
+                rYearSelect.append('<option value="' + y + '">' + y + '</option>');
             }
+
+            // Populate Supplier Filter for Hutang & Customer for Piutang
+            populateSupplierFilter();
+            populateCustomerFilter();
 
             const urlParams = new URLSearchParams(window.location.search);
             const filterType = urlParams.get('filter_type') || 'harian';
             const todayStr = new Date().toISOString().split('T')[0];
+            const thisMonthStr = new Date().toISOString().substring(0, 7);
             const filterTanggalMulai = urlParams.get('tanggal_mulai') || urlParams.get('tanggal') || todayStr;
             const filterTanggalAkhir = urlParams.get('tanggal_akhir') || urlParams.get('tanggal') || todayStr;
-            const filterBulan = urlParams.get('bulan') || new Date().toISOString().substring(0, 7);
+            const filterBulan = urlParams.get('bulan') || thisMonthStr;
             const filterTahun = parseInt(urlParams.get('tahun')) || currentYear;
 
             $('#filter_type').val(filterType);
@@ -709,8 +1079,20 @@
             $('#p_bulan').val(filterBulan);
             $('#p_tahun').val(filterTahun);
 
+            $('#debt_tanggal_mulai').val(filterTanggalMulai);
+            $('#debt_tanggal_akhir').val(filterTanggalAkhir);
+            $('#debt_bulan').val(filterBulan);
+            $('#debt_tahun').val(filterTahun);
+
+            $('#r_tanggal_mulai').val(filterTanggalMulai);
+            $('#r_tanggal_akhir').val(filterTanggalAkhir);
+            $('#r_bulan').val(filterBulan);
+            $('#r_tahun').val(filterTahun);
+
             toggleFilterInputs(filterType);
             togglePurchaseFilterInputs(filterType);
+            toggleDebtFilterInputs($('#debt_filter_type').val() || 'semua');
+            toggleReceivableFilterInputs($('#r_filter_type').val() || 'semua');
 
             $('#filter_type').on('change', function () {
                 toggleFilterInputs($(this).val());
@@ -718,6 +1100,22 @@
 
             $('#purchase_filter_type').on('change', function () {
                 togglePurchaseFilterInputs($(this).val());
+            });
+
+            $('#debt_filter_type').on('change', function () {
+                toggleDebtFilterInputs($(this).val());
+            });
+
+            $('#r_filter_type').on('change', function () {
+                toggleReceivableFilterInputs($(this).val());
+            });
+
+            $('#debt_status_filter, #debt_supplier_filter').on('change', function () {
+                loadDebtReport();
+            });
+
+            $('#r_status_filter, #r_pelanggan_filter').on('change', function () {
+                loadReceivableReport();
             });
 
             $('#salesFilterForm').on('submit', function (e) {
@@ -756,12 +1154,24 @@
                 loadPurchaseReport(type, startDate, endDate, month, year);
             });
 
+            $('#debtFilterForm').on('submit', function (e) {
+                e.preventDefault();
+                loadDebtReport();
+            });
+
+            $('#receivableFilterForm').on('submit', function (e) {
+                e.preventDefault();
+                loadReceivableReport();
+            });
+
+            // Initial report loads
             loadSalesReport(filterType, filterTanggalMulai, filterTanggalAkhir, filterBulan, filterTahun);
             loadPurchaseReport(filterType, filterTanggalMulai, filterTanggalAkhir, filterBulan, filterTahun);
             loadDebtReport();
             loadReceivableReport();
             loadStockReport();
 
+            // Export event handlers
             $('#btnExportPenjualan').on('click', function () {
                 const startDate = $('#tanggal_mulai').val();
                 const endDate = $('#tanggal_akhir').val();
@@ -794,6 +1204,7 @@
                 exportStockToExcel();
             });
 
+            // Form Submit: Bayar Hutang Supplier
             $('#formBayarHutang').on('submit', function (e) {
                 e.preventDefault();
                 try {
@@ -803,6 +1214,17 @@
                     const metode_pembayaran = $('#bayar_metode_hutang').val();
                     const keterangan = $('#bayar_keterangan_hutang').val();
 
+                    if (!jumlah_pembayaran || jumlah_pembayaran <= 0) {
+                        alert('Jumlah pembayaran harus lebih dari 0!');
+                        return;
+                    }
+
+                    const sisaHutang = DB.getSisaHutang(no_pembelian);
+                    if (jumlah_pembayaran > sisaHutang) {
+                        alert('Jumlah pembayaran tidak boleh melebihi sisa hutang (Rp ' + formatNumber(sisaHutang) + ')!');
+                        return;
+                    }
+
                     DB.addPembayaranHutang({
                         no_pembelian,
                         tanggal_pembayaran,
@@ -811,17 +1233,19 @@
                         keterangan
                     });
 
-                    alert('Pembayaran hutang berhasil disimpan!');
+                    alert('Pembayaran hutang supplier berhasil disimpan!');
                     const modalEl = document.getElementById('modalBayarHutang');
                     const modal = bootstrap.Modal.getInstance(modalEl);
                     if (modal) modal.hide();
+
                     loadDebtReport();
-                    loadPurchaseReport($('#purchase_filter_type').val(), $('#p_tanggal').val(), $('#p_bulan').val(), $('#p_tahun').val());
+                    loadPurchaseReport();
                 } catch (err) {
                     alert('Gagal: ' + err.message);
                 }
             });
 
+            // Form Submit: Bayar Piutang Pelanggan
             $('#formBayarPiutang').on('submit', function (e) {
                 e.preventDefault();
                 try {
@@ -831,6 +1255,17 @@
                     const metode_pembayaran = $('#bayar_metode_piutang').val();
                     const keterangan = $('#bayar_keterangan_piutang').val();
 
+                    if (!jumlah_pembayaran || jumlah_pembayaran <= 0) {
+                        alert('Jumlah pembayaran harus lebih dari 0!');
+                        return;
+                    }
+
+                    const sisaPiutang = DB.getSisaPiutang(no_penjualan);
+                    if (jumlah_pembayaran > sisaPiutang) {
+                        alert('Jumlah pembayaran tidak boleh melebihi sisa piutang (Rp ' + formatNumber(sisaPiutang) + ')!');
+                        return;
+                    }
+
                     DB.addPembayaranPiutang({
                         no_penjualan,
                         tanggal_pembayaran,
@@ -839,17 +1274,81 @@
                         keterangan
                     });
 
-                    alert('Pembayaran piutang berhasil disimpan!');
+                    alert('Pembayaran piutang pelanggan berhasil disimpan!');
                     const modalEl = document.getElementById('modalBayarPiutang');
                     const modal = bootstrap.Modal.getInstance(modalEl);
                     if (modal) modal.hide();
+
                     loadReceivableReport();
                     loadSalesReport($('#filter_type').val(), $('#tanggal_mulai').val(), $('#tanggal_akhir').val(), $('#bulan').val(), $('#tahun').val());
                 } catch (err) {
                     alert('Gagal: ' + err.message);
                 }
             });
+
+            // Auto-refresh and adjust DataTables column width when switching tabs
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                const targetId = $(e.target).attr('data-bs-target');
+                if (targetId === '#debt-report') {
+                    populateSupplierFilter();
+                    loadDebtReport();
+                    if (debtTableInstance) debtTableInstance.columns.adjust().responsive.recalc();
+                } else if (targetId === '#purchase-report') {
+                    loadPurchaseReport();
+                    if (purchaseTableInstance) purchaseTableInstance.columns.adjust().responsive.recalc();
+                } else if (targetId === '#receivable-report') {
+                    populateCustomerFilter();
+                    loadReceivableReport();
+                    if (receivableTableInstance) receivableTableInstance.columns.adjust().responsive.recalc();
+                } else if (targetId === '#sales-report') {
+                    $('#salesFilterForm').trigger('submit');
+                    if (salesTableInstance) salesTableInstance.columns.adjust().responsive.recalc();
+                } else if (targetId === '#stock-report') {
+                    loadStockReport();
+                    if (stockTableInstance) stockTableInstance.columns.adjust().responsive.recalc();
+                }
+            });
+
+            // Auto-refresh when tab window gets focus (e.g. user just saved in barang_masuk.html or penjualan.html)
+            $(window).on('focus', function () {
+                const activeTab = $('.nav-tabs .nav-link.active').attr('data-bs-target');
+                if (activeTab === '#debt-report') {
+                    populateSupplierFilter();
+                    loadDebtReport();
+                } else if (activeTab === '#purchase-report') {
+                    loadPurchaseReport();
+                } else if (activeTab === '#receivable-report') {
+                    populateCustomerFilter();
+                    loadReceivableReport();
+                } else if (activeTab === '#sales-report') {
+                    $('#salesFilterForm').trigger('submit');
+                } else if (activeTab === '#stock-report') {
+                    loadStockReport();
+                }
+            });
         });
+
+        function populateSupplierFilter() {
+            const currentVal = $('#debt_supplier_filter').val() || 'semua';
+            const suppliers = DB.getTable('supplier') || [];
+            const select = $('#debt_supplier_filter');
+            select.find('option:not(:first)').remove();
+            suppliers.forEach(s => {
+                select.append('<option value="' + escapeHtml(s.nama_supplier) + '">' + escapeHtml(s.nama_supplier) + '</option>');
+            });
+            select.val(currentVal);
+        }
+
+        function populateCustomerFilter() {
+            const currentVal = $('#r_pelanggan_filter').val() || 'semua';
+            const customers = DB.getTable('pelanggan') || [];
+            const select = $('#r_pelanggan_filter');
+            select.find('option:not(:first)').remove();
+            customers.forEach(c => {
+                select.append('<option value="' + escapeHtml(c.nama_pelanggan) + '">' + escapeHtml(c.nama_pelanggan) + '</option>');
+            });
+            select.val(currentVal);
+        }
 
         function toggleFilterInputs(type) {
             $('.filter-input-wrapper').addClass('d-none');
@@ -863,6 +1362,20 @@
             if (type === 'harian') $('#p-wrapper-harian').removeClass('d-none');
             if (type === 'bulanan') $('#p-wrapper-bulanan').removeClass('d-none');
             if (type === 'tahunan') $('#p-wrapper-tahunan').removeClass('d-none');
+        }
+
+        function toggleDebtFilterInputs(type) {
+            $('.debt-filter-wrapper').addClass('d-none');
+            if (type === 'harian') $('#debt-wrapper-harian').removeClass('d-none');
+            else if (type === 'bulanan') $('#debt-wrapper-bulanan').removeClass('d-none');
+            else if (type === 'tahunan') $('#debt-wrapper-tahunan').removeClass('d-none');
+        }
+
+        function toggleReceivableFilterInputs(type) {
+            $('.r-filter-wrapper').addClass('d-none');
+            if (type === 'harian') $('#r-wrapper-harian').removeClass('d-none');
+            else if (type === 'bulanan') $('#r-wrapper-bulanan').removeClass('d-none');
+            else if (type === 'tahunan') $('#r-wrapper-tahunan').removeClass('d-none');
         }
 
         function loadSalesReport(type, startDateVal, endDateVal, monthVal, yearVal) {
@@ -898,7 +1411,6 @@
             tbody.empty();
 
             filteredSales.forEach((item, index) => {
-                const metodePembayaran = item.metode_pembayaran || 'Tunai';
                 const metodeBadge = item.metode_pembayaran === 'Tempo'
                     ? '<span class="badge bg-warning text-dark">Tempo</span>'
                     : (item.metode_pembayaran === 'Transfer' ? '<span class="badge bg-info text-dark">Transfer</span>' : '<span class="badge bg-secondary">Tunai</span>');
@@ -914,7 +1426,7 @@
                 const pembeliStr = isDipakai ? (escapeHtml(item.nama_pembeli) + ' <span class="badge bg-info text-dark">Dipakai Sendiri</span>') : escapeHtml(item.nama_pembeli);
 
                 tbody.append('<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
                     '<td><span class="small text-muted">' + formatDate(item.tanggal) + '</span></td>' +
                     '<td><span class="fw-semibold text-dark">' + pembeliStr + '</span></td>' +
                     '<td><span class="text-dark">' + escapeHtml(item.nama_barang) + '</span></td>' +
@@ -929,15 +1441,18 @@
             });
 
             salesTableInstance = $('#sales-report-table').DataTable({
-                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' },
+                order: [[1, 'desc']]
             });
         }
 
         function loadPurchaseReport(type, startDateVal, endDateVal, monthVal, yearVal) {
-            if (arguments.length === 4) {
-                yearVal = monthVal;
-                monthVal = endDateVal;
-                endDateVal = startDateVal;
+            if (!type) {
+                type = $('#purchase_filter_type').val() || 'harian';
+                startDateVal = $('#p_tanggal_mulai').val();
+                endDateVal = $('#p_tanggal_akhir').val();
+                monthVal = $('#p_bulan').val();
+                yearVal = $('#p_tahun').val();
             }
             const purchaseHeaders = DB.getPembelianHeaders();
             let filtered = [];
@@ -968,9 +1483,10 @@
             tbody.empty();
 
             filtered.forEach((p, index) => {
-                const statusBadge = p.status_pembayaran === 'Belum Lunas'
-                    ? '<span class="badge bg-danger">Belum Lunas</span>'
-                    : '<span class="badge bg-success">Lunas</span>';
+                const isLunas = p.status_pembayaran === 'Lunas';
+                const statusBadge = isLunas
+                    ? '<span class="badge bg-success">Lunas</span>'
+                    : '<span class="badge bg-danger">Belum Lunas</span>';
 
                 const metodeBadge = p.metode_pembayaran === 'Tempo'
                     ? '<span class="badge bg-warning text-dark">Tempo</span>'
@@ -978,9 +1494,14 @@
 
                 const formattedDue = (p.jatuh_tempo && p.jatuh_tempo !== '-') ? formatDate(p.jatuh_tempo) : '-';
 
+                let aksiBtn = '<button class="btn btn-sm btn-outline-primary me-1" onclick="openModalDetailPembelian(\'' + escapeHtml(p.no_pembelian) + '\')" title="Lihat Rincian Barang"><i class="fa-solid fa-eye"></i> Detail</button>';
+                if (p.metode_pembayaran === 'Tempo' && !isLunas) {
+                    aksiBtn += '<button class="btn btn-sm btn-primary" onclick="openModalBayarHutang(\'' + escapeHtml(p.no_pembelian) + '\')" title="Bayar Hutang"><i class="fa-solid fa-money-bill-wave"></i> Bayar</button>';
+                }
+
                 tbody.append('<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
-                    '<td><span class="fw-semibold text-primary">' + escapeHtml(p.no_pembelian) + '</span></td>' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-primary font-monospace">' + escapeHtml(p.no_pembelian) + '</span></td>' +
                     '<td><span class="small text-muted">' + formatDate(p.tanggal) + '</span></td>' +
                     '<td><span class="fw-semibold text-dark">' + escapeHtml(p.supplier) + '</span></td>' +
                     '<td><span class="small">' + escapeHtml(p.nomor_faktur_supplier || '-') + '</span></td>' +
@@ -988,118 +1509,234 @@
                     '<td class="text-center">' + metodeBadge + '</td>' +
                     '<td class="text-center">' + statusBadge + '</td>' +
                     '<td><span class="small text-muted">' + formattedDue + '</span></td>' +
+                    '<td class="text-center">' + aksiBtn + '</td>' +
                     '</tr>'
                 );
             });
 
             purchaseTableInstance = $('#purchase-report-table').DataTable({
-                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' },
+                order: [[1, 'desc']]
             });
         }
 
         function loadDebtReport() {
-            const debtList = DB.getHutangSupplier();
-            const totalSisa = debtList.reduce((sum, d) => sum + d.sisa_hutang, 0);
+            const filterType = $('#debt_filter_type').val() || 'semua';
+            const startDate = $('#debt_tanggal_mulai').val();
+            const endDate = $('#debt_tanggal_akhir').val();
+            const month = $('#debt_bulan').val();
+            const year = $('#debt_tahun').val();
+            const statusFilter = $('#debt_status_filter').val() || 'semua';
+            const supplierFilter = $('#debt_supplier_filter').val() || 'semua';
 
-            $('#debt-total-amount').text(formatRupiah(totalSisa));
-            $('#debt-total-tx').text(debtList.length + ' Nota');
+            if (filterType === 'harian' && startDate && endDate && startDate > endDate) {
+                alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                return;
+            }
+
+            // Always fetch ALL debt transactions to compute accurate stat cards
+            const allDebts = DB.getHutangSupplier('all');
+
+            const totalSisaAktif = allDebts.reduce((sum, d) => sum + d.sisa_hutang, 0);
+            const totalTerbayar = allDebts.reduce((sum, d) => sum + d.total_dibayar, 0);
+            const countBelumLunas = allDebts.filter(d => d.sisa_hutang > 0).length;
+            const countLunas = allDebts.filter(d => d.sisa_hutang <= 0).length;
+
+            $('#debt-total-amount').text(formatRupiah(totalSisaAktif));
+            $('#debt-total-paid').text(formatRupiah(totalTerbayar));
+            $('#debt-total-tx').text(countBelumLunas + ' Nota');
+            $('#debt-total-lunas').text(countLunas + ' Nota');
+
+            // Filter for table view
+            let filtered = allDebts;
+
+            if (statusFilter === 'belum_lunas') {
+                filtered = filtered.filter(d => d.sisa_hutang > 0);
+            } else if (statusFilter === 'lunas') {
+                filtered = filtered.filter(d => d.sisa_hutang <= 0);
+            }
+
+            if (supplierFilter && supplierFilter !== 'semua') {
+                filtered = filtered.filter(d => d.supplier === supplierFilter || d.nama_supplier === supplierFilter);
+            }
+
+            if (filterType === 'harian') {
+                filtered = filtered.filter(d => {
+                    if (startDate && endDate) return d.tanggal >= startDate && d.tanggal <= endDate;
+                    if (startDate) return d.tanggal >= startDate;
+                    if (endDate) return d.tanggal <= endDate;
+                    return true;
+                });
+            } else if (filterType === 'bulanan' && month) {
+                filtered = filtered.filter(d => d.tanggal && d.tanggal.startsWith(month));
+            } else if (filterType === 'tahunan' && year) {
+                filtered = filtered.filter(d => d.tanggal && d.tanggal.startsWith(year.toString()));
+            }
+
+            $('#debt-table-badge').text('Menampilkan ' + filtered.length + ' dari ' + allDebts.length + ' Transaksi');
 
             const tbody = $('#debt-report-tbody');
             if (debtTableInstance) debtTableInstance.destroy();
             tbody.empty();
 
-            debtList.forEach((d, index) => {
+            filtered.forEach((d, index) => {
                 let tempoBadge = '<span class="badge bg-success">Belum Jatuh Tempo</span>';
-                if (d.status_jatuh_tempo === 'Sudah Lewat Jatuh Tempo') {
+                if (d.is_lunas) {
+                    tempoBadge = '<span class="badge bg-light text-muted border">Selesai</span>';
+                } else if (d.status_jatuh_tempo === 'Sudah Lewat Jatuh Tempo') {
                     tempoBadge = '<span class="badge bg-danger">Lewat ' + Math.abs(d.sisa_hari) + ' Hari</span>';
                 } else if (d.status_jatuh_tempo === 'Jatuh Tempo Hari Ini') {
                     tempoBadge = '<span class="badge bg-warning text-dark">Hari Ini</span>';
                 }
 
+                const statusBadge = d.is_lunas
+                    ? '<span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Lunas</span>'
+                    : '<span class="badge bg-danger"><i class="fa-solid fa-hourglass-half me-1"></i>Belum Lunas</span>';
+
+                const bayarBtn = d.sisa_hutang > 0
+                    ? '<button class="btn btn-sm btn-primary me-1" onclick="openModalBayarHutang(\'' + escapeHtml(d.no_pembelian) + '\')" title="Bayar Hutang"><i class="fa-solid fa-money-bill-wave"></i> Bayar</button>'
+                    : '<button class="btn btn-sm btn-outline-secondary me-1" disabled title="Sudah Lunas"><i class="fa-solid fa-check"></i> Lunas</button>';
+
                 tbody.append('<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
-                    '<td><span class="fw-semibold text-primary">' + escapeHtml(d.no_pembelian) + '</span></td>' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-primary font-monospace">' + escapeHtml(d.no_pembelian) + '</span></td>' +
                     '<td><span class="small text-muted">' + formatDate(d.tanggal) + '</span></td>' +
                     '<td><span class="fw-semibold text-dark">' + escapeHtml(d.supplier) + '</span></td>' +
-                    '<td class="text-end">Rp ' + formatNumber(d.total_pembelian) + '</td>' +
-                    '<td class="text-end text-success">Rp ' + formatNumber(d.total_dibayar) + '</td>' +
+                    '<td><span class="small text-muted">' + escapeHtml(d.nomor_faktur_supplier || '-') + '</span></td>' +
+                    '<td class="text-end fw-medium">Rp ' + formatNumber(d.total_pembelian) + '</td>' +
+                    '<td class="text-end text-success fw-medium">Rp ' + formatNumber(d.total_dibayar) + '</td>' +
                     '<td class="text-end fw-bold text-danger">Rp ' + formatNumber(d.sisa_hutang) + '</td>' +
                     '<td class="text-center">' +
                         '<span class="small d-block">' + formatDate(d.jatuh_tempo) + '</span>' +
                         tempoBadge +
                     '</td>' +
+                    '<td class="text-center">' + statusBadge + '</td>' +
                     '<td class="text-center">' +
-                        '<button class="btn btn-sm btn-primary me-1" onclick="openModalBayarHutang(\'' + escapeHtml(d.no_pembelian) + '\')" title="Bayar Hutang">' +
-                            '<i class="fa-solid fa-money-bill-wave"></i> Bayar' +
-                        '</button>' +
-                        '<button class="btn btn-sm btn-outline-info" onclick="openModalRiwayatHutang(\'' + escapeHtml(d.no_pembelian) + '\')" title="Riwayat Pembayaran">' +
-                            '<i class="fa-solid fa-clock-rotate-left"></i>' +
-                        '</button>' +
+                        '<button class="btn btn-sm btn-outline-primary me-1" onclick="openModalDetailPembelian(\'' + escapeHtml(d.no_pembelian) + '\')" title="Lihat Rincian Barang"><i class="fa-solid fa-eye"></i></button>' +
+                        bayarBtn +
+                        '<button class="btn btn-sm btn-outline-info" onclick="openModalRiwayatHutang(\'' + escapeHtml(d.no_pembelian) + '\')" title="Riwayat Pembayaran"><i class="fa-solid fa-clock-rotate-left"></i></button>' +
                     '</td>' +
                     '</tr>'
                 );
             });
 
             debtTableInstance = $('#debt-report-table').DataTable({
-                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' },
+                order: [[1, 'desc']]
             });
         }
 
         function loadReceivableReport() {
-            const list = DB.getPiutangPelanggan();
-            const totalSisa = list.reduce((sum, r) => sum + r.sisa_piutang, 0);
+            const filterType = $('#r_filter_type').val() || 'semua';
+            const startDate = $('#r_tanggal_mulai').val();
+            const endDate = $('#r_tanggal_akhir').val();
+            const month = $('#r_bulan').val();
+            const year = $('#r_tahun').val();
+            const statusFilter = $('#r_status_filter').val() || 'semua';
+            const customerFilter = $('#r_pelanggan_filter').val() || 'semua';
 
-            $('#receivable-total-amount').text(formatRupiah(totalSisa));
-            $('#receivable-total-tx').text(list.length + ' Nota');
+            if (filterType === 'harian' && startDate && endDate && startDate > endDate) {
+                alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+                return;
+            }
+
+            const allReceivables = DB.getPiutangPelanggan('all');
+
+            const totalSisaAktif = allReceivables.reduce((sum, r) => sum + r.sisa_piutang, 0);
+            const totalTerbayar = allReceivables.reduce((sum, r) => sum + r.total_dibayar, 0);
+            const countBelumLunas = allReceivables.filter(r => r.sisa_piutang > 0).length;
+            const countLunas = allReceivables.filter(r => r.sisa_piutang <= 0).length;
+
+            $('#receivable-total-amount').text(formatRupiah(totalSisaAktif));
+            $('#receivable-total-paid').text(formatRupiah(totalTerbayar));
+            $('#receivable-total-tx').text(countBelumLunas + ' Nota');
+            $('#receivable-total-lunas').text(countLunas + ' Nota');
+
+            let filtered = allReceivables;
+
+            if (statusFilter === 'belum_lunas') {
+                filtered = filtered.filter(r => r.sisa_piutang > 0);
+            } else if (statusFilter === 'lunas') {
+                filtered = filtered.filter(r => r.sisa_piutang <= 0);
+            }
+
+            if (customerFilter && customerFilter !== 'semua') {
+                filtered = filtered.filter(r => r.pelanggan === customerFilter || r.nama_pelanggan === customerFilter);
+            }
+
+            if (filterType === 'harian') {
+                filtered = filtered.filter(r => {
+                    if (startDate && endDate) return r.tanggal >= startDate && r.tanggal <= endDate;
+                    if (startDate) return r.tanggal >= startDate;
+                    if (endDate) return r.tanggal <= endDate;
+                    return true;
+                });
+            } else if (filterType === 'bulanan' && month) {
+                filtered = filtered.filter(r => r.tanggal && r.tanggal.startsWith(month));
+            } else if (filterType === 'tahunan' && year) {
+                filtered = filtered.filter(r => r.tanggal && r.tanggal.startsWith(year.toString()));
+            }
+
+            $('#receivable-table-badge').text('Menampilkan ' + filtered.length + ' dari ' + allReceivables.length + ' Transaksi');
 
             const tbody = $('#receivable-report-tbody');
             if (receivableTableInstance) receivableTableInstance.destroy();
             tbody.empty();
 
-            list.forEach((r, index) => {
+            filtered.forEach((r, index) => {
                 let tempoBadge = '<span class="badge bg-success">Belum Jatuh Tempo</span>';
-                if (r.status_jatuh_tempo === 'Sudah Lewat Jatuh Tempo') {
+                if (r.is_lunas) {
+                    tempoBadge = '<span class="badge bg-light text-muted border">Selesai</span>';
+                } else if (r.status_jatuh_tempo === 'Sudah Lewat Jatuh Tempo') {
                     tempoBadge = '<span class="badge bg-danger">Lewat ' + Math.abs(r.sisa_hari) + ' Hari</span>';
                 } else if (r.status_jatuh_tempo === 'Jatuh Tempo Hari Ini') {
                     tempoBadge = '<span class="badge bg-warning text-dark">Hari Ini</span>';
                 }
 
+                const statusBadge = r.is_lunas
+                    ? '<span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Lunas</span>'
+                    : '<span class="badge bg-danger"><i class="fa-solid fa-hourglass-half me-1"></i>Belum Lunas</span>';
+
+                const bayarBtn = r.sisa_piutang > 0
+                    ? '<button class="btn btn-sm btn-success me-1" onclick="openModalBayarPiutang(\'' + escapeHtml(r.no_penjualan) + '\')" title="Terima Pembayaran"><i class="fa-solid fa-money-bill-wave"></i> Bayar</button>'
+                    : '<button class="btn btn-sm btn-outline-secondary me-1" disabled title="Sudah Lunas"><i class="fa-solid fa-check"></i> Lunas</button>';
+
                 tbody.append('<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
-                    '<td><span class="fw-semibold text-primary">' + escapeHtml(r.no_penjualan) + '</span></td>' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
+                    '<td><span class="fw-semibold text-primary font-monospace">' + escapeHtml(r.no_penjualan) + '</span></td>' +
                     '<td><span class="small text-muted">' + formatDate(r.tanggal) + '</span></td>' +
                     '<td><span class="fw-semibold text-dark">' + escapeHtml(r.pelanggan) + '</span></td>' +
-                    '<td class="text-end">Rp ' + formatNumber(r.total_penjualan) + '</td>' +
-                    '<td class="text-end text-success">Rp ' + formatNumber(r.total_dibayar) + '</td>' +
+                    '<td class="text-end fw-medium">Rp ' + formatNumber(r.total_penjualan) + '</td>' +
+                    '<td class="text-end text-success fw-medium">Rp ' + formatNumber(r.total_dibayar) + '</td>' +
                     '<td class="text-end fw-bold text-info">Rp ' + formatNumber(r.sisa_piutang) + '</td>' +
                     '<td class="text-center">' +
                         '<span class="small d-block">' + formatDate(r.jatuh_tempo) + '</span>' +
                         tempoBadge +
                     '</td>' +
+                    '<td class="text-center">' + statusBadge + '</td>' +
                     '<td class="text-center">' +
-                        '<button class="btn btn-sm btn-success me-1" onclick="openModalBayarPiutang(\'' + escapeHtml(r.no_penjualan) + '\')" title="Terima Pembayaran">' +
-                            '<i class="fa-solid fa-money-bill-wave"></i> Bayar' +
-                        '</button>' +
-                        '<button class="btn btn-sm btn-outline-info" onclick="openModalRiwayatPiutang(\'' + escapeHtml(r.no_penjualan) + '\')" title="Riwayat Pembayaran">' +
-                            '<i class="fa-solid fa-clock-rotate-left"></i>' +
-                        '</button>' +
+                        '<button class="btn btn-sm btn-outline-primary me-1" onclick="openModalDetailPenjualan(\'' + escapeHtml(r.no_penjualan) + '\')" title="Lihat Rincian Barang"><i class="fa-solid fa-eye"></i></button>' +
+                        bayarBtn +
+                        '<button class="btn btn-sm btn-outline-info" onclick="openModalRiwayatPiutang(\'' + escapeHtml(r.no_penjualan) + '\')" title="Riwayat Pembayaran"><i class="fa-solid fa-clock-rotate-left"></i></button>' +
                     '</td>' +
                     '</tr>'
                 );
             });
 
             receivableTableInstance = $('#receivable-report-table').DataTable({
-                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' },
+                order: [[1, 'desc']]
             });
         }
 
         function loadStockReport() {
             const barangList = DB.getBarang();
             const totalItems = barangList.length;
-            const warningItems = barangList.filter(b => b.stok <= b.stok_minimum).length;
+            const allMinMax = DB.getAllMinMaxROP();
+            const warningItems = allMinMax.filter(m => m.stok <= m.ROP).length;
 
             $('#stock-total-items').text(totalItems + ' Item');
-            $('#stock-warning-items').text(warningItems + ' Item');
+            $('#stock-warning-items').text(warningItems + ' Item Perlu Reorder');
 
             const tbody = $('#stock-report-tbody');
 
@@ -1107,21 +1744,21 @@
             tbody.empty();
 
             barangList.forEach((b, index) => {
-                let badge = '';
-                if (b.stok === 0) {
-                    badge = '<span class="badge bg-danger">Habis</span>';
-                } else if (b.stok <= b.stok_minimum) {
-                    badge = '<span class="badge bg-warning text-dark">Menipis</span>';
-                } else {
-                    badge = '<span class="badge bg-success">Aman</span>';
-                }
+                const calc = DB.calculateMinMaxROP(b.id_inventori);
+                const badge = '<span class="badge ' + (calc ? calc.status_badge_class : 'bg-secondary') + '">' + (calc ? calc.status_stok : 'Normal') + '</span>';
 
                 tbody.append('<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
                     '<td><span class="fw-semibold text-dark">' + escapeHtml(b.nama_barang) + '</span></td>' +
                     '<td>' + escapeHtml(b.nama_kategori) + '</td>' +
-                    '<td class="text-end fw-bold">' + b.stok + ' <span class="small text-muted fw-normal">' + escapeHtml(b.satuan) + '</span></td>' +
-                    '<td class="text-end">' + b.stok_minimum + '</td>' +
+                    '<td class="text-end fw-bold text-primary">' + b.stok + ' <span class="small text-muted fw-normal">' + escapeHtml(b.satuan) + '</span></td>' +
+                    '<td class="text-end">' + (calc ? calc.average_usage : 0) + ' <span class="small text-muted">' + escapeHtml(b.satuan) + '/hr</span></td>' +
+                    '<td class="text-center">' + (calc ? calc.lead_time : 3) + ' Hari</td>' +
+                    '<td class="text-end">' + (calc ? calc.safety_stock : 5) + ' ' + escapeHtml(b.satuan) + '</td>' +
+                    '<td class="text-end fw-semibold text-danger">' + (calc ? calc.min_stok : 0) + '</td>' +
+                    '<td class="text-end fw-semibold text-primary">' + (calc ? calc.max_stok : 0) + '</td>' +
+                    '<td class="text-end fw-bold text-dark">' + (calc ? calc.ROP : 0) + '</td>' +
+                    '<td class="text-end fw-bold text-success">+' + (calc ? calc.Q : 0) + '</td>' +
                     '<td class="text-center">' + badge + '</td>' +
                     '</tr>'
                 );
@@ -1132,18 +1769,201 @@
             });
         }
 
-        function openModalBayarHutang(no_pembelian) {
-            const list = DB.getHutangSupplier();
-            const d = list.find(x => x.no_pembelian === no_pembelian);
-            if (!d) return alert('Data hutang tidak ditemukan!');
+        function openModalDetailPembelian(no_pembelian) {
+            const detail = DB.getPembelianDetail(no_pembelian);
+            if (!detail) {
+                alert('Data transaksi pembelian tidak ditemukan!');
+                return;
+            }
 
-            $('#bayar_no_pembelian').val(d.no_pembelian);
-            $('#display_bayar_no_pembelian').val(d.no_pembelian);
-            $('#display_bayar_supplier').val(d.supplier);
-            $('#display_bayar_total_nota').val(formatRupiah(d.total_pembelian));
-            $('#display_bayar_sisa_hutang').val(formatRupiah(d.sisa_hutang));
+            $('#dtl-pembelian-no').text(detail.no_pembelian);
+            $('#dtl-no-pembelian').text(detail.no_pembelian);
+            $('#dtl-supplier').text(detail.supplier);
+            $('#dtl-alamat-supplier').text(detail.alamat_supplier || '-');
+            $('#dtl-tanggal').text(formatDate(detail.tanggal));
+            $('#dtl-faktur').text(detail.nomor_faktur_supplier || '-');
+            $('#dtl-metode').html(detail.metode_pembayaran === 'Tempo' 
+                ? '<span class="badge bg-warning text-dark">Tempo</span>' 
+                : '<span class="badge bg-secondary">Tunai</span>');
+            
+            $('#dtl-status').html(detail.status_pembayaran === 'Lunas' 
+                ? '<span class="badge bg-success">Lunas</span>' 
+                : '<span class="badge bg-danger">Belum Lunas</span>');
+
+            if (detail.metode_pembayaran === 'Tempo' || (detail.jatuh_tempo && detail.jatuh_tempo !== '-')) {
+                $('#dtl-jatuh-tempo').text(formatDate(detail.jatuh_tempo));
+                $('#dtl-jatuh-tempo-row').show();
+                $('#dtl-hutang-summary').removeClass('d-none');
+            } else {
+                $('#dtl-jatuh-tempo-row').hide();
+                $('#dtl-hutang-summary').addClass('d-none');
+            }
+
+            $('#dtl-total-nota').text(formatRupiah(detail.total_pembelian));
+            $('#dtl-sudah-dibayar').text(formatRupiah(detail.total_dibayar));
+            $('#dtl-sisa-hutang').text(formatRupiah(detail.sisa_hutang));
+
+            const tbodyItems = $('#dtl-items-tbody');
+            tbodyItems.empty();
+            if (!detail.items || detail.items.length === 0) {
+                tbodyItems.append('<tr><td colspan="6" class="text-center text-muted py-2">Tidak ada rincian barang.</td></tr>');
+            } else {
+                detail.items.forEach((item, idx) => {
+                    tbodyItems.append('<tr>' +
+                        '<td class="text-center">' + (idx + 1) + '</td>' +
+                        '<td><span class="fw-semibold text-dark">' + escapeHtml(item.nama_barang) + '</span></td>' +
+                        '<td class="text-end fw-medium">' + item.qty + '</td>' +
+                        '<td>' + escapeHtml(item.satuan) + '</td>' +
+                        '<td class="text-end">Rp ' + formatNumber(item.harga_beli) + '</td>' +
+                        '<td class="text-end fw-bold text-primary">Rp ' + formatNumber(item.subtotal) + '</td>' +
+                        '</tr>'
+                    );
+                });
+            }
+            $('#dtl-grand-total').text(formatRupiah(detail.total_pembelian));
+
+            const tbodyPay = $('#dtl-payment-history-tbody');
+            tbodyPay.empty();
+            if (!detail.payments || detail.payments.length === 0) {
+                tbodyPay.append('<tr><td colspan="5" class="text-center text-muted py-2">Belum ada riwayat pembayaran hutang.</td></tr>');
+            } else {
+                detail.payments.forEach((p, idx) => {
+                    tbodyPay.append('<tr>' +
+                        '<td class="text-center">' + (idx + 1) + '</td>' +
+                        '<td>' + formatDate(p.tanggal_pembayaran) + '</td>' +
+                        '<td><span class="badge bg-secondary">' + escapeHtml(p.metode_pembayaran || 'Tunai') + '</span></td>' +
+                        '<td class="text-end fw-bold text-success">Rp ' + formatNumber(p.jumlah_pembayaran) + '</td>' +
+                        '<td>' + escapeHtml(p.keterangan || '-') + '</td>' +
+                        '</tr>'
+                    );
+                });
+            }
+
+            const btnBayar = $('#btnDtlBayarHutang');
+            if (detail.sisa_hutang > 0) {
+                btnBayar.show().off('click').on('click', function () {
+                    const modalEl = document.getElementById('modalDetailPembelian');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    openModalBayarHutang(no_pembelian);
+                });
+            } else {
+                btnBayar.hide();
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalDetailPembelian'));
+            modal.show();
+        }
+
+        function openModalDetailPenjualan(no_penjualan) {
+            const detail = DB.getPenjualanDetail(no_penjualan);
+            if (!detail) {
+                alert('Data transaksi penjualan tidak ditemukan!');
+                return;
+            }
+
+            $('#dtl-penjualan-no').text(detail.no_penjualan);
+            $('#dtl-p-no').text(detail.no_penjualan);
+            $('#dtl-p-pelanggan').text(detail.pelanggan);
+            $('#dtl-p-alamat').text(detail.alamat_pelanggan || '-');
+            $('#dtl-p-tanggal').text(formatDate(detail.tanggal));
+            $('#dtl-p-metode').html(detail.metode_pembayaran === 'Tempo' 
+                ? '<span class="badge bg-warning text-dark">Tempo</span>' 
+                : '<span class="badge bg-secondary">Tunai</span>');
+            
+            $('#dtl-p-status').html(detail.status_pembayaran === 'Lunas' 
+                ? '<span class="badge bg-success">Lunas</span>' 
+                : '<span class="badge bg-danger">Belum Lunas</span>');
+
+            if (detail.metode_pembayaran === 'Tempo' || (detail.jatuh_tempo && detail.jatuh_tempo !== '-')) {
+                $('#dtl-p-jatuh-tempo').text(formatDate(detail.jatuh_tempo));
+                $('#dtl-p-jatuh-tempo-row').show();
+                $('#dtl-piutang-summary').removeClass('d-none');
+            } else {
+                $('#dtl-p-jatuh-tempo-row').hide();
+                $('#dtl-piutang-summary').addClass('d-none');
+            }
+
+            $('#dtl-p-total-nota').text(formatRupiah(detail.total_penjualan));
+            $('#dtl-p-sudah-dibayar').text(formatRupiah(detail.total_dibayar));
+            $('#dtl-p-sisa-piutang').text(formatRupiah(detail.sisa_piutang));
+
+            const tbodyItems = $('#dtl-p-items-tbody');
+            tbodyItems.empty();
+            if (!detail.items || detail.items.length === 0) {
+                tbodyItems.append('<tr><td colspan="6" class="text-center text-muted py-2">Tidak ada rincian barang.</td></tr>');
+            } else {
+                detail.items.forEach((item, idx) => {
+                    tbodyItems.append('<tr>' +
+                        '<td class="text-center">' + (idx + 1) + '</td>' +
+                        '<td><span class="fw-semibold text-dark">' + escapeHtml(item.nama_barang) + '</span></td>' +
+                        '<td class="text-end fw-medium">' + item.qty + '</td>' +
+                        '<td>' + escapeHtml(item.satuan) + '</td>' +
+                        '<td class="text-end">Rp ' + formatNumber(item.harga_jual) + '</td>' +
+                        '<td class="text-end fw-bold text-success">Rp ' + formatNumber(item.subtotal) + '</td>' +
+                        '</tr>'
+                    );
+                });
+            }
+            $('#dtl-p-grand-total').text(formatRupiah(detail.total_penjualan));
+
+            const tbodyPay = $('#dtl-p-payment-history-tbody');
+            tbodyPay.empty();
+            if (!detail.payments || detail.payments.length === 0) {
+                tbodyPay.append('<tr><td colspan="5" class="text-center text-muted py-2">Belum ada riwayat pembayaran piutang.</td></tr>');
+            } else {
+                detail.payments.forEach((p, idx) => {
+                    tbodyPay.append('<tr>' +
+                        '<td class="text-center">' + (idx + 1) + '</td>' +
+                        '<td>' + formatDate(p.tanggal_pembayaran) + '</td>' +
+                        '<td><span class="badge bg-secondary">' + escapeHtml(p.metode_pembayaran || 'Tunai') + '</span></td>' +
+                        '<td class="text-end fw-bold text-success">Rp ' + formatNumber(p.jumlah_pembayaran) + '</td>' +
+                        '<td>' + escapeHtml(p.keterangan || '-') + '</td>' +
+                        '</tr>'
+                    );
+                });
+            }
+
+            const btnBayar = $('#btnDtlBayarPiutang');
+            if (detail.sisa_piutang > 0) {
+                btnBayar.show().off('click').on('click', function () {
+                    const modalEl = document.getElementById('modalDetailPenjualan');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    openModalBayarPiutang(no_penjualan);
+                });
+            } else {
+                btnBayar.hide();
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalDetailPenjualan'));
+            modal.show();
+        }
+
+        function openModalBayarHutang(no_pembelian) {
+            const purchases = DB.getTable('pembelian');
+            const p = purchases.find(x => x.no_pembelian === no_pembelian);
+            if (!p) return alert('Data pembelian tidak ditemukan!');
+
+            const suppliers = DB.getTable('supplier');
+            const s = suppliers.find(x => x.id_supplier === p.id_supplier) || {};
+            const supplierName = s.nama_supplier || 'Supplier Dihapus';
+
+            const totalNota = parseFloat(p.total_pembelian) || 0;
+            const sisaHutang = DB.getSisaHutang(no_pembelian);
+
+            if (sisaHutang <= 0) {
+                alert('Hutang untuk transaksi ini sudah lunas!');
+                return;
+            }
+
+            $('#bayar_no_pembelian').val(p.no_pembelian);
+            $('#display_bayar_no_pembelian').val(p.no_pembelian);
+            $('#display_bayar_supplier').val(supplierName);
+            $('#display_bayar_total_nota').val(formatRupiah(totalNota));
+            $('#display_bayar_sisa_hutang').val(formatRupiah(sisaHutang));
             $('#bayar_tanggal_hutang').val(new Date().toISOString().split('T')[0]);
-            $('#bayar_jumlah_hutang').val(d.sisa_hutang);
+            $('#bayar_jumlah_hutang').val(sisaHutang).attr('max', sisaHutang);
             $('#bayar_keterangan_hutang').val('');
 
             const modal = new bootstrap.Modal(document.getElementById('modalBayarHutang'));
@@ -1154,22 +1974,32 @@
             const purchases = DB.getTable('pembelian');
             const p = purchases.find(x => x.no_pembelian === no_pembelian);
             const history = DB.getHistoriPembayaranHutang(no_pembelian);
+            const suppliers = DB.getTable('supplier');
+            const s = suppliers.find(x => x.id_supplier === (p ? p.id_supplier : null)) || {};
+
+            const totalNota = p ? parseFloat(p.total_pembelian) || 0 : 0;
+            const totalDibayar = DB.getTotalDibayarHutang(no_pembelian);
+            const sisaHutang = DB.getSisaHutang(no_pembelian);
 
             $('#riwayat_hutang_info').html(
-                '<strong>No Pembelian:</strong> ' + escapeHtml(no_pembelian) + ' | ' +
-                '<strong>Total Nota:</strong> Rp ' + formatNumber(p ? p.total_pembelian : 0) + ' | ' +
-                '<strong>Sisa Hutang:</strong> Rp ' + formatNumber(DB.getSisaHutang(no_pembelian))
+                '<div class="row g-2">' +
+                '<div class="col-sm-6"><strong>No Pembelian:</strong> <span class="font-monospace text-primary">' + escapeHtml(no_pembelian) + '</span><br>' +
+                '<strong>Supplier:</strong> ' + escapeHtml(s.nama_supplier || 'Supplier Dihapus') + '</div>' +
+                '<div class="col-sm-6"><strong>Total Nota:</strong> Rp ' + formatNumber(totalNota) + '<br>' +
+                '<strong>Sudah Dibayar:</strong> <span class="text-success">Rp ' + formatNumber(totalDibayar) + '</span> | ' +
+                '<strong>Sisa Hutang:</strong> <span class="text-danger fw-bold">Rp ' + formatNumber(sisaHutang) + '</span></div>' +
+                '</div>'
             );
 
             const tbody = $('#riwayat_hutang_tbody');
             tbody.empty();
 
             if (history.length === 0) {
-                tbody.append('<tr><td colspan="5" class="text-center text-muted">Belum ada riwayat pembayaran.</td></tr>');
+                tbody.append('<tr><td colspan="5" class="text-center text-muted py-3">Belum ada riwayat pembayaran untuk nota ini.</td></tr>');
             } else {
                 history.forEach((h, index) => {
                     tbody.append('<tr>' +
-                        '<td>' + (index + 1) + '</td>' +
+                        '<td class="text-center">' + (index + 1) + '</td>' +
                         '<td>' + formatDate(h.tanggal_pembayaran) + '</td>' +
                         '<td><span class="badge bg-secondary">' + escapeHtml(h.metode_pembayaran || 'Tunai') + '</span></td>' +
                         '<td class="text-end fw-bold text-success">Rp ' + formatNumber(h.jumlah_pembayaran) + '</td>' +
@@ -1184,17 +2014,29 @@
         }
 
         function openModalBayarPiutang(no_penjualan) {
-            const list = DB.getPiutangPelanggan();
-            const r = list.find(x => x.no_penjualan === no_penjualan);
-            if (!r) return alert('Data piutang tidak ditemukan!');
+            const sales = DB.getTable('penjualan');
+            const s = sales.find(x => x.no_penjualan === no_penjualan);
+            if (!s) return alert('Data penjualan tidak ditemukan!');
 
-            $('#bayar_no_penjualan').val(r.no_penjualan);
-            $('#display_bayar_no_penjualan').val(r.no_penjualan);
-            $('#display_bayar_pelanggan').val(r.pelanggan);
-            $('#display_bayar_total_nota_p').val(formatRupiah(r.total_penjualan));
-            $('#display_bayar_sisa_piutang').val(formatRupiah(r.sisa_piutang));
+            const customers = DB.getTable('pelanggan');
+            const c = customers.find(x => x.id_pelanggan === s.id_pelanggan) || {};
+            const customerName = c.nama_pelanggan || 'Umum';
+
+            const totalNota = parseFloat(s.total_penjualan) || 0;
+            const sisaPiutang = DB.getSisaPiutang(no_penjualan);
+
+            if (sisaPiutang <= 0) {
+                alert('Piutang untuk transaksi ini sudah lunas!');
+                return;
+            }
+
+            $('#bayar_no_penjualan').val(s.no_penjualan);
+            $('#display_bayar_no_penjualan').val(s.no_penjualan);
+            $('#display_bayar_pelanggan').val(customerName);
+            $('#display_bayar_total_nota_p').val(formatRupiah(totalNota));
+            $('#display_bayar_sisa_piutang').val(formatRupiah(sisaPiutang));
             $('#bayar_tanggal_piutang').val(new Date().toISOString().split('T')[0]);
-            $('#bayar_jumlah_piutang').val(r.sisa_piutang);
+            $('#bayar_jumlah_piutang').val(sisaPiutang).attr('max', sisaPiutang);
             $('#bayar_keterangan_piutang').val('');
 
             const modal = new bootstrap.Modal(document.getElementById('modalBayarPiutang'));
@@ -1205,22 +2047,32 @@
             const sales = DB.getTable('penjualan');
             const s = sales.find(x => x.no_penjualan === no_penjualan);
             const history = DB.getHistoriPembayaranPiutang(no_penjualan);
+            const customers = DB.getTable('pelanggan');
+            const c = customers.find(x => x.id_pelanggan === (s ? s.id_pelanggan : null)) || {};
+
+            const totalNota = s ? parseFloat(s.total_penjualan) || 0 : 0;
+            const totalDibayar = DB.getTotalDibayarPiutang(no_penjualan);
+            const sisaPiutang = DB.getSisaPiutang(no_penjualan);
 
             $('#riwayat_piutang_info').html(
-                '<strong>No Penjualan:</strong> ' + escapeHtml(no_penjualan) + ' | ' +
-                '<strong>Total Nota:</strong> Rp ' + formatNumber(s ? s.total_penjualan : 0) + ' | ' +
-                '<strong>Sisa Piutang:</strong> Rp ' + formatNumber(DB.getSisaPiutang(no_penjualan))
+                '<div class="row g-2">' +
+                '<div class="col-sm-6"><strong>No Penjualan:</strong> <span class="font-monospace text-primary">' + escapeHtml(no_penjualan) + '</span><br>' +
+                '<strong>Pelanggan:</strong> ' + escapeHtml(c.nama_pelanggan || 'Umum') + '</div>' +
+                '<div class="col-sm-6"><strong>Total Nota:</strong> Rp ' + formatNumber(totalNota) + '<br>' +
+                '<strong>Sudah Dibayar:</strong> <span class="text-success">Rp ' + formatNumber(totalDibayar) + '</span> | ' +
+                '<strong>Sisa Piutang:</strong> <span class="text-info fw-bold">Rp ' + formatNumber(sisaPiutang) + '</span></div>' +
+                '</div>'
             );
 
             const tbody = $('#riwayat_piutang_tbody');
             tbody.empty();
 
             if (history.length === 0) {
-                tbody.append('<tr><td colspan="5" class="text-center text-muted">Belum ada riwayat pembayaran.</td></tr>');
+                tbody.append('<tr><td colspan="5" class="text-center text-muted py-3">Belum ada riwayat pembayaran untuk nota ini.</td></tr>');
             } else {
                 history.forEach((h, index) => {
                     tbody.append('<tr>' +
-                        '<td>' + (index + 1) + '</td>' +
+                        '<td class="text-center">' + (index + 1) + '</td>' +
                         '<td>' + formatDate(h.tanggal_pembayaran) + '</td>' +
                         '<td><span class="badge bg-secondary">' + escapeHtml(h.metode_pembayaran || 'Tunai') + '</span></td>' +
                         '<td class="text-end fw-bold text-success">Rp ' + formatNumber(h.jumlah_pembayaran) + '</td>' +
@@ -1328,10 +2180,12 @@
         }
 
         function exportPurchaseToExcel(type, startDateVal, endDateVal, monthVal, yearVal) {
-            if (arguments.length === 4) {
-                yearVal = monthVal;
-                monthVal = endDateVal;
-                endDateVal = startDateVal;
+            if (!type) {
+                type = $('#purchase_filter_type').val() || 'harian';
+                startDateVal = $('#p_tanggal_mulai').val();
+                endDateVal = $('#p_tanggal_akhir').val();
+                monthVal = $('#p_bulan').val();
+                yearVal = $('#p_tahun').val();
             }
             const purchaseHeaders = DB.getPembelianHeaders();
             let filtered = [];
@@ -1416,11 +2270,54 @@
         }
 
         function exportDebtToExcel() {
-            const list = DB.getHutangSupplier();
-            let rowHtml = '';
+            const filterType = $('#debt_filter_type').val() || 'semua';
+            const startDate = $('#debt_tanggal_mulai').val();
+            const endDate = $('#debt_tanggal_akhir').val();
+            const month = $('#debt_bulan').val();
+            const year = $('#debt_tahun').val();
+            const statusFilter = $('#debt_status_filter').val() || 'semua';
+            const supplierFilter = $('#debt_supplier_filter').val() || 'semua';
 
+            let list = DB.getHutangSupplier('all');
+            let filterTitle = "Status: Semua Status";
+            if (statusFilter === 'belum_lunas') {
+                list = list.filter(d => d.sisa_hutang > 0);
+                filterTitle = "Status: Belum Lunas (Aktif)";
+            } else if (statusFilter === 'lunas') {
+                list = list.filter(d => d.sisa_hutang <= 0);
+                filterTitle = "Status: Lunas (Selesai)";
+            }
+
+            if (supplierFilter && supplierFilter !== 'semua') {
+                list = list.filter(d => d.supplier === supplierFilter || d.nama_supplier === supplierFilter);
+                filterTitle += " | Supplier: " + supplierFilter;
+            }
+
+            if (filterType === 'harian') {
+                list = list.filter(d => {
+                    if (startDate && endDate) return d.tanggal >= startDate && d.tanggal <= endDate;
+                    if (startDate) return d.tanggal >= startDate;
+                    if (endDate) return d.tanggal <= endDate;
+                    return true;
+                });
+                filterTitle += (startDate === endDate || !endDate) ? " | Tanggal: " + formatDate(startDate) : " | Periode: " + formatDate(startDate) + " s/d " + formatDate(endDate);
+            } else if (filterType === 'bulanan' && month) {
+                list = list.filter(d => d.tanggal && d.tanggal.startsWith(month));
+                const parts = month.split('-');
+                const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                filterTitle += " | Bulan: " + monthNames[parseInt(parts[1]) - 1] + " " + parts[0];
+            } else if (filterType === 'tahunan' && year) {
+                list = list.filter(d => d.tanggal && d.tanggal.startsWith(year.toString()));
+                filterTitle += " | Tahun: " + year;
+            }
+
+            let totalNota = list.reduce((sum, d) => sum + d.total_pembelian, 0);
+            let totalDibayar = list.reduce((sum, d) => sum + d.total_dibayar, 0);
+            let totalSisa = list.reduce((sum, d) => sum + d.sisa_hutang, 0);
+
+            let rowHtml = '';
             if (list.length === 0) {
-                rowHtml = '<tr><td colspan="8" align="center">Tidak ada hutang supplier aktif.</td></tr>';
+                rowHtml = '<tr><td colspan="10" align="center">Tidak ada data hutang supplier sesuai filter.</td></tr>';
             } else {
                 list.forEach((d, index) => {
                     rowHtml += '<tr>' +
@@ -1428,10 +2325,12 @@
                         '<td align="center">' + escapeHtml(d.no_pembelian) + '</td>' +
                         '<td align="center">' + formatDate(d.tanggal) + '</td>' +
                         '<td>' + escapeHtml(d.supplier) + '</td>' +
+                        '<td>' + escapeHtml(d.nomor_faktur_supplier || '-') + '</td>' +
                         '<td align="right">' + d.total_pembelian + '</td>' +
-                        '<td align="right">' + d.total_dibayar + '</td>' +
+                        '<td align="right" style="color: #16A34A;">' + d.total_dibayar + '</td>' +
                         '<td align="right" style="font-weight: bold; color: #DC2626;">' + d.sisa_hutang + '</td>' +
-                        '<td align="center">' + formatDate(d.jatuh_tempo) + ' (' + d.status_jatuh_tempo + ')</td>' +
+                        '<td align="center">' + formatDate(d.jatuh_tempo) + '</td>' +
+                        '<td align="center">' + (d.is_lunas ? 'Lunas' : 'Belum Lunas') + '</td>' +
                         '</tr>';
                 });
             }
@@ -1442,6 +2341,7 @@
             const excelTemplate =
                 '<h3>LAPORAN HUTANG SUPPLIER TOKO BANGUNAN</h3>' +
                 '<h4>TB AA BAROKAH</h4>' +
+                '<p>' + filterTitle + '</p>' +
                 '<p>Di-export pada: ' + exportDate + '</p>' +
                 '<table border="1" cellpadding="5" cellspacing="0">' +
                     '<thead>' +
@@ -1450,14 +2350,23 @@
                             '<th style="width: 140px;">No Pembelian</th>' +
                             '<th style="width: 120px;">Tanggal</th>' +
                             '<th style="width: 180px;">Supplier</th>' +
+                            '<th style="width: 140px;">No Faktur</th>' +
                             '<th style="width: 150px;">Total Nota</th>' +
                             '<th style="width: 150px;">Sudah Dibayar</th>' +
                             '<th style="width: 150px;">Sisa Hutang</th>' +
-                            '<th style="width: 180px;">Jatuh Tempo</th>' +
+                            '<th style="width: 140px;">Jatuh Tempo</th>' +
+                            '<th style="width: 120px;">Status</th>' +
                         '</tr>' +
                     '</thead>' +
                     '<tbody>' +
                         rowHtml +
+                        '<tr style="background-color: #F3F4F6; font-weight: bold;">' +
+                            '<td colspan="5" align="right">Total</td>' +
+                            '<td align="right">' + totalNota + '</td>' +
+                            '<td align="right" style="color: #16A34A;">' + totalDibayar + '</td>' +
+                            '<td align="right" style="color: #DC2626;">' + totalSisa + '</td>' +
+                            '<td colspan="2"></td>' +
+                        '</tr>' +
                     '</tbody>' +
                 '</table>';
 
@@ -1466,11 +2375,54 @@
         }
 
         function exportReceivableToExcel() {
-            const list = DB.getPiutangPelanggan();
-            let rowHtml = '';
+            const filterType = $('#r_filter_type').val() || 'semua';
+            const startDate = $('#r_tanggal_mulai').val();
+            const endDate = $('#r_tanggal_akhir').val();
+            const month = $('#r_bulan').val();
+            const year = $('#r_tahun').val();
+            const statusFilter = $('#r_status_filter').val() || 'semua';
+            const customerFilter = $('#r_pelanggan_filter').val() || 'semua';
 
+            let list = DB.getPiutangPelanggan('all');
+            let filterTitle = "Status: Semua Status";
+            if (statusFilter === 'belum_lunas') {
+                list = list.filter(r => r.sisa_piutang > 0);
+                filterTitle = "Status: Belum Lunas (Aktif)";
+            } else if (statusFilter === 'lunas') {
+                list = list.filter(r => r.sisa_piutang <= 0);
+                filterTitle = "Status: Lunas (Selesai)";
+            }
+
+            if (customerFilter && customerFilter !== 'semua') {
+                list = list.filter(r => r.pelanggan === customerFilter || r.nama_pelanggan === customerFilter);
+                filterTitle += " | Pelanggan: " + customerFilter;
+            }
+
+            if (filterType === 'harian') {
+                list = list.filter(r => {
+                    if (startDate && endDate) return r.tanggal >= startDate && r.tanggal <= endDate;
+                    if (startDate) return r.tanggal >= startDate;
+                    if (endDate) return r.tanggal <= endDate;
+                    return true;
+                });
+                filterTitle += (startDate === endDate || !endDate) ? " | Tanggal: " + formatDate(startDate) : " | Periode: " + formatDate(startDate) + " s/d " + formatDate(endDate);
+            } else if (filterType === 'bulanan' && month) {
+                list = list.filter(r => r.tanggal && r.tanggal.startsWith(month));
+                const parts = month.split('-');
+                const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                filterTitle += " | Bulan: " + monthNames[parseInt(parts[1]) - 1] + " " + parts[0];
+            } else if (filterType === 'tahunan' && year) {
+                list = list.filter(r => r.tanggal && r.tanggal.startsWith(year.toString()));
+                filterTitle += " | Tahun: " + year;
+            }
+
+            let totalNota = list.reduce((sum, r) => sum + r.total_penjualan, 0);
+            let totalDibayar = list.reduce((sum, r) => sum + r.total_dibayar, 0);
+            let totalSisa = list.reduce((sum, r) => sum + r.sisa_piutang, 0);
+
+            let rowHtml = '';
             if (list.length === 0) {
-                rowHtml = '<tr><td colspan="8" align="center">Tidak ada piutang pelanggan aktif.</td></tr>';
+                rowHtml = '<tr><td colspan="9" align="center">Tidak ada data piutang pelanggan sesuai filter.</td></tr>';
             } else {
                 list.forEach((r, index) => {
                     rowHtml += '<tr>' +
@@ -1479,9 +2431,10 @@
                         '<td align="center">' + formatDate(r.tanggal) + '</td>' +
                         '<td>' + escapeHtml(r.pelanggan) + '</td>' +
                         '<td align="right">' + r.total_penjualan + '</td>' +
-                        '<td align="right">' + r.total_dibayar + '</td>' +
+                        '<td align="right" style="color: #16A34A;">' + r.total_dibayar + '</td>' +
                         '<td align="right" style="font-weight: bold; color: #0284C7;">' + r.sisa_piutang + '</td>' +
-                        '<td align="center">' + formatDate(r.jatuh_tempo) + ' (' + r.status_jatuh_tempo + ')</td>' +
+                        '<td align="center">' + formatDate(r.jatuh_tempo) + '</td>' +
+                        '<td align="center">' + (r.is_lunas ? 'Lunas' : 'Belum Lunas') + '</td>' +
                         '</tr>';
                 });
             }
@@ -1492,6 +2445,7 @@
             const excelTemplate =
                 '<h3>LAPORAN PIUTANG PELANGGAN TOKO BANGUNAN</h3>' +
                 '<h4>TB AA BAROKAH</h4>' +
+                '<p>' + filterTitle + '</p>' +
                 '<p>Di-export pada: ' + exportDate + '</p>' +
                 '<table border="1" cellpadding="5" cellspacing="0">' +
                     '<thead>' +
@@ -1503,11 +2457,19 @@
                             '<th style="width: 150px;">Total Nota</th>' +
                             '<th style="width: 150px;">Sudah Dibayar</th>' +
                             '<th style="width: 150px;">Sisa Piutang</th>' +
-                            '<th style="width: 180px;">Jatuh Tempo</th>' +
+                            '<th style="width: 140px;">Jatuh Tempo</th>' +
+                            '<th style="width: 120px;">Status</th>' +
                         '</tr>' +
                     '</thead>' +
                     '<tbody>' +
                         rowHtml +
+                        '<tr style="background-color: #F3F4F6; font-weight: bold;">' +
+                            '<td colspan="4" align="right">Total</td>' +
+                            '<td align="right">' + totalNota + '</td>' +
+                            '<td align="right" style="color: #16A34A;">' + totalDibayar + '</td>' +
+                            '<td align="right" style="color: #0284C7;">' + totalSisa + '</td>' +
+                            '<td colspan="2"></td>' +
+                        '</tr>' +
                     '</tbody>' +
                 '</table>';
 
@@ -1520,17 +2482,18 @@
             let rowHtml = '';
 
             if (barangList.length === 0) {
-                rowHtml = '<tr><td colspan="6" align="center">Tidak ada data barang di inventori.</td></tr>';
+                rowHtml = '<tr><td colspan="12" align="center">Tidak ada data barang di inventori.</td></tr>';
             } else {
                 barangList.forEach((b, index) => {
-                    let status = 'Aman';
+                    const calc = DB.calculateMinMaxROP(b.id_inventori);
+                    let status = calc ? calc.status_stok : 'Aman';
                     let color = '#16A34A';
-                    if (b.stok === 0) {
-                        status = 'Habis';
+                    if (calc && calc.status_category === 'HABIS') {
                         color = '#DC2626';
-                    } else if (b.stok <= b.stok_minimum) {
-                        status = 'Menipis';
+                    } else if (calc && calc.status_category === 'REORDER') {
                         color = '#D97706';
+                    } else if (calc && calc.status_category === 'OVERSTOCK') {
+                        color = '#0284C7';
                     }
 
                     rowHtml += '<tr>' +
@@ -1538,7 +2501,13 @@
                         '<td>' + escapeHtml(b.nama_barang) + '</td>' +
                         '<td>' + escapeHtml(b.nama_kategori) + '</td>' +
                         '<td align="right" style="font-weight: bold;">' + b.stok + ' ' + escapeHtml(b.satuan) + '</td>' +
-                        '<td align="right">' + b.stok_minimum + '</td>' +
+                        '<td align="right">' + (calc ? calc.average_usage : 0) + '</td>' +
+                        '<td align="center">' + (calc ? calc.lead_time : 3) + ' Hari</td>' +
+                        '<td align="right">' + (calc ? calc.safety_stock : 5) + '</td>' +
+                        '<td align="right">' + (calc ? calc.min_stok : 0) + '</td>' +
+                        '<td align="right">' + (calc ? calc.max_stok : 0) + '</td>' +
+                        '<td align="right" style="font-weight: bold;">' + (calc ? calc.ROP : 0) + '</td>' +
+                        '<td align="right" style="font-weight: bold; color: #16A34A;">' + (calc ? calc.Q : 0) + '</td>' +
                         '<td align="center" style="font-weight: bold; color: ' + color + ';">' + status + '</td>' +
                         '</tr>';
                 });
@@ -1548,18 +2517,24 @@
             const exportDate = formatDate(today.toISOString().split('T')[0]) + ' ' + today.toTimeString().substring(0,8);
 
             const excelTemplate =
-                '<h3>LAPORAN STOK BARANG TOKO BANGUNAN</h3>' +
+                '<h3>LAPORAN METODE MIN-MAX STOCK & REORDER POINT (ROP)</h3>' +
                 '<h4>TB AA BAROKAH</h4>' +
                 '<p>Di-export pada: ' + exportDate + '</p>' +
                 '<table border="1" cellpadding="5" cellspacing="0">' +
                     '<thead>' +
                         '<tr style="background-color: #1E3A8A; color: #FFFFFF; font-weight: bold;">' +
-                            '<th style="width: 50px;">No</th>' +
-                            '<th style="width: 250px;">Nama Barang</th>' +
-                            '<th style="width: 150px;">Kategori</th>' +
-                            '<th style="width: 120px;">Stok Saat Ini</th>' +
-                            '<th style="width: 120px;">Stok Minimum</th>' +
-                            '<th style="width: 120px;">Status</th>' +
+                            '<th style="width: 40px;">No</th>' +
+                            '<th style="width: 220px;">Nama Barang</th>' +
+                            '<th style="width: 140px;">Kategori</th>' +
+                            '<th style="width: 110px;">Stok Saat Ini</th>' +
+                            '<th style="width: 110px;">Rata-rata Pemakaian/Hr</th>' +
+                            '<th style="width: 100px;">Lead Time</th>' +
+                            '<th style="width: 100px;">Safety Stock</th>' +
+                            '<th style="width: 100px;">Min Stok</th>' +
+                            '<th style="width: 100px;">Max Stok</th>' +
+                            '<th style="width: 100px;">ROP</th>' +
+                            '<th style="width: 100px;">Order Qty (Q)</th>' +
+                            '<th style="width: 150px;">Status</th>' +
                         '</tr>' +
                     '</thead>' +
                     '<tbody>' +
@@ -1568,26 +2543,26 @@
                 '</table>';
 
             const timestamp = today.toISOString().replace(/[-:T.]/g, "").substring(0, 14);
-            DB.exportToExcel(excelTemplate, 'Laporan_Stok_Barang_' + timestamp + '.xls');
+            DB.exportToExcel(excelTemplate, 'Laporan_Stok_MinMax_ROP_' + timestamp + '.xls');
         }
 
         function formatRupiah(value) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value || 0);
         }
 
         function formatDate(dateStr) {
-            if (!dateStr) return '-';
+            if (!dateStr || dateStr === '-') return '-';
             const parts = dateStr.split('-');
             if (parts.length !== 3) return dateStr;
             return parts[2] + '/' + parts[1] + '/' + parts[0];
         }
 
         function formatNumber(num) {
-            return new Intl.NumberFormat('id-ID').format(num);
+            return new Intl.NumberFormat('id-ID').format(num || 0);
         }
 
         function escapeHtml(text) {
-            if (!text) return '';
+            if (!text && text !== 0) return '';
             return text
                 .toString()
                 .replace(/&/g, "&amp;")

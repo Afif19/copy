@@ -53,7 +53,9 @@ CREATE TABLE IF NOT EXISTS `barang` (
   `stok` INT NOT NULL DEFAULT 0, -- Stok Utuh (Alias kompatibilitas)
   `stok_utuh` INT NOT NULL DEFAULT 0,
   `stok_eceran` INT NOT NULL DEFAULT 0,
-  `stok_minimum` INT NOT NULL DEFAULT 5
+  `stok_minimum` INT NOT NULL DEFAULT 5,
+  `lead_time` INT NOT NULL DEFAULT 3, -- Lead Time (Hari) untuk Min-Max ROP
+  `safety_stock` INT NOT NULL DEFAULT 5 -- Safety Stock (Unit) untuk Min-Max ROP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 12. TABEL PEMECAHAN BARANG
@@ -185,12 +187,12 @@ INSERT INTO `pelanggan` (`id_pelanggan`, `kode_pelanggan`, `nama_pelanggan`, `je
 (3, 'TB0002', 'TB Budi Hartono', 'Retail', 'Perum Sentosa Indah C-5', '087812345678');
 
 -- Seed Barang default
-INSERT INTO `barang` (`id_inventori`, `kode_barang`, `nama_barang`, `kategori`, `satuan`, `harga_beli`, `harga_jual`, `stok`, `stok_minimum`) VALUES
-(1, 'BRG0001', 'Semen Tiga Roda 50kg', 'Semen', 'Sak', 65000.00, 70000.00, 120, 10),
-(2, 'BRG0002', 'Besi Beton 10mm', 'Besi & Baja', 'Batang', 55000.00, 62000.00, 85, 15),
-(3, 'BRG0003', 'Cat Tembok Dulux 5kg', 'Cat & Perlengkapan', 'Pcs', 145000.00, 160000.00, 4, 5),
-(4, 'BRG0004', 'Pipa PVC Wavin 1/2"', 'Pipa & Fitting', 'Batang', 18000.00, 22000.00, 50, 10),
-(5, 'BRG0005', 'Kayu Kaso 4x6', 'Kayu', 'Batang', 12000.00, 15000.00, 0, 5);
+INSERT INTO `barang` (`id_inventori`, `kode_barang`, `nama_barang`, `kategori`, `satuan`, `harga_beli`, `harga_jual`, `stok`, `stok_minimum`, `lead_time`, `safety_stock`) VALUES
+(1, 'BRG0001', 'Semen Tiga Roda 50kg', 'Semen', 'Sak', 65000.00, 70000.00, 120, 10, 3, 10),
+(2, 'BRG0002', 'Besi Beton 10mm', 'Besi & Baja', 'Batang', 55000.00, 62000.00, 85, 15, 3, 15),
+(3, 'BRG0003', 'Cat Tembok Dulux 5kg', 'Cat & Perlengkapan', 'Pcs', 145000.00, 160000.00, 4, 5, 2, 5),
+(4, 'BRG0004', 'Pipa PVC Wavin 1/2"', 'Pipa & Fitting', 'Batang', 18000.00, 22000.00, 50, 10, 3, 10),
+(5, 'BRG0005', 'Kayu Kaso 4x6', 'Kayu', 'Batang', 12000.00, 15000.00, 0, 5, 4, 5);
 
 -- Seed Transaksi Pembelian (Barang Masuk) - Format nomor pembelian 6-digit: PBL000001
 INSERT INTO `pembelian` (`no_pembelian`, `tanggal`, `id_supplier`, `total_pembelian`, `nomor_faktur_supplier`, `metode_pembayaran`, `status_pembayaran`, `jatuh_tempo`) VALUES

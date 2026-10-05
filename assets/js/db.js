@@ -14,7 +14,7 @@ const DB = {
      * Alur: Mengisi localStorage dengan seed data awal relasional.
      */
     init: function () {
-        const CURRENT_VERSION = 'v1.6';
+        const CURRENT_VERSION = 'v1.7';
         if (localStorage.getItem('db_version') !== CURRENT_VERSION) {
             localStorage.removeItem('users');
             localStorage.removeItem('kategori');
@@ -51,11 +51,11 @@ const DB = {
         // 3. Inisialisasi Tabel Barang (Master Inventori)
         if (!localStorage.getItem('barang')) {
             localStorage.setItem('barang', JSON.stringify([
-                { id_inventori: 1, kode_barang: 'BRG0001', nama_barang: 'Semen Tiga Roda 50kg', kategori: 'Semen', satuan: 'Sak', satuan_eceran: 'Kg', nilai_konversi: 50, harga_beli: 65000, harga_jual: 70000, stok: 120, stok_utuh: 120, stok_eceran: 0, stok_minimum: 10 },
-                { id_inventori: 2, kode_barang: 'BRG0002', nama_barang: 'Besi Beton 10mm', kategori: 'Besi & Baja', satuan: 'Batang', satuan_eceran: null, nilai_konversi: 1, harga_beli: 55000, harga_jual: 62000, stok: 85, stok_utuh: 85, stok_eceran: 0, stok_minimum: 15 },
-                { id_inventori: 3, kode_barang: 'BRG0003', nama_barang: 'Cat Tembok Dulux 5kg', kategori: 'Cat & Perlengkapan', satuan: 'PCS', satuan_eceran: null, nilai_konversi: 1, harga_beli: 145000, harga_jual: 160000, stok: 4, stok_utuh: 4, stok_eceran: 0, stok_minimum: 5 },
-                { id_inventori: 4, kode_barang: 'BRG0004', nama_barang: 'Pipa PVC Wavin 1/2"', kategori: 'Pipa & Fitting', satuan: 'Batang', satuan_eceran: 'Meter', nilai_konversi: 4, harga_beli: 18000, harga_jual: 22000, stok: 50, stok_utuh: 50, stok_eceran: 0, stok_minimum: 10 },
-                { id_inventori: 5, kode_barang: 'BRG0005', nama_barang: 'Kayu Kaso 4x6', kategori: 'Kayu', satuan: 'Batang', satuan_eceran: null, nilai_konversi: 1, harga_beli: 12000, harga_jual: 15000, stok: 0, stok_utuh: 0, stok_eceran: 0, stok_minimum: 5 }
+                { id_inventori: 1, kode_barang: 'BRG0001', nama_barang: 'Semen Tiga Roda 50kg', kategori: 'Semen', satuan: 'Sak', satuan_eceran: 'Kg', nilai_konversi: 50, harga_beli: 65000, harga_jual: 70000, stok: 120, stok_utuh: 120, stok_eceran: 0, stok_minimum: 10, lead_time: 3, safety_stock: 10 },
+                { id_inventori: 2, kode_barang: 'BRG0002', nama_barang: 'Besi Beton 10mm', kategori: 'Besi & Baja', satuan: 'Batang', satuan_eceran: null, nilai_konversi: 1, harga_beli: 55000, harga_jual: 62000, stok: 85, stok_utuh: 85, stok_eceran: 0, stok_minimum: 15, lead_time: 3, safety_stock: 15 },
+                { id_inventori: 3, kode_barang: 'BRG0003', nama_barang: 'Cat Tembok Dulux 5kg', kategori: 'Cat & Perlengkapan', satuan: 'PCS', satuan_eceran: null, nilai_konversi: 1, harga_beli: 145000, harga_jual: 160000, stok: 4, stok_utuh: 4, stok_eceran: 0, stok_minimum: 5, lead_time: 2, safety_stock: 5 },
+                { id_inventori: 4, kode_barang: 'BRG0004', nama_barang: 'Pipa PVC Wavin 1/2"', kategori: 'Pipa & Fitting', satuan: 'Batang', satuan_eceran: 'Meter', nilai_konversi: 4, harga_beli: 18000, harga_jual: 22000, stok: 50, stok_utuh: 50, stok_eceran: 0, stok_minimum: 10, lead_time: 3, safety_stock: 10 },
+                { id_inventori: 5, kode_barang: 'BRG0005', nama_barang: 'Kayu Kaso 4x6', kategori: 'Kayu', satuan: 'Batang', satuan_eceran: null, nilai_konversi: 1, harga_beli: 12000, harga_jual: 15000, stok: 0, stok_utuh: 0, stok_eceran: 0, stok_minimum: 5, lead_time: 4, safety_stock: 5 }
             ]));
         }
 
@@ -257,6 +257,8 @@ const DB = {
             const stokUtuhVal = b.stok_utuh !== undefined ? parseInt(b.stok_utuh) : parseInt(b.stok || 0);
             const stokEceranVal = parseInt(b.stok_eceran || 0);
             const konversiVal = parseInt(b.nilai_konversi) || 1;
+            const leadTimeVal = b.lead_time !== undefined ? parseInt(b.lead_time) : 3;
+            const safetyStockVal = b.safety_stock !== undefined ? parseInt(b.safety_stock) : (parseInt(b.stok_minimum) || 5);
 
             return {
                 ...b,
@@ -267,7 +269,9 @@ const DB = {
                 stok_eceran: stokEceranVal,
                 stok: stokUtuhVal, // Alias kompatibilitas
                 id_barang: b.id_inventori, // Alias id_barang untuk menghindari error visual dashboard
-                nama_kategori: b.kategori  // Alias nama_kategori
+                nama_kategori: b.kategori, // Alias nama_kategori
+                lead_time: leadTimeVal,
+                safety_stock: safetyStockVal
             };
         }).sort((a, b) => b.id_inventori - a.id_inventori);
     },
@@ -300,6 +304,8 @@ const DB = {
         const stokUtuhVal = item.stok_utuh !== undefined ? parseInt(item.stok_utuh) : (parseInt(item.stok) || 0);
         const stokEceranVal = parseInt(item.stok_eceran) || 0;
         const konversiVal = parseInt(item.nilai_konversi) || 1;
+        const leadTimeVal = item.lead_time !== undefined ? parseInt(item.lead_time) : 3;
+        const safetyStockVal = item.safety_stock !== undefined ? parseInt(item.safety_stock) : (parseInt(item.stok_minimum) || 5);
 
         barangList.push({
             id_inventori: nextId,
@@ -314,7 +320,9 @@ const DB = {
             stok: stokUtuhVal,
             stok_utuh: stokUtuhVal,
             stok_eceran: stokEceranVal,
-            stok_minimum: parseInt(item.stok_minimum) || 5
+            stok_minimum: parseInt(item.stok_minimum) || 5,
+            lead_time: leadTimeVal,
+            safety_stock: safetyStockVal
         });
         
         this.saveTable('barang', barangList);
@@ -337,6 +345,8 @@ const DB = {
         const stokUtuhVal = item.stok_utuh !== undefined ? parseInt(item.stok_utuh) : (item.stok !== undefined ? parseInt(item.stok) : (currentBarang.stok_utuh !== undefined ? currentBarang.stok_utuh : currentBarang.stok));
         const stokEceranVal = item.stok_eceran !== undefined ? parseInt(item.stok_eceran) : (currentBarang.stok_eceran || 0);
         const konversiVal = item.nilai_konversi !== undefined ? parseInt(item.nilai_konversi) : (currentBarang.nilai_konversi || 1);
+        const leadTimeVal = item.lead_time !== undefined ? parseInt(item.lead_time) : (currentBarang.lead_time !== undefined ? parseInt(currentBarang.lead_time) : 3);
+        const safetyStockVal = item.safety_stock !== undefined ? parseInt(item.safety_stock) : (currentBarang.safety_stock !== undefined ? parseInt(currentBarang.safety_stock) : 5);
 
         barangList[index] = {
             ...currentBarang,
@@ -350,7 +360,9 @@ const DB = {
             stok: stokUtuhVal,
             stok_utuh: stokUtuhVal,
             stok_eceran: stokEceranVal,
-            stok_minimum: parseInt(item.stok_minimum)
+            stok_minimum: parseInt(item.stok_minimum),
+            lead_time: leadTimeVal,
+            safety_stock: safetyStockVal
         };
         
         this.saveTable('barang', barangList);
@@ -844,8 +856,138 @@ const DB = {
     },
 
     // ==========================================
-    // METRIK DASHBOARD & CHART
+    // METRIK DASHBOARD & CHART & MIN-MAX ROP ENGINE
     // ==========================================
+
+    /**
+     * FUNGSI: calculateMinMaxROP(id_inventori)
+     * Deskripsi: Menghitung Min Stok, Max Stok, Q (Jumlah Pemesanan), dan ROP (Reorder Point)
+     *            berdasarkan data histori transaksi aktual (outgoing sales) dan parameter Lead Time & Safety Stock.
+     * Rumus:
+     *   1. Min Stok = (Lead Time * Rata-rata Pemakaian) + Safety Stock
+     *   2. Max Stok = 2 * (Lead Time * Rata-rata Pemakaian) + Safety Stock
+     *   3. Q = Max Stok - Min Stok
+     *   4. ROP = (Lead Time * Average Usage) + Safety Stock
+     */
+    calculateMinMaxROP: function (id_inventori) {
+        const barangList = this.getBarang();
+        const item = barangList.find(b => b.id_inventori === parseInt(id_inventori));
+        if (!item) return null;
+
+        const leadTime = parseInt(item.lead_time) >= 0 ? parseInt(item.lead_time) : 3;
+        const safetyStock = parseInt(item.safety_stock) >= 0 ? parseInt(item.safety_stock) : 5;
+
+        // Ambil data transaksi penjualan fisik barang (outgoing items)
+        const detailPenjualan = this.getTable('detail_penjualan');
+        const penjualan = this.getTable('penjualan');
+        const itemSales = detailPenjualan.filter(dp => dp.id_inventori === item.id_inventori);
+
+        let totalQtySoldUtuh = 0;
+        const saleDates = [];
+
+        itemSales.forEach(dp => {
+            const parent = penjualan.find(p => p.no_penjualan === dp.no_penjualan);
+            if (parent && parent.tanggal) {
+                saleDates.push(new Date(parent.tanggal));
+                const isEceranSale = item.satuan_eceran && dp.satuan === item.satuan_eceran;
+                const konversi = parseInt(item.nilai_konversi) || 1;
+                if (isEceranSale && konversi > 0) {
+                    totalQtySoldUtuh += (parseFloat(dp.qty) / konversi);
+                } else {
+                    totalQtySoldUtuh += parseFloat(dp.qty);
+                }
+            }
+        });
+
+        // Tentukan periode analisis pemakaian (dalam hari)
+        let daysPeriod = 30; // Rentang default analisis (30 hari)
+        if (saleDates.length > 1) {
+            const minDate = new Date(Math.min(...saleDates));
+            const maxDate = new Date(Math.max(...saleDates));
+            const diffDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1;
+            if (diffDays > 0) daysPeriod = Math.max(diffDays, 7);
+        }
+
+        // 1. Rata-rata Pemakaian (Average Usage / AU)
+        const averageUsage = daysPeriod > 0 ? (totalQtySoldUtuh / daysPeriod) : 0;
+        const auDisplay = Math.round(averageUsage * 100) / 100;
+
+        // 2. Min Stok = (Lead Time * Rata-rata Pemakaian) + Safety Stock
+        const minStokRaw = (leadTime * averageUsage) + safetyStock;
+        const minStok = Math.round(minStokRaw);
+
+        // 3. Max Stok = 2 * (Lead Time * Rata-rata Pemakaian) + Safety Stock
+        const maxStokRaw = 2 * (leadTime * averageUsage) + safetyStock;
+        let maxStok = Math.round(maxStokRaw);
+        if (averageUsage > 0 && maxStok <= minStok) {
+            maxStok = minStok + Math.max(1, Math.round(leadTime * averageUsage));
+        }
+
+        // 4. Q (Jumlah Pemesanan) = Max Stok - Min Stok
+        const Q = Math.max(0, maxStok - minStok);
+
+        // 5. ROP (Reorder Point) = (Lead Time * Average Usage) + Safety Stock
+        const ROP = minStok;
+
+        // Evaluasi kondisi stok berbasis ROP & Min-Max
+        const currentStok = item.stok_utuh !== undefined ? parseInt(item.stok_utuh) : parseInt(item.stok || 0);
+        let statusStok = 'Aman';
+        let statusBadgeClass = 'bg-success';
+        let statusCategory = 'AMAN';
+
+        if (currentStok === 0) {
+            statusStok = 'Stok Habis';
+            statusBadgeClass = 'bg-danger';
+            statusCategory = 'HABIS';
+        } else if (currentStok <= ROP) {
+            statusStok = 'Perlu Reorder (≤ ROP)';
+            statusBadgeClass = 'bg-warning text-dark';
+            statusCategory = 'REORDER';
+        } else if (maxStok > 0 && currentStok > maxStok) {
+            statusStok = 'Overstock (> Max)';
+            statusBadgeClass = 'bg-info text-dark';
+            statusCategory = 'OVERSTOCK';
+        } else {
+            statusStok = 'Aman';
+            statusBadgeClass = 'bg-success';
+            statusCategory = 'AMAN';
+        }
+
+        return {
+            id_inventori: item.id_inventori,
+            kode_barang: item.kode_barang,
+            nama_barang: item.nama_barang,
+            kategori: item.kategori,
+            satuan: item.satuan,
+            stok: currentStok,
+            stok_minimum: item.stok_minimum,
+            lead_time: leadTime,
+            safety_stock: safetyStock,
+            total_terjual: Math.round(totalQtySoldUtuh * 100) / 100,
+            periode_hari: daysPeriod,
+            average_usage: auDisplay,
+            min_stok: minStok,
+            max_stok: maxStok,
+            Q: Q,
+            ROP: ROP,
+            status_stok: statusStok,
+            status_badge_class: statusBadgeClass,
+            status_category: statusCategory,
+            butuh_pengadaan: (currentStok <= ROP)
+        };
+    },
+
+    getAllMinMaxROP: function () {
+        const barangList = this.getBarang();
+        return barangList.map(b => this.calculateMinMaxROP(b.id_inventori)).filter(Boolean);
+    },
+
+    getMinMaxAlertList: function () {
+        const allCalculated = this.getAllMinMaxROP();
+        const alertList = allCalculated.filter(item => item.butuh_pengadaan || item.stok <= item.ROP);
+        return alertList.sort((a, b) => a.stok - b.stok);
+    },
+
     getMetrics: function () {
         const barangList = this.getTable('barang');
         const penjualan = this.getTable('penjualan');
@@ -856,13 +998,17 @@ const DB = {
             .filter(s => s.tanggal === todayStr)
             .reduce((sum, s) => sum + parseFloat(s.total_penjualan), 0);
         const totalTx = penjualan.length;
-        const lowStock = barangList.filter(b => b.stok <= b.stok_minimum).length;
+
+        // Metrik Min-Max & ROP
+        const allMinMax = this.getAllMinMaxROP();
+        const perluReorderCount = allMinMax.filter(m => m.stok <= m.ROP).length;
 
         return {
             total_barang: totalBarang,
             penjualan_hari_ini: salesToday,
             total_transaksi: totalTx,
-            barang_hampir_habis: lowStock
+            barang_hampir_habis: perluReorderCount,
+            barang_perlu_reorder: perluReorderCount
         };
     },
 
@@ -1000,13 +1146,21 @@ const DB = {
 
         return pembelian.map(p => {
             const s = suppliers.find(x => x.id_supplier === p.id_supplier) || {};
+            const totalDibayar = this.getTotalDibayarHutang(p.no_pembelian);
+            const totalPembelian = parseFloat(p.total_pembelian) || 0;
+            const sisaHutang = Math.max(0, totalPembelian - totalDibayar);
+            const isLunas = (p.metode_pembayaran !== 'Tempo' && p.status_pembayaran === 'Lunas') || (sisaHutang <= 0);
             return {
                 no_pembelian: p.no_pembelian,
                 tanggal: p.tanggal,
+                id_supplier: p.id_supplier,
                 supplier: s.nama_supplier || 'Supplier Dihapus',
-                total_pembelian: p.total_pembelian,
+                nomor_faktur_supplier: p.nomor_faktur_supplier || '-',
+                total_pembelian: totalPembelian,
+                total_dibayar: totalDibayar,
+                sisa_hutang: sisaHutang,
                 metode_pembayaran: p.metode_pembayaran || 'Tunai',
-                status_pembayaran: p.status_pembayaran || 'Lunas',
+                status_pembayaran: isLunas ? 'Lunas' : (p.status_pembayaran || 'Belum Lunas'),
                 jatuh_tempo: p.jatuh_tempo || '-'
             };
         }).sort((a, b) => b.no_pembelian.localeCompare(a.no_pembelian));
@@ -1019,17 +1173,24 @@ const DB = {
         return penjualan.map(p => {
             const pl = pelangganList.find(x => x.id_pelanggan === p.id_pelanggan) || {};
             const isDipakai = p.jenis_transaksi === 'DIPAKAI_SENDIRI';
+            const totalDibayar = this.getTotalDibayarPiutang(p.no_penjualan);
+            const totalPenjualan = parseFloat(p.total_penjualan) || 0;
+            const sisaPiutang = Math.max(0, totalPenjualan - totalDibayar);
+            const isLunas = (p.metode_pembayaran !== 'Tempo' && p.status_pembayaran === 'Lunas') || (sisaPiutang <= 0);
             return {
                 id_penjualan: p.id_penjualan,
                 no_penjualan: p.no_penjualan,
                 tanggal: p.tanggal,
+                id_pelanggan: p.id_pelanggan,
                 pelanggan: isDipakai ? (pl.nama_pelanggan || 'Penggunaan Internal (Toko)') : (pl.nama_pelanggan || 'Umum'),
                 alamat: pl.alamat || '-',
-                total_penjualan: p.total_penjualan,
+                total_penjualan: totalPenjualan,
+                total_dibayar: totalDibayar,
+                sisa_piutang: sisaPiutang,
                 jenis_transaksi: p.jenis_transaksi || 'PENJUALAN',
                 keterangan: p.keterangan || '-',
                 metode_pembayaran: p.metode_pembayaran || 'Tunai',
-                status_pembayaran: p.status_pembayaran || 'Lunas',
+                status_pembayaran: isLunas ? 'Lunas' : (p.status_pembayaran || 'Belum Lunas'),
                 jatuh_tempo: p.jatuh_tempo || '-'
             };
         }).sort((a, b) => b.no_penjualan.localeCompare(a.no_penjualan));
@@ -1074,10 +1235,11 @@ const DB = {
             return { status: 'Tanpa Jatuh Tempo', sisa_hari: null };
         }
         const todayStr = new Date().toISOString().split('T')[0];
-        const due = new Date(jatuhTempoDateStr);
-        const tdy = new Date(todayStr);
-        const diffTime = due - tdy;
-        const sisaHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const dueStr = jatuhTempoDateStr.split('T')[0];
+        const due = new Date(dueStr + 'T00:00:00');
+        const tdy = new Date(todayStr + 'T00:00:00');
+        const diffTime = due.getTime() - tdy.getTime();
+        const sisaHari = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
         let status = 'Belum Jatuh Tempo';
         if (sisaHari < 0) status = 'Sudah Lewat Jatuh Tempo';
@@ -1125,13 +1287,15 @@ const DB = {
         this.saveTable('pembayaran_pembelian', list);
 
         const sisaAfter = this.getSisaHutang(data.no_pembelian);
-        if (sisaAfter <= 0) {
-            const pembelian = this.getTable('pembelian');
-            const idx = pembelian.findIndex(p => p.no_pembelian === data.no_pembelian);
-            if (idx !== -1) {
+        const pembelian = this.getTable('pembelian');
+        const idx = pembelian.findIndex(p => p.no_pembelian === data.no_pembelian);
+        if (idx !== -1) {
+            if (sisaAfter <= 0) {
                 pembelian[idx].status_pembayaran = 'Lunas';
-                this.saveTable('pembelian', pembelian);
+            } else {
+                pembelian[idx].status_pembayaran = 'Belum Lunas';
             }
+            this.saveTable('pembelian', pembelian);
         }
 
         return record;
@@ -1162,124 +1326,236 @@ const DB = {
         this.saveTable('pembayaran_penjualan', list);
 
         const sisaAfter = this.getSisaPiutang(data.no_penjualan);
-        if (sisaAfter <= 0) {
-            const penjualan = this.getTable('penjualan');
-            const idx = penjualan.findIndex(p => p.no_penjualan === data.no_penjualan);
-            if (idx !== -1) {
+        const penjualan = this.getTable('penjualan');
+        const idx = penjualan.findIndex(p => p.no_penjualan === data.no_penjualan);
+        if (idx !== -1) {
+            if (sisaAfter <= 0) {
                 penjualan[idx].status_pembayaran = 'Lunas';
-                this.saveTable('penjualan', penjualan);
+            } else {
+                penjualan[idx].status_pembayaran = 'Belum Lunas';
             }
+            this.saveTable('penjualan', penjualan);
         }
 
         return record;
     },
 
-    getHutangSupplier: function () {
+    getHutangSupplier: function (statusFilter = 'all') {
         const pembelian = this.getTable('pembelian');
         const suppliers = this.getTable('supplier');
-
-        const todayStr = new Date().toISOString().split('T')[0];
+        const payments = this.getTable('pembayaran_pembelian');
         const result = [];
 
         pembelian.forEach(p => {
-            if (p.metode_pembayaran === 'Tempo' || p.status_pembayaran === 'Belum Lunas') {
+            const totalDibayar = this.getTotalDibayarHutang(p.no_pembelian);
+            const totalNota = parseFloat(p.total_pembelian) || 0;
+            const sisaHutang = Math.max(0, totalNota - totalDibayar);
+
+            // Transaksi masuk kategori hutang jika:
+            // 1. Metode pembayarannya Tempo, ATAU
+            // 2. Status pembayarannya Belum Lunas, ATAU
+            // 3. Memiliki riwayat pembayaran hutang (cicilan/pelunasan), ATAU
+            // 4. Ada tanggal jatuh tempo aktif
+            const hasPaymentHistory = payments.some(pay => pay.no_pembelian === p.no_pembelian);
+            const isHutangTransaction = (p.metode_pembayaran === 'Tempo') || 
+                                       (p.status_pembayaran === 'Belum Lunas') || 
+                                       hasPaymentHistory || 
+                                       (p.jatuh_tempo && p.jatuh_tempo !== '-');
+
+            if (isHutangTransaction) {
                 const s = suppliers.find(x => x.id_supplier === p.id_supplier) || {};
-                const totalDibayar = this.getTotalDibayarHutang(p.no_pembelian);
-                const totalNota = parseFloat(p.total_pembelian) || 0;
-                const sisaHutang = Math.max(0, totalNota - totalDibayar);
+                const tempoInfo = this.calculateJatuhTempoStatus(p.jatuh_tempo);
+                const isLunas = sisaHutang <= 0;
+                const statusPembayaran = isLunas ? 'Lunas' : 'Belum Lunas';
 
-                if (sisaHutang > 0) {
-                    let statusTempo = 'Belum Jatuh Tempo';
-                    let sisaHari = null;
-
-                    if (p.jatuh_tempo && p.jatuh_tempo !== '-') {
-                        const due = new Date(p.jatuh_tempo);
-                        const tdy = new Date(todayStr);
-                        const diffTime = due - tdy;
-                        sisaHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                        if (sisaHari < 0) statusTempo = 'Sudah Lewat Jatuh Tempo';
-                        else if (sisaHari === 0) statusTempo = 'Jatuh Tempo Hari Ini';
-                    }
-
-                    result.push({
-                        no_pembelian: p.no_pembelian,
-                        tanggal: p.tanggal,
-                        id_supplier: p.id_supplier,
-                        supplier: s.nama_supplier || 'Supplier Dihapus',
-                        nama_supplier: s.nama_supplier || 'Supplier Dihapus',
-                        kode_supplier: s.kode_supplier || '-',
-                        no_telp: s.no_telp || '-',
-                        nomor_faktur_supplier: p.nomor_faktur_supplier || '-',
-                        total_pembelian: totalNota,
-                        total_hutang: totalNota,
-                        total_dibayar: totalDibayar,
-                        sisa_hutang: sisaHutang,
-                        status_pembayaran: 'Belum Lunas',
-                        metode_pembayaran: p.metode_pembayaran || 'Tempo',
-                        jatuh_tempo: p.jatuh_tempo || '-',
-                        status_jatuh_tempo: statusTempo,
-                        sisa_hari: sisaHari
-                    });
+                // Sinkronkan status di data tabel pembelian bila berbeda
+                if (p.status_pembayaran !== statusPembayaran) {
+                    p.status_pembayaran = statusPembayaran;
                 }
+
+                // Filter status
+                if (statusFilter === 'belum_lunas' && isLunas) return;
+                if (statusFilter === 'lunas' && !isLunas) return;
+
+                result.push({
+                    no_pembelian: p.no_pembelian,
+                    tanggal: p.tanggal,
+                    id_supplier: p.id_supplier,
+                    supplier: s.nama_supplier || 'Supplier Dihapus',
+                    nama_supplier: s.nama_supplier || 'Supplier Dihapus',
+                    kode_supplier: s.kode_supplier || '-',
+                    alamat: s.alamat || '-',
+                    no_telp: s.no_telp || '-',
+                    nomor_faktur_supplier: p.nomor_faktur_supplier || '-',
+                    total_pembelian: totalNota,
+                    total_hutang: totalNota,
+                    total_dibayar: totalDibayar,
+                    sisa_hutang: sisaHutang,
+                    status_pembayaran: statusPembayaran,
+                    is_lunas: isLunas,
+                    metode_pembayaran: p.metode_pembayaran || 'Tempo',
+                    jatuh_tempo: p.jatuh_tempo || '-',
+                    status_jatuh_tempo: isLunas ? 'Lunas' : tempoInfo.status,
+                    sisa_hari: isLunas ? null : tempoInfo.sisa_hari
+                });
             }
         });
 
         return result.sort((a, b) => b.no_pembelian.localeCompare(a.no_pembelian));
     },
 
-    getPiutangPelanggan: function () {
+    getPiutangPelanggan: function (statusFilter = 'all') {
         const penjualan = this.getTable('penjualan');
         const pelangganList = this.getTable('pelanggan');
-
-        const todayStr = new Date().toISOString().split('T')[0];
+        const payments = this.getTable('pembayaran_penjualan');
         const result = [];
 
         penjualan.forEach(p => {
-            if (p.metode_pembayaran === 'Tempo' || p.status_pembayaran === 'Belum Lunas') {
+            const totalDibayar = this.getTotalDibayarPiutang(p.no_penjualan);
+            const totalNota = parseFloat(p.total_penjualan) || 0;
+            const sisaPiutang = Math.max(0, totalNota - totalDibayar);
+
+            const hasPaymentHistory = payments.some(pay => pay.no_penjualan === p.no_penjualan);
+            const isPiutangTransaction = (p.metode_pembayaran === 'Tempo') || 
+                                         (p.status_pembayaran === 'Belum Lunas') || 
+                                         hasPaymentHistory || 
+                                         (p.jatuh_tempo && p.jatuh_tempo !== '-');
+
+            if (isPiutangTransaction) {
                 const pl = pelangganList.find(x => x.id_pelanggan === p.id_pelanggan) || {};
-                const totalDibayar = this.getTotalDibayarPiutang(p.no_penjualan);
-                const totalNota = parseFloat(p.total_penjualan) || 0;
-                const sisaPiutang = Math.max(0, totalNota - totalDibayar);
+                const tempoInfo = this.calculateJatuhTempoStatus(p.jatuh_tempo);
+                const isLunas = sisaPiutang <= 0;
+                const statusPembayaran = isLunas ? 'Lunas' : 'Belum Lunas';
 
-                if (sisaPiutang > 0) {
-                    let statusTempo = 'Belum Jatuh Tempo';
-                    let sisaHari = null;
-
-                    if (p.jatuh_tempo && p.jatuh_tempo !== '-') {
-                        const due = new Date(p.jatuh_tempo);
-                        const tdy = new Date(todayStr);
-                        const diffTime = due - tdy;
-                        sisaHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                        if (sisaHari < 0) statusTempo = 'Sudah Lewat Jatuh Tempo';
-                        else if (sisaHari === 0) statusTempo = 'Jatuh Tempo Hari Ini';
-                    }
-
-                    result.push({
-                        no_penjualan: p.no_penjualan,
-                        id_penjualan: p.id_penjualan,
-                        tanggal: p.tanggal,
-                        id_pelanggan: p.id_pelanggan,
-                        pelanggan: pl.nama_pelanggan || 'Umum',
-                        nama_pelanggan: pl.nama_pelanggan || 'Umum',
-                        kode_pelanggan: pl.kode_pelanggan || '-',
-                        no_telp: pl.no_telp || '-',
-                        total_penjualan: totalNota,
-                        total_piutang: totalNota,
-                        total_dibayar: totalDibayar,
-                        sisa_piutang: sisaPiutang,
-                        status_pembayaran: 'Belum Lunas',
-                        metode_pembayaran: p.metode_pembayaran || 'Tempo',
-                        jatuh_tempo: p.jatuh_tempo || '-',
-                        status_jatuh_tempo: statusTempo,
-                        sisa_hari: sisaHari
-                    });
+                if (p.status_pembayaran !== statusPembayaran) {
+                    p.status_pembayaran = statusPembayaran;
                 }
+
+                if (statusFilter === 'belum_lunas' && isLunas) return;
+                if (statusFilter === 'lunas' && !isLunas) return;
+
+                result.push({
+                    no_penjualan: p.no_penjualan,
+                    id_penjualan: p.id_penjualan,
+                    tanggal: p.tanggal,
+                    id_pelanggan: p.id_pelanggan,
+                    pelanggan: pl.nama_pelanggan || 'Umum',
+                    nama_pelanggan: pl.nama_pelanggan || 'Umum',
+                    kode_pelanggan: pl.kode_pelanggan || '-',
+                    alamat: pl.alamat || '-',
+                    no_telp: pl.no_telp || '-',
+                    total_penjualan: totalNota,
+                    total_piutang: totalNota,
+                    total_dibayar: totalDibayar,
+                    sisa_piutang: sisaPiutang,
+                    status_pembayaran: statusPembayaran,
+                    is_lunas: isLunas,
+                    metode_pembayaran: p.metode_pembayaran || 'Tempo',
+                    jatuh_tempo: p.jatuh_tempo || '-',
+                    status_jatuh_tempo: isLunas ? 'Lunas' : tempoInfo.status,
+                    sisa_hari: isLunas ? null : tempoInfo.sisa_hari
+                });
             }
         });
 
         return result.sort((a, b) => b.no_penjualan.localeCompare(a.no_penjualan));
+    },
+
+    getPembelianDetail: function (no_pembelian) {
+        const pembelian = this.getTable('pembelian');
+        const detailPembelian = this.getTable('detail_pembelian');
+        const barangList = this.getTable('barang');
+        const suppliers = this.getTable('supplier');
+
+        const parent = pembelian.find(p => p.no_pembelian === no_pembelian);
+        if (!parent) return null;
+
+        const s = suppliers.find(x => x.id_supplier === parent.id_supplier) || {};
+        const totalDibayar = this.getTotalDibayarHutang(no_pembelian);
+        const totalNota = parseFloat(parent.total_pembelian) || 0;
+        const sisaHutang = Math.max(0, totalNota - totalDibayar);
+        const payments = this.getHistoriPembayaranHutang(no_pembelian);
+
+        const items = detailPembelian
+            .filter(dp => dp.no_pembelian === no_pembelian)
+            .map(dp => {
+                const b = barangList.find(x => x.id_inventori === dp.id_inventori) || {};
+                return {
+                    id_detail: dp.id_detail,
+                    id_inventori: dp.id_inventori,
+                    nama_barang: b.nama_barang || 'Barang Dihapus',
+                    kode_barang: b.kode_barang || '-',
+                    qty: dp.qty,
+                    satuan: dp.satuan || b.satuan || '-',
+                    harga_beli: dp.harga_beli,
+                    subtotal: dp.subtotal
+                };
+            });
+
+        return {
+            no_pembelian: parent.no_pembelian,
+            tanggal: parent.tanggal,
+            supplier: s.nama_supplier || 'Supplier Dihapus',
+            alamat_supplier: s.alamat || '-',
+            no_telp_supplier: s.no_telp || '-',
+            nomor_faktur_supplier: parent.nomor_faktur_supplier || '-',
+            metode_pembayaran: parent.metode_pembayaran || 'Tunai',
+            status_pembayaran: sisaHutang <= 0 ? 'Lunas' : (parent.status_pembayaran || 'Belum Lunas'),
+            jatuh_tempo: parent.jatuh_tempo || '-',
+            total_pembelian: totalNota,
+            total_dibayar: totalDibayar,
+            sisa_hutang: sisaHutang,
+            items: items,
+            payments: payments
+        };
+    },
+
+    getPenjualanDetail: function (no_penjualan) {
+        const penjualan = this.getTable('penjualan');
+        const detailPenjualan = this.getTable('detail_penjualan');
+        const barangList = this.getTable('barang');
+        const pelangganList = this.getTable('pelanggan');
+
+        const parent = penjualan.find(p => p.no_penjualan === no_penjualan);
+        if (!parent) return null;
+
+        const pl = pelangganList.find(x => x.id_pelanggan === parent.id_pelanggan) || {};
+        const totalDibayar = this.getTotalDibayarPiutang(no_penjualan);
+        const totalNota = parseFloat(parent.total_penjualan) || 0;
+        const sisaPiutang = Math.max(0, totalNota - totalDibayar);
+        const payments = this.getHistoriPembayaranPiutang(no_penjualan);
+
+        const items = detailPenjualan
+            .filter(dp => dp.no_penjualan === no_penjualan)
+            .map(dp => {
+                const b = barangList.find(x => x.id_inventori === dp.id_inventori) || {};
+                return {
+                    id_detail: dp.id_detail,
+                    id_inventori: dp.id_inventori,
+                    nama_barang: b.nama_barang || 'Barang Dihapus',
+                    kode_barang: b.kode_barang || '-',
+                    qty: dp.qty,
+                    satuan: dp.satuan || b.satuan || '-',
+                    harga_jual: dp.harga_jual,
+                    subtotal: dp.subtotal
+                };
+            });
+
+        return {
+            no_penjualan: parent.no_penjualan,
+            tanggal: parent.tanggal,
+            pelanggan: pl.nama_pelanggan || 'Umum',
+            alamat_pelanggan: pl.alamat || '-',
+            no_telp_pelanggan: pl.no_telp || '-',
+            metode_pembayaran: parent.metode_pembayaran || 'Tunai',
+            status_pembayaran: sisaPiutang <= 0 ? 'Lunas' : (parent.status_pembayaran || 'Belum Lunas'),
+            jatuh_tempo: parent.jatuh_tempo || '-',
+            total_penjualan: totalNota,
+            total_dibayar: totalDibayar,
+            sisa_piutang: sisaPiutang,
+            items: items,
+            payments: payments
+        };
     },
 
     exportToExcel: function (htmlTableContent, filename) {

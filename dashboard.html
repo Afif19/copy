@@ -157,14 +157,14 @@
                         </div>
                     </div>
                     
-                    <!-- Barang Hampir Habis -->
+                    <!-- Barang Hampir Habis / Perlu Reorder -->
                     <div class="col-xl-3 col-sm-6">
                         <div class="stat-card d-flex align-items-center justify-content-between">
                             <div>
-                                <span class="text-muted small fw-medium">Barang Hampir Habis</span>
+                                <span class="text-muted small fw-medium">Barang Perlu Reorder (ROP)</span>
                                 <h3 class="fw-bold text-dark mt-1 mb-0" id="stat-barang-hampir-habis">0</h3>
                             </div>
-                            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                             </div>
                         </div>
@@ -251,11 +251,11 @@
                         </div>
                     </div>
 
-                    <!-- Stock Alerts -->
+                    <!-- Stock Alerts & ROP Recommendation -->
                     <div class="col-lg-5">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-header bg-white border-bottom py-3">
-                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Peringatan Stok Hampir Habis</h6>
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Peringatan Stok & Reorder (ROP)</h6>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -264,12 +264,14 @@
                                             <tr>
                                                 <th>Nama Barang</th>
                                                 <th class="text-center">Stok</th>
+                                                <th class="text-center">ROP</th>
+                                                <th class="text-center">Pesan (Q)</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody id="alert-stock-table">
                                             <tr>
-                                                <td colspan="3" class="text-center py-4 text-success small"><i class="fa-solid fa-circle-check me-1"></i> Semua stok aman!</td>
+                                                <td colspan="5" class="text-center py-4 text-success small"><i class="fa-solid fa-circle-check me-1"></i> Semua stok aman!</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -345,21 +347,22 @@
                 });
             }
 
-            // MEMANGGIL: DB.getAlertStockList() di db.js
-            // FUNGSI: Mengambil daftar barang yang stoknya kritis untuk ditampilkan di tabel warning.
-            const alertStock = DB.getAlertStockList();
+            // MEMANGGIL: DB.getMinMaxAlertList() di db.js
+            // FUNGSI: Mengambil daftar barang yang memerlukan reorder (stok <= ROP) dan rekomendasi jumlah pemesanan (Q).
+            const alertStock = DB.getMinMaxAlertList();
             const alertTable = $('#alert-stock-table');
             alertTable.empty();
             if (alertStock.length === 0) {
-                alertTable.append('<tr><td colspan="3" class="text-center py-4 text-success small"><i class="fa-solid fa-circle-check me-1"></i> Semua stok aman!</td></tr>');
+                alertTable.append('<tr><td colspan="5" class="text-center py-4 text-success small"><i class="fa-solid fa-circle-check me-1"></i> Semua stok aman di atas ROP!</td></tr>');
             } else {
                 alertStock.forEach(item => {
-                    const badgeClass = item.status === 'Habis' ? 'bg-danger' : 'bg-warning text-dark';
                     alertTable.append(`
                         <tr>
                             <td><span class="fw-semibold text-dark">${escapeHtml(item.nama_barang)}</span></td>
                             <td class="text-center fw-bold text-danger">${item.stok} <span class="text-muted fw-normal small">${escapeHtml(item.satuan)}</span></td>
-                            <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                            <td class="text-center fw-semibold text-dark">${item.ROP} <span class="text-muted fw-normal small">${escapeHtml(item.satuan)}</span></td>
+                            <td class="text-center"><span class="badge bg-primary fs-7">+${item.Q} ${escapeHtml(item.satuan)}</span></td>
+                            <td><span class="badge ${item.status_badge_class}">${item.status_stok}</span></td>
                         </tr>
                     `);
                 });

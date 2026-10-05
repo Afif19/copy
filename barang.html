@@ -224,6 +224,14 @@
                                 <label for="add_stok_minimum" class="form-label fw-medium">Stok Minimum</label>
                                 <input type="number" class="form-control" name="stok_minimum" id="add_stok_minimum" value="5" required min="0">
                             </div>
+                            <div class="col-md-6">
+                                <label for="add_lead_time" class="form-label fw-medium">Lead Time (Hari Supplier)</label>
+                                <input type="number" class="form-control" name="lead_time" id="add_lead_time" value="3" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="add_safety_stock" class="form-label fw-medium">Safety Stock (Stok Pengaman)</label>
+                                <input type="number" class="form-control" name="safety_stock" id="add_safety_stock" value="5" required min="0">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-3 bg-light">
@@ -289,6 +297,14 @@
                                 <label for="edit_stok_minimum" class="form-label fw-medium">Stok Minimum</label>
                                 <input type="number" class="form-control" name="stok_minimum" id="edit_stok_minimum" required min="0">
                             </div>
+                            <div class="col-md-6">
+                                <label for="edit_lead_time" class="form-label fw-medium">Lead Time (Hari Supplier)</label>
+                                <input type="number" class="form-control" name="lead_time" id="edit_lead_time" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_safety_stock" class="form-label fw-medium">Safety Stock (Stok Pengaman)</label>
+                                <input type="number" class="form-control" name="safety_stock" id="edit_safety_stock" required min="0">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-3 bg-light">
@@ -296,6 +312,101 @@
                         <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detail Analisis Min-Max & ROP -->
+    <div class="modal fade" id="modalMinMaxDetail" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2 text-warning"></i> Analisis Min-Max Stock & ROP</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded border">
+                        <div>
+                            <span class="text-muted small d-block">Kode & Nama Barang:</span>
+                            <strong class="fs-5 text-dark" id="mm_nama_barang">BRG0001 - Semen Tiga Roda</strong>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-muted small d-block">Status Kondisi Stok:</span>
+                            <span class="badge fs-6" id="mm_status_badge">Aman</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3 col-6">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <span class="text-muted small d-block mb-1">Stok Fisik Saat Ini</span>
+                                <h4 class="fw-bold text-primary mb-0" id="mm_stok_saat_ini">0</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <span class="text-muted small d-block mb-1">Rata-rata Pemakaian</span>
+                                <h4 class="fw-bold text-dark mb-0" id="mm_average_usage">0</h4>
+                                <span class="small text-muted" id="mm_periode_hari">/ hari (30 hari)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <span class="text-muted small d-block mb-1">Lead Time Supplier</span>
+                                <h4 class="fw-bold text-dark mb-0" id="mm_lead_time">3</h4>
+                                <span class="small text-muted">Hari</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <span class="text-muted small d-block mb-1">Safety Stock</span>
+                                <h4 class="fw-bold text-dark mb-0" id="mm_safety_stock">5</h4>
+                                <span class="small text-muted">Unit Pengaman</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 bg-light p-3 mb-3">
+                        <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-square-root-variable me-2 text-primary"></i>Rincian Hasil Perhitungan Rumus:</h6>
+                        <div class="row g-3 small">
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border">
+                                    <span class="fw-semibold d-block text-dark">1. Min Stok (Stok Minimum Dinamis)</span>
+                                    <span class="text-muted d-block">= (Lead Time × AU) + Safety Stock</span>
+                                    <span class="text-muted d-block" id="mm_calc_min">= (0 × 0) + 0</span>
+                                    <strong class="fs-6 text-danger" id="mm_val_min">0 Sak</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border">
+                                    <span class="fw-semibold d-block text-dark">2. Max Stok (Batas Maksimum Stok)</span>
+                                    <span class="text-muted d-block">= 2 × (Lead Time × AU) + Safety Stock</span>
+                                    <span class="text-muted d-block" id="mm_calc_max">= 2 × (0 × 0) + 0</span>
+                                    <strong class="fs-6 text-primary" id="mm_val_max">0 Sak</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border">
+                                    <span class="fw-semibold d-block text-dark">3. Reorder Point (ROP - Titik Pesan Ulang)</span>
+                                    <span class="text-muted d-block">= (Lead Time × Average Usage) + Safety Stock</span>
+                                    <span class="text-muted d-block" id="mm_calc_rop">= (0 × 0) + 0</span>
+                                    <strong class="fs-6 text-warning text-dark" id="mm_val_rop">0 Sak</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border">
+                                    <span class="fw-semibold d-block text-dark">4. Q (Kuantitas Pemesanan / Reorder Qty)</span>
+                                    <span class="text-muted d-block">= Max Stok − Min Stok</span>
+                                    <span class="text-muted d-block" id="mm_calc_q">= 0 − 0</span>
+                                    <strong class="fs-6 text-success" id="mm_val_q">0 Sak</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
             </div>
         </div>
     </div>
@@ -419,7 +530,9 @@
                     harga_beli: $('#add_harga_beli').val(),
                     harga_jual: $('#add_harga_jual').val(),
                     stok: $('#add_stok').val(),
-                    stok_minimum: $('#add_stok_minimum').val()
+                    stok_minimum: $('#add_stok_minimum').val(),
+                    lead_time: $('#add_lead_time').val(),
+                    safety_stock: $('#add_safety_stock').val()
                 };
 
                 try {
@@ -446,7 +559,9 @@
                     harga_beli: $('#edit_harga_beli').val(),
                     harga_jual: $('#edit_harga_jual').val(),
                     stok: $('#edit_stok').val(),
-                    stok_minimum: $('#edit_stok_minimum').val()
+                    stok_minimum: $('#edit_stok_minimum').val(),
+                    lead_time: $('#edit_lead_time').val(),
+                    safety_stock: $('#edit_safety_stock').val()
                 };
 
                 try {
@@ -472,6 +587,8 @@
                 const sell = $(this).data('sell');
                 const stock = $(this).data('stock');
                 const min = $(this).data('min');
+                const lt = $(this).data('lt');
+                const ss = $(this).data('ss');
  
                 $('#edit_id_barang').val(id);
                 $('#edit_kode_barang').val(code);
@@ -484,6 +601,38 @@
                 $('#edit_harga_jual').val(sell);
                 $('#edit_stok').val(stock);
                 $('#edit_stok_minimum').val(min);
+                $('#edit_lead_time').val(lt !== undefined ? lt : 3);
+                $('#edit_safety_stock').val(ss !== undefined ? ss : 5);
+            });
+
+            // FUNGSI: Event listener click untuk tombol Detail Min-Max & ROP (.btn-minmax)
+            $(document).on('click', '.btn-minmax', function () {
+                const id = $(this).data('id');
+                const calc = DB.calculateMinMaxROP(id);
+                if (!calc) return;
+
+                $('#mm_nama_barang').text(`${calc.kode_barang} - ${calc.nama_barang}`);
+                $('#mm_status_badge').text(calc.status_stok).attr('class', `badge fs-6 ${calc.status_badge_class}`);
+                $('#mm_stok_saat_ini').text(`${calc.stok} ${calc.satuan}`);
+                $('#mm_average_usage').text(`${calc.average_usage} ${calc.satuan}`);
+                $('#mm_periode_hari').text(`/ hari (analisis ${calc.periode_hari} hari)`);
+                $('#mm_lead_time').text(calc.lead_time);
+                $('#mm_safety_stock').text(`${calc.safety_stock} ${calc.satuan}`);
+
+                $('#mm_calc_min').text(`= (${calc.lead_time} × ${calc.average_usage}) + ${calc.safety_stock}`);
+                $('#mm_val_min').text(`${calc.min_stok} ${calc.satuan}`);
+
+                $('#mm_calc_max').text(`= 2 × (${calc.lead_time} × ${calc.average_usage}) + ${calc.safety_stock}`);
+                $('#mm_val_max').text(`${calc.max_stok} ${calc.satuan}`);
+
+                $('#mm_calc_rop').text(`= (${calc.lead_time} × ${calc.average_usage}) + ${calc.safety_stock}`);
+                $('#mm_val_rop').text(`${calc.ROP} ${calc.satuan}`);
+
+                $('#mm_calc_q').text(`= ${calc.max_stok} − ${calc.min_stok}`);
+                $('#mm_val_q').text(`${calc.Q} ${calc.satuan}`);
+
+                const modal = new bootstrap.Modal(document.getElementById('modalMinMaxDetail'));
+                modal.show();
             });
 
             // FUNGSI: Event listener click untuk tombol Hapus (.btn-delete).
@@ -649,18 +798,13 @@
             tbody.empty();
 
             barangList.forEach((b, index) => {
-                let badge = '';
                 const stokUtuhVal = b.stok_utuh !== undefined ? b.stok_utuh : b.stok;
                 const stokEceranVal = b.stok_eceran || 0;
 
-                if (stokUtuhVal === 0 && stokEceranVal === 0) {
-                    badge = '<span class="badge bg-danger">Habis</span>';
-                } else if (stokUtuhVal <= b.stok_minimum) {
-                    badge = '<span class="badge bg-warning text-dark">Menipis</span>';
-                } else {
-                    badge = '<span class="badge bg-success">Aman</span>';
-                }
- 
+                // Hitung status Min-Max & ROP
+                const calc = DB.calculateMinMaxROP(b.id_inventori);
+                const badge = `<span class="badge ${calc ? calc.status_badge_class : 'bg-secondary'}">${calc ? calc.status_stok : 'Normal'}</span>`;
+
                 const sEceranDisplay = b.satuan_eceran ? `<span class="badge bg-light text-dark">${escapeHtml(b.satuan_eceran)} (1=${b.nilai_konversi})</span>` : '<span class="text-muted small">-</span>';
                 const stokEceranDisplay = b.satuan_eceran ? `<span class="fw-bold text-success">${formatNumber(stokEceranVal)}</span> <span class="small text-muted">${escapeHtml(b.satuan_eceran)}</span>` : '<span class="text-muted small">-</span>';
 
@@ -678,6 +822,11 @@
                         <td class="text-end">Rp ${formatNumber(b.harga_jual)}</td>
                         <td class="text-center">${badge}</td>
                         <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-info me-1 btn-minmax"
+                                    data-id="${b.id_barang}"
+                                    title="Analisis Min-Max & ROP">
+                                <i class="fa-solid fa-calculator"></i>
+                            </button>
                             <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit"
                                     data-id="${b.id_barang}"
                                     data-code="${escapeHtml(b.kode_barang)}"
@@ -690,6 +839,8 @@
                                     data-sell="${b.harga_jual}"
                                     data-stock="${stokUtuhVal}"
                                     data-min="${b.stok_minimum}"
+                                    data-lt="${b.lead_time}"
+                                    data-ss="${b.safety_stock}"
                                     data-bs-toggle="modal" data-bs-target="#editBarangModal"
                                     title="Edit Barang">
                                 <i class="fa-solid fa-pen"></i>
